@@ -541,6 +541,7 @@ function tryCompleteQuest(actionId) {
   if (data.done || data.id !== actionId) return;
   if (setQuestDone()) {
     renderDailyQuest();
+  fetchDailyCount();
     haptic('success');
     if (tg?.showPopup) {
       tg.showPopup({
@@ -867,6 +868,7 @@ function updateUI() {
   renderStreakUI(s);
   renderCollection();
   renderDailyQuest();
+  fetchDailyCount();
 
   const titleCol = document.getElementById('title-collection');
   if (titleCol) titleCol.textContent = lang === 'ru' ? 'Коллекция карт' : 'Card collection';
@@ -1166,17 +1168,62 @@ function initTelegram() {
 function trackVisit() {
   try {
     const user = tg?.initDataUnsafe?.user;
-    if (!user?.id) return;
-    fetch('https://cosmic-boost.vercel.app/api/track', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
+    const doFetch = (payload) => {
+      fetch('https://cosmic-boost.vercel.app/api/track', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+      })
+        .then(r => r.json())
+        .then(data => {
+          if (data && typeof data.dailyCount === 'number') {
+            updateSocialProof(data.dailyCount);
+          } else {
+            fetchDailyCount();
+          }
+        })
+        .catch(() => fetchDailyCount());
+    };
+    if (user?.id) {
+      doFetch({
         userId: user.id,
         lang: lang || 'ru',
         name: userName || user.first_name || ''
-      })
-    }).catch(() => {});
-  } catch (_) {}
+      });
+    } else {
+      fetchDailyCount();
+    }
+  } catch (_) {
+    fetchDailyCount();
+  }
+}
+
+function fetchDailyCount() {
+  fetch('https://cosmic-boost.vercel.app/api/track')
+    .then(r => r.json())
+    .then(data => {
+      if (data && typeof data.dailyCount === 'number') updateSocialProof(data.dailyCount);
+    })
+    .catch(() => {});
+}
+
+function updateSocialProof(n) {
+  const el = document.getElementById('social-proof-text');
+  if (!el) return;
+  const count = Math.max(1, Number(n) || 1);
+  if (lang === 'ru') {
+    el.innerHTML = `Сегодня уже <strong>${count}</strong> ${pluralRu(count, 'человек получил', 'человека получили', 'человек получили')} заряд ✨`;
+  } else {
+    el.innerHTML = `Already <strong>${count}</strong> ${count === 1 ? 'person has' : 'people have'} charged up today ✨`;
+  }
+}
+
+function pluralRu(n, one, few, many) {
+  const mod10 = n % 10;
+  const mod100 = n % 100;
+  if (mod10 === 1 && mod100 !== 11) return one;
+  if (mod10 >= 2 && mod10 <= 4 && (mod100 < 10 || mod100 >= 20)) return few;
+  return many;
 }
 
 function hideSplash() {
