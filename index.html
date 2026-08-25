@@ -33,11 +33,13 @@
       <div class="card streak-card">
         <div class="streak-row">
           <span class="streak-fire">🔥</span>
-          <div>
+          <div style="flex:1">
             <div class="streak-label" id="title-streak">Серия дней</div>
             <div class="streak-value" id="streak-value">1 день</div>
+            <div class="streak-milestones" id="streak-milestones"></div>
           </div>
         </div>
+        <div class="streak-reward" id="streak-reward" style="display:none"></div>
       </div>
 
       <div class="card">
@@ -136,6 +138,17 @@
         </div>
         <button class="btn btn-primary mt-16" id="btn-card" onclick="drawCard()">Открыть карту</button>
         <button class="btn btn-secondary mt-10 hidden" id="card-share" onclick="shareSmart(document.getElementById('card-title').textContent + ' — ' + document.getElementById('card-text').textContent)">Поделиться</button>
+      </div>
+
+      <div class="card">
+        <div class="card-title"><img class="title-img" src="icons/stars.png" alt=""> <span id="title-collection">Коллекция карт</span></div>
+        <div class="text-soft mb-8" id="collection-hint" style="font-size:13px">Собери 7 карт — получи бейдж</div>
+        <div class="collection-progress">
+          <div class="collection-count" id="collection-count">0 / 7</div>
+          <div class="energy-bar"><div class="energy-fill" id="collection-fill" style="width:0%"></div></div>
+        </div>
+        <div class="collection-grid" id="collection-grid"></div>
+        <div class="badge-row" id="badge-row"></div>
       </div>
     </div>
   </div>
