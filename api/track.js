@@ -1,7 +1,12 @@
 const mem = globalThis.__cbUsers || (globalThis.__cbUsers = new Map());
+const memDaily = globalThis.__cbDaily || (globalThis.__cbDaily = new Map());
 
 function hasRedis() {
   return !!(process.env.UPSTASH_REDIS_REST_URL && process.env.UPSTASH_REDIS_REST_TOKEN);
+}
+
+function todayKey() {
+  return new Date().toISOString().slice(0, 10);
 }
 
 async function redis(command) {
@@ -29,19 +34,42 @@ async function redis(command) {
 async function touchUser(chatId, meta = {}) {
   const id = String(chatId);
   const now = Date.now();
+  const day = todayKey();
   const payload = JSON.stringify({
     id,
     lastSeen: now,
     lang: meta.lang || 'ru',
     name: meta.name || '',
   });
+
+  let dailyCount = 1;
+
   if (hasRedis()) {
     await redis(['HSET', 'cb:users', id, payload]);
     await redis(['SADD', 'cb:user_ids', id]);
-    return { storage: 'redis' };
+    // unique visitors today
+    const added = await redis(['SADD', `cb:daily:${day}`, id]);
+    dailyCount = Number(await redis(['SCARD', `cb:daily:${day}`])) || 1;
+    // expire daily set in 48h
+    await redis(['EXPIRE', `cb:daily:${day}`, 172800]);
+    return { storage: 'redis', dailyCount, isNewToday: added === 1 };
   }
+
   mem.set(id, JSON.parse(payload));
-  return { storage: 'memory' };
+  const set = memDaily.get(day) || new Set();
+  const isNew = !set.has(id);
+  set.add(id);
+  memDaily.set(day, set);
+  return { storage: 'memory', dailyCount: set.size, isNewToday: isNew };
+}
+
+async function getDailyCount() {
+  const day = todayKey();
+  if (hasRedis()) {
+    const n = Number(await redis(['SCARD', `cb:daily:${day}`])) || 0;
+    return n;
+  }
+  return (memDaily.get(day) || new Set()).size;
 }
 
 export default async function handler(req, res) {
@@ -50,30 +78,18 @@ export default async function handler(req, res) {
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
   if (req.method === 'OPTIONS') return res.status(200).end();
 
-  // Diagnostic: GET /api/track
   if (req.method === 'GET') {
-    const url = (process.env.UPSTASH_REDIS_REST_URL || '').trim().replace(/^"|"$/g, '');
-    const token = (process.env.UPSTASH_REDIS_REST_TOKEN || '').trim().replace(/^"|"$/g, '');
-    const info = {
-      redisUrlSet: !!url,
-      redisTokenSet: !!token,
-      urlHost: url ? url.replace(/^https?:\/\//, '').split('/')[0] : null,
-      tokenLen: token ? token.length : 0,
-    };
-    if (!url || !token) {
-      return res.status(200).json({ ok: false, step: 'env', ...info });
-    }
     try {
-      const pong = await redis(['PING']);
-      try {
-        await redis(['SET', 'cb:diag', '1']);
-        await redis(['DEL', 'cb:diag']);
-        return res.status(200).json({ ok: true, step: 'write_ok', pong, ...info });
-      } catch (e) {
-        return res.status(200).json({ ok: false, step: 'write_fail', pong, detail: String(e.message || e).slice(0, 200), ...info });
-      }
+      const dailyCount = await getDailyCount();
+      const url = (process.env.UPSTASH_REDIS_REST_URL || '').trim();
+      const token = (process.env.UPSTASH_REDIS_REST_TOKEN || '').trim();
+      return res.status(200).json({
+        ok: true,
+        dailyCount,
+        redisConfigured: !!(url && token),
+      });
     } catch (e) {
-      return res.status(200).json({ ok: false, step: 'ping_fail', detail: String(e.message || e).slice(0, 200), ...info });
+      return res.status(200).json({ ok: false, dailyCount: 0, detail: String(e.message || e).slice(0, 150) });
     }
   }
 
