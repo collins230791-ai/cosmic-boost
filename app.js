@@ -783,6 +783,7 @@ async function saveName() {
   document.getElementById('name-modal')?.classList.remove('active');
   haptic('success');
   updateUI();
+  trackVisit();
   // Next step: birth date
   if (!birthDate) {
     setTimeout(openBirthModal, 300);
@@ -1161,6 +1162,23 @@ function initTelegram() {
   }
 }
 
+
+function trackVisit() {
+  try {
+    const user = tg?.initDataUnsafe?.user;
+    if (!user?.id) return;
+    fetch('https://cosmic-boost.vercel.app/api/track', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        userId: user.id,
+        lang: lang || 'ru',
+        name: userName || user.first_name || ''
+      })
+    }).catch(() => {});
+  } catch (_) {}
+}
+
 function hideSplash() {
   const s = document.getElementById('splash');
   if (!s) return;
@@ -1176,6 +1194,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     const timeout = new Promise(r => setTimeout(r, 600));
     await Promise.race([cloudPromise, timeout]);
     updateUI();
+    trackVisit();
     hideSplash();
     cloudPromise.then(() => {
       if (userSign || userName || birthDate) updateUI();
