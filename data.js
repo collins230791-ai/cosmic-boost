@@ -408,24 +408,6 @@ const CELEBRITIES = [
     }
   },
   {
-    id: "putin",
-    name: { ru: "Владимир Путин", en: "Vladimir Putin" },
-    emoji: "🦅",
-    sign: "libra",
-    funny: {
-      ru: [
-        "Совместимость уровня «мы оба любим, когда всё под контролем».",
-        "Звёзды молчат. И это, возможно, лучший комментарий.",
-        "Вы оба умеете держать паузу. Долгую. Очень долгую."
-      ],
-      en: [
-        "Compatibility level: 'we both like when everything is under control'.",
-        "The stars are silent. And that might be the best comment.",
-        "You both know how to hold a pause. A long one. A very long one."
-      ]
-    }
-  },
-  {
     id: "mask",
     name: { ru: "Марк Цукерберг", en: "Mark Zuckerberg" },
     emoji: "🤖",
