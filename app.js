@@ -221,7 +221,7 @@ function shareResult(text) {
 function shareToStory(text) {
   haptic('medium');
   let caption = cleanText(String(text || '')).replace(/\s+/g, ' ').trim();
-  if (caption.length > 160) caption = caption.slice(0, 157) + '...';
+  if (caption.length > 200) caption = caption.slice(0, 197) + '...';
 
   if (!caption || /Связываемся|Connecting|Загрузка|думают|Loading/i.test(caption)) {
     if (tg?.showAlert) tg.showAlert(lang === 'ru' ? 'Сначала дождись текста ✨' : 'Wait for the text first ✨');
@@ -233,14 +233,15 @@ function shareToStory(text) {
 
   if (typeof tg?.shareToStory === 'function') {
     try {
-      tg.shareToStory(mediaUrl, {
-        widget_link: { url: APP_LINK, name: 'Cosmic Boost' }
-      });
+      // Plain media first — more reliable for publishing
+      tg.shareToStory(mediaUrl);
       return;
     } catch (e1) {
       console.error('shareToStory failed', e1);
       try {
-        tg.shareToStory(mediaUrl);
+        tg.shareToStory(mediaUrl, {
+          widget_link: { url: APP_LINK, name: 'Cosmic Boost' }
+        });
         return;
       } catch (e2) {
         console.error(e2);
