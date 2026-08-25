@@ -79,6 +79,17 @@ function haptic(type = 'light') {
   } catch (_) {}
 }
 
+function toBase64Url(str) {
+  try {
+    const bytes = new TextEncoder().encode(String(str || ''));
+    let binary = '';
+    bytes.forEach((b) => { binary += String.fromCharCode(b); });
+    return btoa(binary).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
+  } catch {
+    return '';
+  }
+}
+
 function cleanText(s) {
   if (!s) return s;
   return String(s).replace(/\*\*/g, '').replace(/__/g, '').replace(/^#+\s*/gm, '').replace(/\n{3,}/g, '\n\n').trim();
@@ -218,7 +229,7 @@ function shareToStory(text) {
   }
 
   // Image with text baked in the center (no Telegram caption needed)
-  const mediaUrl = 'https://cosmic-boost.vercel.app/api/story-card?text=' + encodeURIComponent(caption);
+  const mediaUrl = 'https://cosmic-boost.vercel.app/api/story-card?t=' + toBase64Url(caption);
 
   if (typeof tg?.shareToStory === 'function') {
     try {
