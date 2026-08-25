@@ -234,6 +234,137 @@ function updateStreak() {
   return streak;
 }
 
+
+const STREAK_MILESTONES = [3, 7, 14];
+const COLLECTION_GOAL = 7;
+
+function loadCollection() {
+  try {
+    return JSON.parse(localStorage.getItem('cb_collection') || '[]');
+  } catch {
+    return [];
+  }
+}
+
+function saveCollection(arr) {
+  localStorage.setItem('cb_collection', JSON.stringify(arr.slice(0, 30)));
+}
+
+function addToCollection(title, text) {
+  const today = getToday();
+  let col = loadCollection();
+  // one card per day
+  if (col.some(c => c.date === today)) {
+    col = col.map(c => c.date === today ? { date: today, title, text } : c);
+  } else {
+    col.unshift({ date: today, title, text });
+  }
+  saveCollection(col);
+  return col;
+}
+
+function loadBadges() {
+  try {
+    return JSON.parse(localStorage.getItem('cb_badges') || '[]');
+  } catch {
+    return [];
+  }
+}
+
+function unlockBadge(id, label) {
+  const badges = loadBadges();
+  if (badges.some(b => b.id === id)) return false;
+  badges.push({ id, label, at: getToday() });
+  localStorage.setItem('cb_badges', JSON.stringify(badges));
+  return true;
+}
+
+function checkStreakRewards(s) {
+  const rewards = [];
+  if (s >= 3 && unlockBadge('streak3', lang === 'ru' ? '🔥 3 дня' : '🔥 3 days')) {
+    rewards.push(lang === 'ru' ? 'Бейдж «3 дня подряд»!' : 'Badge «3-day streak»!');
+  }
+  if (s >= 7 && unlockBadge('streak7', lang === 'ru' ? '⚡ 7 дней' : '⚡ 7 days')) {
+    rewards.push(lang === 'ru' ? 'Бейдж «Неделя с вселенной»!' : 'Badge «Week with the universe»!');
+  }
+  if (s >= 14 && unlockBadge('streak14', lang === 'ru' ? '🌌 14 дней' : '🌌 14 days')) {
+    rewards.push(lang === 'ru' ? 'Бейдж «Космический марафон»!' : 'Badge «Cosmic marathon»!');
+  }
+  return rewards;
+}
+
+function renderStreakUI(s) {
+  const box = document.getElementById('streak-milestones');
+  if (box) {
+    box.innerHTML = STREAK_MILESTONES.map(m =>
+      `<span class="milestone ${s >= m ? 'done' : ''}">${m}d</span>`
+    ).join('');
+  }
+  const rewardEl = document.getElementById('streak-reward');
+  if (rewardEl) {
+    const rewards = checkStreakRewards(s);
+    if (rewards.length) {
+      rewardEl.style.display = 'block';
+      rewardEl.textContent = rewards.join(' ');
+    } else if (s > 0 && s < 3) {
+      rewardEl.style.display = 'block';
+      rewardEl.textContent = lang === 'ru'
+        ? `Ещё ${3 - s} дн. до первого бейджа`
+        : `${3 - s} day(s) to first badge`;
+    } else if (s >= 3 && s < 7) {
+      rewardEl.style.display = 'block';
+      rewardEl.textContent = lang === 'ru'
+        ? `Ещё ${7 - s} дн. до недельного бейджа`
+        : `${7 - s} day(s) to weekly badge`;
+    } else if (s >= 7 && s < 14) {
+      rewardEl.style.display = 'block';
+      rewardEl.textContent = lang === 'ru'
+        ? `Ещё ${14 - s} дн. до космического марафона`
+        : `${14 - s} day(s) to cosmic marathon`;
+    } else {
+      rewardEl.style.display = 'none';
+    }
+  }
+}
+
+function renderCollection() {
+  const col = loadCollection();
+  const countEl = document.getElementById('collection-count');
+  const fillEl = document.getElementById('collection-fill');
+  const grid = document.getElementById('collection-grid');
+  const badgeRow = document.getElementById('badge-row');
+  const n = col.length;
+  const goal = COLLECTION_GOAL;
+  if (countEl) countEl.textContent = `${Math.min(n, goal)} / ${goal}` + (n > goal ? ` (+${n - goal})` : '');
+  if (fillEl) fillEl.style.width = Math.min(100, (n / goal) * 100) + '%';
+
+  if (n >= goal) {
+    unlockBadge('collector7', lang === 'ru' ? '🃏 Коллекционер' : '🃏 Collector');
+  }
+
+  if (grid) {
+    if (!n) {
+      grid.innerHTML = `<div class="collection-empty">${lang === 'ru' ? 'Пока пусто — открой карту дня' : 'Empty — draw a card of the day'}</div>`;
+    } else {
+      grid.innerHTML = col.slice(0, 14).map(c => `
+        <div class="collection-item">
+          <div class="ci-title">${c.title || 'Карта'}</div>
+          <div>${(c.text || '').slice(0, 80)}${(c.text || '').length > 80 ? '…' : ''}</div>
+          <div class="ci-date">${c.date || ''}</div>
+        </div>
+      `).join('');
+    }
+  }
+
+  if (badgeRow) {
+    const badges = loadBadges();
+    badgeRow.innerHTML = badges.length
+      ? badges.map(b => `<span class="badge">${b.label}</span>`).join('')
+      : '';
+  }
+}
+
+
 function getDailyEnergy() {
   const seed = getToday().split('-').reduce((a, b) => a + parseInt(b, 10), 0);
   const n = Math.abs(Math.sin(seed * 999)) * 10000;
@@ -720,6 +851,12 @@ async function drawCard() {
     textEl.textContent = c.text;
   }
   document.getElementById('card-share')?.classList.remove('hidden');
+  const tTitle = titleEl.textContent || '';
+  const tText = textEl.textContent || '';
+  if (tTitle && tText && !/думает|thinking|Loading|Загрузка/i.test(tTitle)) {
+    addToCollection(tTitle, tText);
+    renderCollection();
+  }
   haptic('success');
 }
 
