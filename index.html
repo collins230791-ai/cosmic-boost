@@ -9,7 +9,6 @@
 </head>
 <body>
   <div class="stars" id="stars"></div>
-
   <div class="app">
     <div class="header">
       <div class="logo">Cosmic Boost</div>
@@ -23,6 +22,16 @@
 
     <!-- BOOST -->
     <div class="screen active" id="screen-boost">
+      <div class="card streak-card">
+        <div class="streak-row">
+          <span class="streak-fire">🔥</span>
+          <div>
+            <div class="streak-label" id="title-streak">Серия дней</div>
+            <div class="streak-value" id="streak-value">1 день</div>
+          </div>
+        </div>
+      </div>
+
       <div class="card">
         <div class="energy-box">
           <div class="energy-value" id="energy-value">—</div>
@@ -34,11 +43,13 @@
       <div class="card">
         <div class="card-title"><span class="emoji">💌</span> <span id="title-compliment">Комплимент от вселенной</span></div>
         <div class="compliment-text" id="compliment-text">Загрузка...</div>
+        <button class="btn btn-secondary mt-12" onclick="shareResult(document.getElementById('compliment-text').textContent)" id="btn-share-comp">Поделиться</button>
       </div>
 
       <div class="card">
         <div class="card-title"><span class="emoji">🔮</span> <span id="title-horoscope">Твой прогноз на сегодня</span></div>
         <div class="horoscope-text" id="horoscope-text">Выбери знак в Профиле ✨</div>
+        <button class="btn btn-secondary mt-12" onclick="shareResult(document.getElementById('horoscope-text').textContent)">Поделиться</button>
       </div>
     </div>
 
@@ -48,6 +59,7 @@
         <div class="card-title"><span class="emoji">😴</span> <span id="title-lazy">Гороскоп для ленивых</span></div>
         <div class="lazy-text" id="lazy-text">Нажми кнопку</div>
         <button class="btn btn-primary mt-16" id="btn-lazy" onclick="getLazy()">Получить разрешение</button>
+        <button class="btn btn-secondary mt-10 hidden" id="lazy-share" onclick="shareResult(document.getElementById('lazy-text').textContent)">Поделиться</button>
       </div>
     </div>
 
@@ -60,7 +72,7 @@
       </div>
     </div>
 
-    <!-- UNIVERSE (AI) -->
+    <!-- UNIVERSE -->
     <div class="screen" id="screen-universe">
       <div class="card">
         <div class="card-title"><span class="emoji">🌌</span> <span id="title-universe">Спросить вселенную</span></div>
@@ -93,26 +105,17 @@
           <div class="card-text" id="card-text"></div>
         </div>
         <button class="btn btn-primary mt-16" id="btn-card" onclick="drawCard()">Открыть карту</button>
+        <button class="btn btn-secondary mt-10 hidden" id="card-share" onclick="shareResult(document.getElementById('card-title').textContent + ' — ' + document.getElementById('card-text').textContent)">Поделиться</button>
       </div>
     </div>
   </div>
 
   <nav class="bottom-nav">
-    <button class="nav-item active" data-screen="boost" onclick="showScreen('boost')">
-      <span class="nav-icon">🚀</span><span id="nav-boost">Буст</span>
-    </button>
-    <button class="nav-item" data-screen="lazy" onclick="showScreen('lazy')">
-      <span class="nav-icon">😴</span><span id="nav-lazy">Ленивый</span>
-    </button>
-    <button class="nav-item" data-screen="stars" onclick="showScreen('stars')">
-      <span class="nav-icon">🌟</span><span id="nav-stars">Звёзды</span>
-    </button>
-    <button class="nav-item" data-screen="universe" onclick="showScreen('universe')">
-      <span class="nav-icon">🌌</span><span id="nav-universe">Вселенная</span>
-    </button>
-    <button class="nav-item" data-screen="profile" onclick="showScreen('profile')">
-      <span class="nav-icon">👤</span><span id="nav-profile">Профиль</span>
-    </button>
+    <button class="nav-item active" data-screen="boost" onclick="showScreen('boost')"><span class="nav-icon">🚀</span><span id="nav-boost">Буст</span></button>
+    <button class="nav-item" data-screen="lazy" onclick="showScreen('lazy')"><span class="nav-icon">😴</span><span id="nav-lazy">Ленивый</span></button>
+    <button class="nav-item" data-screen="stars" onclick="showScreen('stars')"><span class="nav-icon">🌟</span><span id="nav-stars">Звёзды</span></button>
+    <button class="nav-item" data-screen="universe" onclick="showScreen('universe')"><span class="nav-icon">🌌</span><span id="nav-universe">Вселенная</span></button>
+    <button class="nav-item" data-screen="profile" onclick="showScreen('profile')"><span class="nav-icon">👤</span><span id="nav-profile">Профиль</span></button>
   </nav>
 
   <div class="overlay" id="result-overlay" onclick="closeModal(event)">
