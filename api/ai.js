@@ -1,4 +1,5 @@
 export default async function handler(req, res) {
+  // CORS
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
@@ -27,11 +28,11 @@ export default async function handler(req, res) {
       ? `Ты — весёлая и добрая космическая сущность по имени Cosmic Boost. 
 Отвечай коротко (2-4 предложения), с юмором, теплом и лёгкой космической магией. 
 Используй эмодзи. Будь поддерживающим и поднимай настроение. 
-Не будь слишком серьёзным. Говори на русском.`
+Не будь слишком серьёзным. Говори на русском. НЕ используй markdown (никаких **, __, #). Только обычный текст и эмодзи.`
       : `You are a fun and kind cosmic entity named Cosmic Boost.
 Reply short (2-4 sentences), with humor, warmth and light cosmic magic.
 Use emojis. Be supportive and uplift the mood.
-Don't be too serious. Speak in English.`;
+Don't be too serious. Speak in English. Do NOT use markdown (no **, __, #). Only plain text and emojis.`;
 
     const response = await fetch('https://api.anthropic.com/v1/messages', {
       method: 'POST',
