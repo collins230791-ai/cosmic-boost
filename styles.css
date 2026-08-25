@@ -1,0 +1,521 @@
+:root {
+  --bg: #0f0c29;
+  --bg2: #302b63;
+  --bg3: #24243e;
+  --card: rgba(255, 255, 255, 0.08);
+  --card-hover: rgba(255, 255, 255, 0.12);
+  --text: #ffffff;
+  --text-soft: rgba(255, 255, 255, 0.7);
+  --accent: #ff6b9d;
+  --accent2: #c44cff;
+  --accent3: #00d4ff;
+  --yellow: #ffd93d;
+  --green: #6bcb77;
+  --radius: 20px;
+  --shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  -webkit-tap-highlight-color: transparent;
+}
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  background: linear-gradient(135deg, #0f0c29 0%, #302b63 50%, #24243e 100%);
+  color: var(--text);
+  min-height: 100vh;
+  overflow-x: hidden;
+  padding-bottom: 90px;
+}
+
+/* Stars background */
+.stars {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: 0;
+  overflow: hidden;
+}
+
+.star {
+  position: absolute;
+  background: white;
+  border-radius: 50%;
+  animation: twinkle var(--duration) ease-in-out infinite;
+  opacity: 0;
+}
+
+@keyframes twinkle {
+  0%, 100% { opacity: 0; transform: scale(0.5); }
+  50% { opacity: var(--opacity); transform: scale(1); }
+}
+
+.app {
+  position: relative;
+  z-index: 1;
+  max-width: 480px;
+  margin: 0 auto;
+  padding: 16px;
+}
+
+/* Header */
+.header {
+  text-align: center;
+  padding: 20px 0 16px;
+}
+
+.logo {
+  font-size: 28px;
+  font-weight: 800;
+  background: linear-gradient(90deg, #ff6b9d, #c44cff, #00d4ff);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  letter-spacing: -0.5px;
+}
+
+.subtitle {
+  font-size: 13px;
+  color: var(--text-soft);
+  margin-top: 4px;
+}
+
+/* Language switcher */
+.lang-switch {
+  display: flex;
+  justify-content: center;
+  gap: 8px;
+  margin: 12px 0 20px;
+}
+
+.lang-btn {
+  padding: 6px 14px;
+  border-radius: 20px;
+  border: 1px solid rgba(255,255,255,0.15);
+  background: transparent;
+  color: var(--text-soft);
+  font-size: 13px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.lang-btn.active {
+  background: linear-gradient(90deg, #ff6b9d, #c44cff);
+  color: white;
+  border-color: transparent;
+}
+
+/* Cards */
+.card {
+  background: var(--card);
+  backdrop-filter: blur(12px);
+  border-radius: var(--radius);
+  padding: 20px;
+  margin-bottom: 16px;
+  border: 1px solid rgba(255,255,255,0.08);
+  box-shadow: var(--shadow);
+}
+
+.card-title {
+  font-size: 15px;
+  font-weight: 600;
+  margin-bottom: 12px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.card-title .emoji {
+  font-size: 20px;
+}
+
+/* Energy bar */
+.energy-box {
+  text-align: center;
+  padding: 8px 0;
+}
+
+.energy-value {
+  font-size: 48px;
+  font-weight: 800;
+  background: linear-gradient(90deg, #ffd93d, #ff6b9d);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  line-height: 1;
+}
+
+.energy-label {
+  font-size: 13px;
+  color: var(--text-soft);
+  margin-top: 4px;
+}
+
+.energy-bar {
+  height: 8px;
+  background: rgba(255,255,255,0.1);
+  border-radius: 10px;
+  margin-top: 12px;
+  overflow: hidden;
+}
+
+.energy-fill {
+  height: 100%;
+  border-radius: 10px;
+  background: linear-gradient(90deg, #ffd93d, #ff6b9d, #c44cff);
+  transition: width 1s ease;
+}
+
+/* Text blocks */
+.horoscope-text, .compliment-text, .lazy-text, .fortune-text, .card-text {
+  font-size: 16px;
+  line-height: 1.5;
+  color: var(--text);
+}
+
+.compliment-text {
+  font-size: 17px;
+  font-weight: 500;
+  text-align: center;
+  padding: 8px 0;
+}
+
+/* Buttons */
+.btn {
+  display: block;
+  width: 100%;
+  padding: 16px;
+  border: none;
+  border-radius: 16px;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+  text-align: center;
+}
+
+.btn-primary {
+  background: linear-gradient(90deg, #ff6b9d, #c44cff);
+  color: white;
+  box-shadow: 0 4px 20px rgba(196, 76, 255, 0.4);
+}
+
+.btn-primary:active {
+  transform: scale(0.97);
+}
+
+.btn-secondary {
+  background: rgba(255,255,255,0.1);
+  color: white;
+  margin-top: 10px;
+}
+
+.btn-secondary:active {
+  background: rgba(255,255,255,0.15);
+}
+
+/* Zodiac selector */
+.zodiac-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+}
+
+.zodiac-item {
+  background: rgba(255,255,255,0.06);
+  border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 14px;
+  padding: 12px 8px;
+  text-align: center;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.zodiac-item:active, .zodiac-item.selected {
+  background: linear-gradient(135deg, rgba(255,107,157,0.3), rgba(196,76,255,0.3));
+  border-color: #c44cff;
+  transform: scale(0.96);
+}
+
+.zodiac-emoji {
+  font-size: 24px;
+  display: block;
+  margin-bottom: 4px;
+}
+
+.zodiac-name {
+  font-size: 12px;
+  font-weight: 500;
+}
+
+/* Celebrity list */
+.celeb-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.celeb-item {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  background: rgba(255,255,255,0.06);
+  border-radius: 16px;
+  padding: 14px;
+  cursor: pointer;
+  transition: all 0.2s;
+  border: 1px solid transparent;
+}
+
+.celeb-item:active {
+  background: rgba(255,255,255,0.1);
+  border-color: rgba(196,76,255,0.4);
+}
+
+.celeb-emoji {
+  font-size: 28px;
+  width: 44px;
+  height: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(255,255,255,0.08);
+  border-radius: 12px;
+}
+
+.celeb-info {
+  flex: 1;
+}
+
+.celeb-name {
+  font-weight: 600;
+  font-size: 15px;
+}
+
+.celeb-sign {
+  font-size: 12px;
+  color: var(--text-soft);
+  margin-top: 2px;
+}
+
+/* Result screens */
+.result-box {
+  text-align: center;
+  padding: 10px 0;
+}
+
+.result-emoji {
+  font-size: 56px;
+  margin-bottom: 12px;
+  display: block;
+}
+
+.result-percent {
+  font-size: 42px;
+  font-weight: 800;
+  background: linear-gradient(90deg, #ff6b9d, #c44cff);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  margin-bottom: 8px;
+}
+
+.result-title {
+  font-size: 18px;
+  font-weight: 600;
+  margin-bottom: 12px;
+}
+
+/* Card of the day */
+.day-card {
+  background: linear-gradient(135deg, rgba(255,107,157,0.2), rgba(196,76,255,0.2));
+  border: 1px solid rgba(255,107,157,0.3);
+  border-radius: 20px;
+  padding: 24px;
+  text-align: center;
+  min-height: 180px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.day-card-title {
+  font-size: 18px;
+  font-weight: 700;
+  margin-bottom: 12px;
+  color: var(--yellow);
+}
+
+/* Bottom navigation */
+.bottom-nav {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: rgba(15, 12, 41, 0.95);
+  backdrop-filter: blur(20px);
+  border-top: 1px solid rgba(255,255,255,0.08);
+  display: flex;
+  justify-content: space-around;
+  padding: 10px 0 24px;
+  z-index: 100;
+}
+
+.nav-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  background: none;
+  border: none;
+  color: var(--text-soft);
+  font-size: 11px;
+  cursor: pointer;
+  padding: 6px 10px;
+  border-radius: 12px;
+  transition: all 0.2s;
+}
+
+.nav-item.active {
+  color: white;
+}
+
+.nav-item.active .nav-icon {
+  transform: scale(1.15);
+}
+
+.nav-icon {
+  font-size: 22px;
+  transition: transform 0.2s;
+}
+
+/* Screens */
+.screen {
+  display: none;
+  animation: fadeIn 0.3s ease;
+}
+
+.screen.active {
+  display: block;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* Modal / overlay for results */
+.overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.7);
+  z-index: 200;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+}
+
+.overlay.active {
+  display: flex;
+}
+
+.modal {
+  background: linear-gradient(135deg, #1a1635, #2a2555);
+  border-radius: 24px;
+  padding: 28px 20px;
+  max-width: 360px;
+  width: 100%;
+  border: 1px solid rgba(255,255,255,0.1);
+  text-align: center;
+  animation: popIn 0.3s ease;
+}
+
+@keyframes popIn {
+  from { opacity: 0; transform: scale(0.9); }
+  to { opacity: 1; transform: scale(1); }
+}
+
+.modal-close {
+  margin-top: 20px;
+}
+
+/* Profile */
+.user-info {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin-bottom: 20px;
+}
+
+.user-avatar {
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #ff6b9d, #c44cff);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 24px;
+  font-weight: 700;
+}
+
+.user-name {
+  font-size: 18px;
+  font-weight: 600;
+}
+
+.user-sign {
+  font-size: 13px;
+  color: var(--text-soft);
+  margin-top: 2px;
+}
+
+/* Empty state */
+.empty-state {
+  text-align: center;
+  padding: 40px 20px;
+  color: var(--text-soft);
+}
+
+.empty-state .emoji {
+  font-size: 48px;
+  margin-bottom: 12px;
+  display: block;
+}
+
+/* Share button */
+.share-row {
+  display: flex;
+  gap: 10px;
+  margin-top: 16px;
+}
+
+.share-row .btn {
+  flex: 1;
+}
+
+/* Small helpers */
+.mt-8 { margin-top: 8px; }
+.mt-12 { margin-top: 12px; }
+.mt-16 { margin-top: 16px; }
+.mb-8 { margin-bottom: 8px; }
+.text-center { text-align: center; }
+.text-soft { color: var(--text-soft); }
+.fw-600 { font-weight: 600; }
+
+/* Loading / skeleton */
+.pulse {
+  animation: pulse 1.5s ease-in-out infinite;
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.5; }
+}

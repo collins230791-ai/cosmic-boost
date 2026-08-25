@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Cosmic Boost</title>
+  <script src="https://telegram.org/js/telegram-web-app.js"></script>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div class="stars" id="stars"></div>
+
+  <div class="app">
+    <!-- Header -->
+    <div class="header">
+      <div class="logo">Cosmic Boost</div>
+      <div class="subtitle" id="subtitle">Твой ежедневный заряд от вселенной</div>
+    </div>
+
+    <!-- Language -->
+    <div class="lang-switch">
+      <button class="lang-btn active" data-lang="ru" onclick="setLang('ru')">RU</button>
+      <button class="lang-btn" data-lang="en" onclick="setLang('en')">EN</button>
+    </div>
+
+    <!-- ========== SCREEN: BOOST (Home) ========== -->
+    <div class="screen active" id="screen-boost">
+      <!-- Energy -->
+      <div class="card">
+        <div class="energy-box">
+          <div class="energy-value" id="energy-value">87%</div>
+          <div class="energy-label" id="energy-label">Космическая энергия на максимуме</div>
+          <div class="energy-bar">
+            <div class="energy-fill" id="energy-fill" style="width: 87%"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Daily Compliment -->
+      <div class="card">
+        <div class="card-title"><span class="emoji">💌</span> <span id="title-compliment">Комплимент от вселенной</span></div>
+        <div class="compliment-text" id="compliment-text">Загрузка...</div>
+      </div>
+
+      <!-- Daily Horoscope -->
+      <div class="card">
+        <div class="card-title"><span class="emoji">🔮</span> <span id="title-horoscope">Твой прогноз на сегодня</span></div>
+        <div class="horoscope-text" id="horoscope-text">Выбери свой знак зодиака в профиле ✨</div>
+      </div>
+    </div>
+
+    <!-- ========== SCREEN: LAZY ========== -->
+    <div class="screen" id="screen-lazy">
+      <div class="card">
+        <div class="card-title"><span class="emoji">😴</span> <span id="title-lazy">Гороскоп для ленивых</span></div>
+        <div class="lazy-text" id="lazy-text">Нажми кнопку, чтобы получить разрешение ничего не делать</div>
+        <button class="btn btn-primary mt-16" id="btn-lazy" onclick="getLazyHoroscope()">Получить разрешение</button>
+      </div>
+    </div>
+
+    <!-- ========== SCREEN: STARS (Celebrities) ========== -->
+    <div class="screen" id="screen-stars">
+      <div class="card">
+        <div class="card-title"><span class="emoji">🌟</span> <span id="title-stars">С кем из звёзд ты совместим(а)</span></div>
+        <div class="text-soft mb-8" id="stars-hint" style="font-size:13px">Выбери знаменитость</div>
+        <div class="celeb-list" id="celeb-list"></div>
+      </div>
+    </div>
+
+    <!-- ========== SCREEN: MATCH ========== -->
+    <div class="screen" id="screen-match">
+      <div class="card">
+        <div class="card-title"><span class="emoji">💞</span> <span id="title-match">Совместимость</span></div>
+        <div class="text-soft mb-8" id="match-hint" style="font-size:13px">Выбери знак друга / подруги</div>
+        <div class="zodiac-grid" id="match-zodiac-grid"></div>
+      </div>
+    </div>
+
+    <!-- ========== SCREEN: MORE ========== -->
+    <div class="screen" id="screen-more">
+      <!-- Card of the day -->
+      <div class="card">
+        <div class="card-title"><span class="emoji">🃏</span> <span id="title-card">Карта дня</span></div>
+        <div class="day-card" id="day-card">
+          <div class="day-card-title" id="card-title">Нажми, чтобы открыть</div>
+          <div class="card-text" id="card-text"></div>
+        </div>
+        <button class="btn btn-primary mt-16" id="btn-card" onclick="drawCard()">Открыть карту</button>
+      </div>
+
+      <!-- Random Fortune -->
+      <div class="card">
+        <div class="card-title"><span class="emoji">✨</span> <span id="title-fortune">Случайное предсказание</span></div>
+        <div class="fortune-text" id="fortune-text">Жми, если нужно немного магии</div>
+        <button class="btn btn-primary mt-16" id="btn-fortune" onclick="getRandomFortune()">Узнать судьбу</button>
+      </div>
+
+      <!-- Profile -->
+      <div class="card">
+        <div class="card-title"><span class="emoji">👤</span> <span id="title-profile">Профиль</span></div>
+        <div class="user-info">
+          <div class="user-avatar" id="user-avatar">?</div>
+          <div>
+            <div class="user-name" id="user-name">Гость</div>
+            <div class="user-sign" id="user-sign">Знак не выбран</div>
+          </div>
+        </div>
+        <div class="text-soft mb-8" id="choose-sign-label" style="font-size:13px">Выбери свой знак зодиака:</div>
+        <div class="zodiac-grid" id="profile-zodiac-grid"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Bottom Navigation -->
+  <nav class="bottom-nav">
+    <button class="nav-item active" data-screen="boost" onclick="showScreen('boost')">
+      <span class="nav-icon">🚀</span>
+      <span id="nav-boost">Буст</span>
+    </button>
+    <button class="nav-item" data-screen="lazy" onclick="showScreen('lazy')">
+      <span class="nav-icon">😴</span>
+      <span id="nav-lazy">Ленивый</span>
+    </button>
+    <button class="nav-item" data-screen="stars" onclick="showScreen('stars')">
+      <span class="nav-icon">🌟</span>
+      <span id="nav-stars">Звёзды</span>
+    </button>
+    <button class="nav-item" data-screen="match" onclick="showScreen('match')">
+      <span class="nav-icon">💞</span>
+      <span id="nav-match">Матч</span>
+    </button>
+    <button class="nav-item" data-screen="more" onclick="showScreen('more')">
+      <span class="nav-icon">✨</span>
+      <span id="nav-more">Ещё</span>
+    </button>
+  </nav>
+
+  <!-- Result Modal -->
+  <div class="overlay" id="result-overlay" onclick="closeModal(event)">
+    <div class="modal" onclick="event.stopPropagation()">
+      <div id="modal-content"></div>
+      <button class="btn btn-primary modal-close" id="modal-close-btn" onclick="closeModal()">Закрыть</button>
+    </div>
+  </div>
+
+  <script src="data.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
