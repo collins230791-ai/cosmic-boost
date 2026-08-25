@@ -7,6 +7,7 @@ const AI_TIMEOUT_MS = 4500;
 let lang = localStorage.getItem('cb_lang') || 'ru';
 let userSign = localStorage.getItem('cb_sign') || null;
 let userName = localStorage.getItem('cb_name') || '';
+let birthDate = localStorage.getItem('cb_birth') || '';
 let streak = parseInt(localStorage.getItem('cb_streak') || '0', 10);
 
 const i18n = {
@@ -30,7 +31,7 @@ const i18n = {
     loadingShort: "Звёзды думают...",
     error: "Звёзды сейчас вне зоны доступа. Попробуй чуть позже ✨",
     streakDays: "дней подряд",
-    shareText: "Смотри, что мне сказала вселенная в Cosmic Boost ✨"
+    shareText: "Смотри, что мне сказала вселенная ✨\n\nCosmic Boost — t.me/CosmicBoostApp_bot/cosmicb"
   },
   en: {
     subtitle: "Your daily charge from the universe",
@@ -52,7 +53,7 @@ const i18n = {
     loadingShort: "Stars are thinking...",
     error: "Stars are currently out of range. Try a bit later ✨",
     streakDays: "days in a row",
-    shareText: "Look what the universe told me in Cosmic Boost ✨"
+    shareText: "Look what the universe told me ✨\n\nCosmic Boost — t.me/CosmicBoostApp_bot/cosmicb"
   }
 };
 
@@ -127,14 +128,16 @@ function cloudSet(key, value) {
 }
 
 async function loadProfileFromCloud() {
-  const [sign, savedLang, name] = await Promise.all([
+  const [sign, savedLang, name, birth] = await Promise.all([
     cloudGet('cb_sign'),
     cloudGet('cb_lang'),
-    cloudGet('cb_name')
+    cloudGet('cb_name'),
+    cloudGet('cb_birth')
   ]);
   if (sign) userSign = sign;
   if (savedLang === 'ru' || savedLang === 'en') lang = savedLang;
   if (name) userName = name;
+  if (birth) birthDate = birth;
 }
 
 // ===== AI with timeout =====
@@ -224,6 +227,34 @@ function shareResult(text) {
   }
 }
 
+
+function shareSmart(text) {
+  haptic('medium');
+  const body = cleanText(String(text || '')).trim();
+  if (!body || /Связываемся|Connecting|Загрузка|думают|Loading/i.test(body)) {
+    if (tg?.showAlert) tg.showAlert(lang === 'ru' ? 'Сначала дождись текста ✨' : 'Wait for the text first ✨');
+    return;
+  }
+
+  // If Stories available — ask user
+  if (typeof tg?.shareToStory === 'function' && tg?.showPopup) {
+    tg.showPopup({
+      title: lang === 'ru' ? 'Поделиться' : 'Share',
+      message: lang === 'ru' ? 'Куда отправить?' : 'Where to share?',
+      buttons: [
+        { id: 'story', type: 'default', text: lang === 'ru' ? '📱 Stories' : '📱 Stories' },
+        { id: 'chat', type: 'default', text: lang === 'ru' ? 'В чат' : 'To chat' },
+        { type: 'cancel' }
+      ]
+    }, (id) => {
+      if (id === 'story') shareToStory(body);
+      else if (id === 'chat') shareResult(body);
+    });
+    return;
+  }
+  shareResult(body);
+}
+
 function shareToStory(text) {
   haptic('medium');
   let caption = cleanText(String(text || '')).replace(/\s+/g, ' ').trim();
@@ -281,6 +312,65 @@ function applyTelegramTheme() {
   document.body.classList.toggle('tg-light', !!isLight);
 }
 
+
+
+async function saveBirthDate() {
+  const el = document.getElementById('birth-date');
+  const v = el?.value || '';
+  if (!v) {
+    if (tg?.showAlert) tg.showAlert(lang === 'ru' ? 'Выбери дату' : 'Pick a date');
+    return;
+  }
+  birthDate = v;
+  localStorage.setItem('cb_birth', birthDate);
+  await cloudSet('cb_birth', birthDate);
+  // auto-set zodiac from date if possible
+  const sign = signFromDate(birthDate);
+  if (sign) {
+    userSign = sign;
+    localStorage.setItem('cb_sign', sign);
+    await cloudSet('cb_sign', sign);
+    localStorage.removeItem(cacheKey('horoscope'));
+  }
+  haptic('success');
+  updateUI();
+  if (tg?.showPopup) tg.showPopup({ message: lang === 'ru' ? 'Дата сохранена ✨' : 'Date saved ✨', buttons: [{ type: 'ok' }] });
+}
+
+function signFromDate(iso) {
+  if (!iso) return null;
+  const [y, m, d] = iso.split('-').map(Number);
+  const md = m * 100 + d;
+  if (md >= 321 && md <= 419) return 'aries';
+  if (md >= 420 && md <= 520) return 'taurus';
+  if (md >= 521 && md <= 620) return 'gemini';
+  if (md >= 621 && md <= 722) return 'cancer';
+  if (md >= 723 && md <= 822) return 'leo';
+  if (md >= 823 && md <= 922) return 'virgo';
+  if (md >= 923 && md <= 1022) return 'libra';
+  if (md >= 1023 && md <= 1121) return 'scorpio';
+  if (md >= 1122 && md <= 1221) return 'sagittarius';
+  if (md >= 1222 || md <= 119) return 'capricorn';
+  if (md >= 120 && md <= 218) return 'aquarius';
+  if (md >= 219 && md <= 320) return 'pisces';
+  return null;
+}
+
+async function getRelocate() {
+  const el = document.getElementById('relocate-text');
+  setLoading(el, true);
+  haptic('medium');
+  const n = nameForAI();
+  const signPart = userSign && ZODIAC[userSign] ? ZODIAC[userSign][lang] : '';
+  const birthPart = birthDate || (lang === 'ru' ? 'дата неизвестна' : 'unknown date');
+  const prompt = lang === 'ru'
+    ? `Ты весёлый космический гид. Человека зовут ${n}, знак ${signPart || 'не указан'}, дата рождения ${birthPart}. Напиши шутливую но тёплую рекомендацию: в какую страну или город ему/ей «по звёздам» переехать и почему. 3-4 предложения. 1-2 варианта мест. С эмодзи. Без markdown. Не будь серьёзным астрологом — это для настроения.`
+    : `You are a fun cosmic guide. Person is named ${n}, sign ${signPart || 'unknown'}, birth date ${birthPart}. Write a warm funny recommendation: which country or city they should "move to by the stars" and why. 3-4 sentences. 1-2 place options. Emoji. No markdown. Not serious astrology — for mood.`;
+  const reply = await askAI(prompt);
+  el.textContent = reply || (lang === 'ru' ? 'Звёзды пока молчат про переезд ✨' : 'Stars are silent about moving ✨');
+  document.getElementById('relocate-share')?.classList.remove('hidden');
+  haptic(reply ? 'success' : 'error');
+}
 
 function openNameModal() {
   const modal = document.getElementById('name-modal');
@@ -360,6 +450,19 @@ function updateUI() {
   } else {
     document.getElementById('user-sign').textContent = t('signNotSelected');
   }
+
+  const birthEl = document.getElementById('birth-date');
+  if (birthEl && birthDate) birthEl.value = birthDate;
+  const birthLabel = document.getElementById('birth-label');
+  if (birthLabel) birthLabel.textContent = lang === 'ru' ? 'Дата рождения:' : 'Birth date:';
+  const btnBirth = document.getElementById('btn-save-birth');
+  if (btnBirth) btnBirth.textContent = lang === 'ru' ? 'Сохранить дату' : 'Save date';
+  const titleRel = document.getElementById('title-relocate');
+  if (titleRel) titleRel.textContent = lang === 'ru' ? 'Куда тебе переехать' : 'Where should you move';
+  const relHint = document.getElementById('relocate-hint');
+  if (relHint) relHint.textContent = lang === 'ru' ? 'По дате рождения и вайбу — с юмором' : 'By birth date and vibe — with humor';
+  const btnRel = document.getElementById('btn-relocate');
+  if (btnRel) btnRel.textContent = lang === 'ru' ? 'Узнать 🌍' : 'Find out 🌍';
 
   renderZodiac();
   renderCelebrities();
@@ -456,10 +559,7 @@ async function showCelebAI(celeb) {
     <div class="result-emoji">${celeb.emoji}</div>
     <div class="result-title">${celeb.name[lang]}</div>
     <p style="font-size:15px;line-height:1.5;margin-top:12px">${reply}</p>
-    <div class="share-row mt-16">
-      <button class="btn btn-secondary" onclick="shareResult(\`${String(celeb.name[lang]+': '+reply).replace(/`/g,'')}\`)">${t('btnShare')}</button>
-      <button class="btn btn-story" onclick="shareToStory(\`${String(celeb.name[lang]+': '+reply).replace(/`/g,'')}\`)">📱 Stories</button>
-    </div>`;
+    <button class="btn btn-secondary mt-16" onclick="shareSmart(\`${String(celeb.name[lang]+': '+reply).replace(/`/g,'')}\`)">${t('btnShare')}</button>`;
   haptic('success');
 }
 
@@ -533,10 +633,7 @@ async function askUniverse() {
   haptic('medium');
   const reply = await askAI(msg);
   result.innerHTML = `<div class="ai-reply">${reply || t('error')}</div>
-    <div class="share-row mt-12">
-      <button class="btn btn-secondary" onclick="shareResult(\`${String(reply||'').replace(/`/g,'')}\`)">${t('btnShare')}</button>
-      <button class="btn btn-story" onclick="shareToStory(\`${String(reply||'').replace(/`/g,'')}\`)">📱 Stories</button>
-    </div>`;
+    <button class="btn btn-secondary mt-12" onclick="shareSmart(\`${String(reply||'').replace(/`/g,'')}\`)">${t('btnShare')}</button>`;
   haptic(reply ? 'success' : 'error');
 }
 
