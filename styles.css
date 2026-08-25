@@ -745,3 +745,21 @@ body.tg-light {
 .nav-item {
   gap: 2px;
 }
+
+
+/* Section title images */
+.title-img {
+  width: 28px;
+  height: 28px;
+  border-radius: 8px;
+  object-fit: cover;
+  vertical-align: middle;
+  margin-right: 8px;
+  box-shadow: 0 0 10px rgba(196, 76, 255, 0.35);
+  display: inline-block;
+}
+.card-title {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
