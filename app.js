@@ -1,6 +1,7 @@
 const tg = window.Telegram?.WebApp;
 const AI_URL = 'https://cosmic-boost.vercel.app/api/ai';
 const APP_LINK = 'https://t.me/CosmicBoostApp_bot/cosmicb';
+const STORY_BG = 'https://cosmic-boost.vercel.app/story-bg.jpg';
 const AI_TIMEOUT_MS = 4500;
 
 let lang = localStorage.getItem('cb_lang') || 'ru';
@@ -19,7 +20,7 @@ const i18n = {
     titleCard: "Карта дня",
     titleStreak: "Серия дней",
     navBoost: "Буст", navLazy: "Ленивый", navStars: "Звёзды", navUniverse: "Вселенная", navProfile: "Профиль",
-    btnLazy: "Получить разрешение", btnCard: "Открыть карту", btnAsk: "Спросить ✨", btnClose: "Закрыть", btnShare: "Поделиться",
+    btnLazy: "Получить разрешение", btnCard: "Открыть карту", btnAsk: "Спросить ✨", btnClose: "Закрыть", btnShare: "Поделиться", btnStory: "В Stories",
     chooseSign: "Твой знак зодиака:", signNotSelected: "Знак не выбран", guest: "Гость",
     starsHint: "Выбери знаменитость", cardPlaceholder: "Нажми, чтобы открыть",
     horoscopePlaceholder: "Выбери знак в Профиле ✨",
@@ -41,7 +42,7 @@ const i18n = {
     titleCard: "Card of the Day",
     titleStreak: "Day streak",
     navBoost: "Boost", navLazy: "Lazy", navStars: "Stars", navUniverse: "Universe", navProfile: "Profile",
-    btnLazy: "Get permission", btnCard: "Draw a card", btnAsk: "Ask ✨", btnClose: "Close", btnShare: "Share",
+    btnLazy: "Get permission", btnCard: "Draw a card", btnAsk: "Ask ✨", btnClose: "Close", btnShare: "Share", btnStory: "To Stories",
     chooseSign: "Your zodiac sign:", signNotSelected: "Sign not selected", guest: "Guest",
     starsHint: "Choose a celebrity", cardPlaceholder: "Press to open",
     horoscopePlaceholder: "Choose your sign in Profile ✨",
@@ -206,6 +207,27 @@ function shareResult(text) {
   }
 }
 
+function shareToStory(text) {
+  haptic('medium');
+  const caption = (text || '').slice(0, 200);
+  if (tg?.shareToStory) {
+    try {
+      tg.shareToStory(STORY_BG, {
+        text: caption,
+        widget_link: {
+          url: APP_LINK,
+          name: 'Cosmic Boost'
+        }
+      });
+      return;
+    } catch (e) {
+      console.error('shareToStory failed', e);
+    }
+  }
+  // Fallback: share to chat if Stories not supported
+  shareResult(text);
+}
+
 // ===== Theme =====
 function applyTelegramTheme() {
   if (!tg?.themeParams) return;
@@ -347,7 +369,10 @@ async function showCelebAI(celeb) {
     <div class="result-emoji">${celeb.emoji}</div>
     <div class="result-title">${celeb.name[lang]}</div>
     <p style="font-size:15px;line-height:1.5;margin-top:12px">${reply}</p>
-    <button class="btn btn-secondary mt-16" onclick="shareResult(\`${String(celeb.name[lang]+': '+reply).replace(/`/g,'')}\`)">${t('btnShare')}</button>`;
+    <div class="share-row mt-16">
+      <button class="btn btn-secondary" onclick="shareResult(\`${String(celeb.name[lang]+': '+reply).replace(/`/g,'')}\`)">${t('btnShare')}</button>
+      <button class="btn btn-story" onclick="shareToStory(\`${String(celeb.name[lang]+': '+reply).replace(/`/g,'')}\`)">📱 Stories</button>
+    </div>`;
   haptic('success');
 }
 
@@ -420,7 +445,10 @@ async function askUniverse() {
   haptic('medium');
   const reply = await askAI(msg);
   result.innerHTML = `<div class="ai-reply">${reply || t('error')}</div>
-    <button class="btn btn-secondary mt-12" onclick="shareResult(\`${String(reply||'').replace(/`/g,'')}\`)">${t('btnShare')}</button>`;
+    <div class="share-row mt-12">
+      <button class="btn btn-secondary" onclick="shareResult(\`${String(reply||'').replace(/`/g,'')}\`)">${t('btnShare')}</button>
+      <button class="btn btn-story" onclick="shareToStory(\`${String(reply||'').replace(/`/g,'')}\`)">📱 Stories</button>
+    </div>`;
   haptic(reply ? 'success' : 'error');
 }
 
