@@ -160,6 +160,18 @@
 
   
   <!-- Name onboarding -->
+  
+  <!-- Birth onboarding -->
+  <div class="overlay" id="birth-modal">
+    <div class="modal name-modal" onclick="event.stopPropagation()">
+      <div class="result-emoji">🎂</div>
+      <div class="result-title" id="birth-modal-title">Когда ты родился(ась)?</div>
+      <p id="birth-modal-sub" style="opacity:0.7;font-size:14px;margin:8px 0 16px">Для знака, числа судьбы и космических советов</p>
+      <input type="date" id="birth-modal-input" class="name-input" style="text-align:left">
+      <button class="btn btn-primary mt-16" id="birth-save-btn" onclick="saveBirthFromModal()">Дальше ✨</button>
+    </div>
+  </div>
+
   <div class="overlay" id="name-modal">
     <div class="modal name-modal" onclick="event.stopPropagation()">
       <div class="result-emoji">✨</div>
