@@ -793,6 +793,7 @@ body.tg-light {
   cursor: pointer;
   text-decoration: underline;
 }
-#name-modal.active {
+#name-modal.active,
+#birth-modal.active {
   display: flex;
 }
