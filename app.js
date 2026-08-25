@@ -209,40 +209,34 @@ function shareResult(text) {
 
 function shareToStory(text) {
   haptic('medium');
-  // Short clean caption — Telegram limit ~200, and short text is more readable
-  let caption = cleanText(String(text || ''))
-    .replace(/\s+/g, ' ')
-    .trim();
-  if (caption.length > 160) {
-    caption = caption.slice(0, 157) + '...';
-  }
-  // Avoid empty / loading states
-  if (!caption || caption.includes('Связываемся') || caption.includes('Connecting') || caption.includes('Загрузка') || caption.includes('думают')) {
+  let caption = cleanText(String(text || '')).replace(/\s+/g, ' ').trim();
+  if (caption.length > 160) caption = caption.slice(0, 157) + '...';
+
+  if (!caption || /Связываемся|Connecting|Загрузка|думают|Loading/i.test(caption)) {
     if (tg?.showAlert) tg.showAlert(lang === 'ru' ? 'Сначала дождись текста ✨' : 'Wait for the text first ✨');
     return;
   }
 
+  // Image with text baked in the center (no Telegram caption needed)
+  const mediaUrl = 'https://cosmic-boost.vercel.app/api/story-card?text=' + encodeURIComponent(caption);
+
   if (typeof tg?.shareToStory === 'function') {
     try {
-      // First try with widget link
-      tg.shareToStory(STORY_BG, {
-        text: caption,
+      tg.shareToStory(mediaUrl, {
         widget_link: { url: APP_LINK, name: 'Cosmic Boost' }
       });
       return;
     } catch (e1) {
-      console.error('shareToStory+widget failed', e1);
+      console.error('shareToStory failed', e1);
       try {
-        // Fallback without widget
-        tg.shareToStory(STORY_BG, { text: caption });
+        tg.shareToStory(mediaUrl);
         return;
       } catch (e2) {
-        console.error('shareToStory failed', e2);
+        console.error(e2);
       }
     }
   }
 
-  // Not supported — explain + share to chat
   if (tg?.showPopup) {
     tg.showPopup({
       title: 'Stories',
