@@ -1,32 +1,42 @@
-// Cosmic Boost - Fun content database
+// Cosmic Boost - Expanded content database (UTF-8)
 
 const ZODIAC = {
-  aries: { ru: "25=", en: "Aries", emoji: "H", dates: "21.03  19.04" },
-  taurus: { ru: ""5;5F", en: "Taurus", emoji: "I", dates: "20.04  20.05" },
-  gemini: { ru: ";87=5FK", en: "Gemini", emoji: "J", dates: "21.05  20.06" },
-  cancer: { ru: " 0:", en: "Cancer", emoji: "K", dates: "21.06  22.07" },
-  leo: { ru: "52", en: "Leo", emoji: "L", dates: "23.07  22.08" },
-  virgo: { ru: "520", en: "Virgo", emoji: "M", dates: "23.08  22.09" },
-  libra: { ru: "5AK", en: "Libra", emoji: "N", dates: "23.09  22.10" },
-  scorpio: { ru: "!:>@?8>=", en: "Scorpio", emoji: "O", dates: "23.10  21.11" },
-  sagittarius: { ru: "!B@5;5F", en: "Sagittarius", emoji: "P", dates: "22.11  21.12" },
-  capricorn: { ru: ">75@>3", en: "Capricorn", emoji: "Q", dates: "22.12  19.01" },
-  aquarius: { ru: ">4>;59", en: "Aquarius", emoji: "R", dates: "20.01  18.02" },
-  pisces: { ru: " K1K", en: "Pisces", emoji: "S", dates: "19.02  20.03" }
+  aries:       { ru: "Овен",      en: "Aries",       emoji: "♈", dates: "21.03 – 19.04" },
+  taurus:      { ru: "Телец",     en: "Taurus",      emoji: "♉", dates: "20.04 – 20.05" },
+  gemini:      { ru: "Близнецы",  en: "Gemini",      emoji: "♊", dates: "21.05 – 20.06" },
+  cancer:      { ru: "Рак",       en: "Cancer",      emoji: "♋", dates: "21.06 – 22.07" },
+  leo:         { ru: "Лев",       en: "Leo",         emoji: "♌", dates: "23.07 – 22.08" },
+  virgo:       { ru: "Дева",      en: "Virgo",       emoji: "♍", dates: "23.08 – 22.09" },
+  libra:       { ru: "Весы",      en: "Libra",       emoji: "♎", dates: "23.09 – 22.10" },
+  scorpio:     { ru: "Скорпион",  en: "Scorpio",     emoji: "♏", dates: "23.10 – 21.11" },
+  sagittarius: { ru: "Стрелец",   en: "Sagittarius", emoji: "♐", dates: "22.11 – 21.12" },
+  capricorn:   { ru: "Козерог",   en: "Capricorn",   emoji: "♑", dates: "22.12 – 19.01" },
+  aquarius:    { ru: "Водолей",   en: "Aquarius",    emoji: "♒", dates: "20.01 – 18.02" },
+  pisces:      { ru: "Рыбы",      en: "Pisces",      emoji: "♓", dates: "19.02 – 20.03" }
 };
 
 const COMPLIMENTS = {
   ru: [
-    "A5;5==0O A53>4=O >A>15==> B>1>9 3>@48BAO. !5@LQ7=>.",
-    ""K A53>4=O A25B8HLAO O@G5, G5< 2A5 A>725748O 2<5AB5 27OBK5.",
-    ">A<>A H5?G5B: �-B>B G5;>25:  >3>=L�. -B> ?@> B51O.",
-    ""2>O M=5@38O A53>4=O =0 C@>2=5 A25@E=>2>9. AB>@>6=>, <>6=> 7065GL :>3> C3>4=>.",
-    ""K  B>B A0<K9 3;8BG 2 <0B@8F5, :>B>@K9 45;05B <8@ ;CGH5.",
-    "2Q74K 4>3>2>@8;8AL: A53>4=O B515 <>6=> 2AQ. 1A>;NB=> 2AQ.",
-    ""K 2K3;O48HL B0:, 1C4B> B>;L:> GB> ?>1548;(0) 2 :>A<8G5A:>9 ;>B5@55.",
-    "A5;5==0O >B?@028;0 B515 2>74CH=K9 ?>F5;C9. >28.",
-    ""K A53>4=O 3;02=K9 ?@>B03>=8AB. AB0;L=K5  <0AA>2:0.",
-    ""2>O C;K1:0 A59G0A 8<55B A8;C <0;5=L:>9 GQ@=>9 4K@K  ?@8BO38205B 2A5E."
+    "Вселенная сегодня особенно тобой гордится. Серьёзно.",
+    "Ты сегодня светишься ярче, чем все созвездия вместе взятые.",
+    "Космос шепчет: «Этот человек — огонь». Это про тебя.",
+    "Твоя энергия сегодня на уровне сверхновой. Осторожно, можно зажечь кого угодно.",
+    "Ты — тот самый глитч в матрице, который делает мир лучше.",
+    "Звёзды договорились: сегодня тебе можно всё. Абсолютно всё.",
+    "Ты выглядишь так, будто только что победил(а) в космической лотерее.",
+    "Вселенная отправила тебе воздушный поцелуй. Лови.",
+    "Ты сегодня главный протагонист. Остальные — массовка.",
+    "Твоя улыбка сейчас имеет силу маленькой чёрной дыры — притягивает всех.",
+    "Сегодня ты официально в списке «люди, от которых становится теплее».",
+    "Космос сегодня на твоей стороне. И немного завидует твоему вайбу.",
+    "Ты — ходячий источник серотонина. Спасибо, что существуешь.",
+    "Звёзды сегодня шепчут твоё имя с уважением.",
+    "Ты сегодня выглядишь как человек, у которого всё под контролем (даже если нет).",
+    "Вселенная решила: ты заслужил(а) хороший день. Получай.",
+    "Твоя энергия сегодня заразительна в самом лучшем смысле.",
+    "Ты — причина, почему кто-то сегодня улыбнётся.",
+    "Космос ставит тебе лайк. Двойной.",
+    "Сегодня ты — главная причина хорошего настроения в радиусе 5 км."
   ],
   en: [
     "The Universe is especially proud of you today. Seriously.",
@@ -38,22 +48,37 @@ const COMPLIMENTS = {
     "You look like you just won the cosmic lottery.",
     "The Universe just sent you an air kiss. Catch it.",
     "You're the main character today. Everyone else is NPC.",
-    "Your smile currently has the power of a small black hole  it attracts everyone."
+    "Your smile currently has the power of a small black hole — it attracts everyone.",
+    "Today you're officially on the list of 'people who make things warmer'.",
+    "The cosmos is on your side today. And a little jealous of your vibe.",
+    "You're a walking source of serotonin. Thanks for existing.",
+    "The stars are whispering your name with respect today.",
+    "You look like someone who has everything under control (even if you don't).",
+    "The Universe decided: you deserve a good day. Here it is.",
+    "Your energy is contagious in the best possible way today.",
+    "You're the reason someone will smile today.",
+    "The cosmos just gave you a double like.",
+    "Today you're the main reason for good mood within a 5 km radius."
   ]
 };
 
 const LAZY_HOROSCOPES = {
   ru: [
-    "!53>4=O <>6=> =8G53> =5 45;0BL. A5;5==0O C65 2AQ A45;0;0 70 B51O. B4KE09, G5<?8>=.",
-    ""2>9 ?;0= =0 45=L: ACI5AB2>20BL :@0A82>. AQ >AB0;L=>5  >?F8>=0;L=>.",
-    "2Q74K 3>2>@OB: �568. K 3>@48<AO B>1>9 4065 2 3>@87>=B0;L=>< ?>;>65=88�.",
-    "!53>4=O 8450;L=K9 45=L, GB>1K =8G53> =5 ?;0=8@>20BL 8 2AQ @02=> 1KBL <>;>45F.",
-    ">A<>A @07@5H05B B515 ?@>?CAB8BL 2A5 45;0. !5@LQ7=>. >B ?@O< 2A5.",
-    ""K C65 4>AB0B>G=> ?>AB0@0;AO(0AL) 2 MB>9 687=8. !53>4=O  1>=CA=K9 C@>25=L �=8G53>=545;0=85�.",
-    ">@>A:>? 4;O ;5=82KE: 2AB0=L, ?>?59 2>4K, ;O3 >1@0B=>. "K A?@028;AO.",
-    "A5;5==0O A53>4=O @01>B05B 70 B51O. "2>O 7040G0  ?@>AB> 2K3;O45BL E>@>H>.",
-    "!53>4=O <>6=> 83=>@8@>20BL 2A5 C254><;5=8O. 2Q74K B51O ?@8:@>NB.",
-    ""2>9 548=AB25==K9 ?;0=: 1KBL 2 E>@>H5< =0AB@>5=88. K?>;=5=> 70@0=55."
+    "Сегодня можно ничего не делать. Вселенная уже всё сделала за тебя. Отдыхай, чемпион.",
+    "Твой план на день: существовать красиво. Всё остальное — опционально.",
+    "Звёзды говорят: «Лежи. Мы гордимся тобой даже в горизонтальном положении».",
+    "Сегодня идеальный день, чтобы ничего не планировать и всё равно быть молодец.",
+    "Космос разрешает тебе пропустить все дела. Серьёзно. Вот прям все.",
+    "Ты уже достаточно постарался(ась) в этой жизни. Сегодня — бонусный уровень «ничегонеделание».",
+    "Гороскоп для ленивых: встань, попей воды, ляг обратно. Ты справился.",
+    "Вселенная сегодня работает за тебя. Твоя задача — просто выглядеть хорошо.",
+    "Сегодня можно игнорировать все уведомления. Звёзды тебя прикроют.",
+    "Твой единственный план: быть в хорошем настроении. Выполнено заранее.",
+    "Сегодня официально разрешено ничего не решать. Решения подождут.",
+    "Космос сегодня берёт больничный за тебя. Отдыхай.",
+    "Лучший план на сегодня — отсутствие плана. Звёзды одобряют.",
+    "Ты имеешь полное право сегодня просто быть. Без достижений.",
+    "Сегодня можно не отвечать на сообщения. Вселенная поймёт."
   ],
   en: [
     "Today you can do nothing. The Universe already handled everything. Rest, champion.",
@@ -65,109 +90,138 @@ const LAZY_HOROSCOPES = {
     "Lazy horoscope: get up, drink water, lie back down. You did great.",
     "The Universe is working overtime for you. Your only job is to look good.",
     "You may ignore all notifications today. The stars have your back.",
-    "Your only mission: be in a good mood. Already completed."
+    "Your only mission: be in a good mood. Already completed.",
+    "Today it's officially allowed to decide nothing. Decisions can wait.",
+    "The cosmos is taking a sick day for you. Rest.",
+    "Best plan for today — no plan. The stars approve.",
+    "You have every right to just be today. No achievements required.",
+    "You can leave messages unanswered today. The Universe understands."
   ]
 };
 
 const DAILY_HOROSCOPES = {
   ru: {
     aries: [
-      "25=, A53>4=O B2>O M=5@38O G5@57 :@09. >6=> A25@=CBL 3>@K& 8;8 E>BO 1K 3>@87>=B. ;02=>5  =5 A65GL 2A5E 2>:@C3 A2>8< M=BC7807<><.",
-      "2Q74K 40;8 B515 75;Q=K9 A25B =0 2A5 157C<=K5 8458. 4=0 87 =8E A53>4=O 2KAB@5;8B. 0:0O  C7=05HL ?> E>4C."
+      "Овен, сегодня твоя энергия через край. Можно свернуть горы… или хотя бы горизонт.",
+      "Звёзды дали тебе зелёный свет на все безумные идеи. Одна из них сегодня выстрелит.",
+      "Сегодня ты — ходячий источник драйва. Только не поджигай случайно мебель."
     ],
     taurus: [
-      ""5;5F, A53>4=O 2A5;5==0O ?>4:84K205B B515 :><D>@B 8 <0;5=L:85 @04>AB8. 5 >B:07K209AO. "K MB> 70A;C68;(0).",
-      "5=L A>740= 4;O B>3>, GB>1K =0A;0640BLAO. 4>9, <C7K:>9, ;N4L<8. AQ >AB0;L=>5 <>65B ?>4>640BL."
+      "Телец, сегодня вселенная подкидывает тебе комфорт и маленькие радости. Не отказывайся.",
+      "День создан для того, чтобы наслаждаться. Едой, музыкой, людьми.",
+      "Сегодня можно чуть медленнее. Красота в деталях, а ты их мастер."
     ],
     gemini: [
-      ";87=5FK, A53>4=O B2>9 O7K:  B2>Q AC?5@>@C685. >6=> >G0@>20BL :>3> C3>4=>. ;8 A;CG09=> 70B@>;;8BL. K1>@ 70 B>1>9.",
-      "459 1C45B A;8H:>< <=>3>. 0?8AK209. 4=0 87 =8E  @50;L=> 7>;>B0O."
+      "Близнецы, сегодня твой язык — твоё супероружие. Можно очаровать кого угодно.",
+      "Идей будет слишком много. Записывай. Одна из них — реально золотая.",
+      "Сегодня ты особенно обаятелен(на). Используй это во благо (или для мемов)."
     ],
     cancer: [
-      " 0:, A53>4=O M<>F88 =0 2KA>B5. -B> E>@>H>. @>AB> =5 AB@>9 87 =8E F5;K9 A5@80; A 8 A57>=0<8.",
-      "A5;5==0O A53>4=O >A>15==> =56=0O : B515. @8<8 MBC 701>BC 8 ?5@540209 40;LH5."
+      "Рак, сегодня эмоции на высоте. Это хорошо. Просто не строй из них сериал.",
+      "Вселенная сегодня особенно нежная к тебе. Прими эту заботу.",
+      "Сегодня можно позволить себе быть мягким. Это сила, а не слабость."
     ],
     leo: [
-      "52, A53>4=O AF5=0 ?@8=04;568B B515. 065 5A;8 MB> AF5=0 2 <0@H@CB:5. !8O9, :>@>;L/:>@>;520.",
-      "><?;8<5=BK A53>4=O 1C4CB ;5B5BL 2 B51O, :0: <5B5>@8B=K9 4>64L. @8=8<09 A 4>AB>8=AB2><."
+      "Лев, сегодня сцена принадлежит тебе. Даже если это сцена в маршрутке. Сияй.",
+      "Комплименты сегодня будут лететь в тебя, как метеоритный дождь.",
+      "Ты сегодня главный герой. Остальные просто счастливы, что попали в твой кадр."
     ],
     virgo: [
-      "520, A53>4=O <>6=> =5<=>3> >B?CAB8BL :>=B@>;L. %0>A A53>4=O  B2>9 4@C3. @0240-?@0240.",
-      ""2>O A?>A>1=>ABL 70<5G0BL 45B0;8 A53>4=O =0 <0:A8<C<5. A?>;L7C9 2> 1;03> (8;8 GB>1K =09B8 8450;L=K9 <5<)."
+      "Дева, сегодня можно немного отпустить контроль. Хаос сегодня — твой друг.",
+      "Твоя способность замечать детали сегодня на максимуме. Используй во благо.",
+      "Сегодня идеальный день, чтобы навести порядок… или наоборот, разрешить беспорядок."
     ],
     libra: [
-      "5AK, A53>4=O 10;0=A 1C45B =0945= ?>GB8 A0< A>1>9. 0A;06409AO @54:8< <><5=B><, :>340 2AQ AE>48BAO.",
-      "@0A>B0 8 30@<>=8O A53>4=O =0 B2>59 AB>@>=5. >6=> 4065 =5 AB0@0BLAO  BK 8 B0: ?@5:@0A5=(=0)."
+      "Весы, сегодня баланс будет найден почти сам собой. Наслаждайся.",
+      "Красота и гармония сегодня на твоей стороне. Можно даже не стараться.",
+      "Сегодня всё будет красиво. Даже если ты ничего для этого не сделаешь."
     ],
     scorpio: [
-      "!:>@?8>=, A53>4=O B2>O 8=B5=A82=>ABL  MB> AC?5@A8;0. ">;L:> =5 ?C309 A;CG09=KE ?@>E>68E 273;O4><.",
-      ";C18=0 A53>4=O  B2>9 AB8;L. >6=> ?>3@C78BLAO 2 8=B5@5A=>5 45;> 8;8 2 GC685 B09=K (A @07@5H5=8O)."
+      "Скорпион, сегодня твоя интенсивность — это суперсила. Только не пугай прохожих.",
+      "Глубина сегодня — твой стиль. Можно погрузиться во что угодно.",
+      "Сегодня ты видишь то, что другие не замечают. Это твоё преимущество."
     ],
     sagittarius: [
-      "!B@5;5F, A53>4=O E>G5BAO A2>1>4K 8 ?@8:;NG5=89. 065 ?>E>4 2 A>A54=89 <03078= <>65B AB0BL :25AB><.",
-      "?B8<87< A53>4=O 1LQB :;NG><. 0@0609 8< 2A5E 2>:@C3. < MB> =C6=>."
+      "Стрелец, сегодня хочется свободы и приключений. Даже поход в магазин — квест.",
+      "Оптимизм сегодня бьёт ключом. Заражай им всех вокруг.",
+      "Сегодня вселенная открывает перед тобой двери. Заходи смело."
     ],
     capricorn: [
-      ">75@>3, A53>4=O <>6=> =5<=>3> @0AA;018BL 30;ABC: (2 <5B0D>@8G5A:>< A<KA;5). "K 8 B0: 2AQ :>=B@>;8@C5HL.",
-      ""2>8 CA8;8O 70<5G0NB. 065 5A;8 :065BAO, GB> =5B. A5;5==0O 254QB CGQB."
+      "Козерог, сегодня можно немного расслабить галстук. Ты и так всё контролируешь.",
+      "Твои усилия замечают. Даже если кажется, что нет. Вселенная ведёт учёт.",
+      "Сегодня можно позволить себе маленькую победу без большого плана."
     ],
     aquarius: [
-      ">4>;59, A53>4=O B2>8 AB@0==K5 8458  A0<K5 ?@028;L=K5. 5 ?KB09AO 1KBL =>@<0;L=K<. -B> A:CG=>.",
-      "@838=0;L=>ABL A53>4=O =0 <0:A8<C<5. A?>;L7C9, ?>:0 72Q74K 40NB 1CAB."
+      "Водолей, сегодня твои странные идеи — самые правильные. Не пытайся быть нормальным.",
+      "Оригинальность сегодня на максимуме. Используй, пока звёзды дают буст.",
+      "Сегодня ты — глоток свежего воздуха для всех вокруг."
     ],
     pisces: [
-      " K1K, A53>4=O D0=B078O @01>B05B =0 ?>;=CN. >6=> ?@84C<0BL F5;K9 <8@& 8;8 ?@>AB> :@0A82K9 ?;59;8AB.",
-      "=BC8F8O A53>4=O  B2>9 ;CGH89 =02830B>@. >25@O9 AB@0==K< >ICI5=8O<."
+      "Рыбы, сегодня фантазия работает на полную. Можно придумать целый мир.",
+      "Интуиция сегодня — твой лучший навигатор. Доверяй странным ощущениям.",
+      "Сегодня можно просто плыть по течению. Течение сегодня доброе."
     ]
   },
   en: {
     aries: [
-      "Aries, your energy is off the charts today. You could move mountains& or at least the horizon. Just try not to set everyone on fire with your enthusiasm.",
-      "The stars gave you a green light for all crazy ideas. One of them will hit today. You'll know which one when it happens."
+      "Aries, your energy is off the charts today. You could move mountains… or at least the horizon.",
+      "The stars gave you a green light for all crazy ideas. One of them will hit today.",
+      "Today you're a walking source of drive. Just try not to accidentally set the furniture on fire."
     ],
     taurus: [
-      "Taurus, the Universe is serving you comfort and small joys today. Don't refuse. You earned this.",
-      "This day was made for enjoying things. Food, music, people. Everything else can wait."
+      "Taurus, the Universe is serving you comfort and small joys today. Don't refuse.",
+      "This day was made for enjoying things. Food, music, people.",
+      "You can go a little slower today. Beauty is in the details, and you're a master of them."
     ],
     gemini: [
-      "Gemini, your words are a superpower today. You can charm anyone. Or accidentally troll them. Your choice.",
-      "Too many ideas incoming. Write them down. One of them is pure gold."
+      "Gemini, your words are a superpower today. You can charm anyone.",
+      "Too many ideas incoming. Write them down. One of them is pure gold.",
+      "You're especially charming today. Use it for good (or for memes)."
     ],
     cancer: [
-      "Cancer, emotions are running high today. That's good. Just don't turn them into an 8-season drama series.",
-      "The Universe is being extra soft with you today. Accept the care and pass it on."
+      "Cancer, emotions are running high today. That's good. Just don't turn them into a series.",
+      "The Universe is being extra soft with you today. Accept the care.",
+      "You can allow yourself to be soft today. It's strength, not weakness."
     ],
     leo: [
-      "Leo, the stage is yours today. Even if it's the stage of a public bus. Shine, royalty.",
-      "Compliments will rain on you like a meteor shower. Accept them with grace."
+      "Leo, the stage is yours today. Even if it's the stage of a public bus. Shine.",
+      "Compliments will rain on you like a meteor shower.",
+      "You're the main character today. Everyone else is just happy to be in your frame."
     ],
     virgo: [
-      "Virgo, you can loosen the grip on control a little today. Chaos is actually your friend right now. Promise.",
-      "Your eye for detail is maxed out. Use it for good (or to find the perfect meme)."
+      "Virgo, you can loosen the grip on control a little today. Chaos is actually your friend.",
+      "Your eye for detail is maxed out. Use it for good.",
+      "Perfect day to organize everything… or to finally allow some mess."
     ],
     libra: [
-      "Libra, balance will almost find itself today. Enjoy this rare moment when everything just clicks.",
-      "Beauty and harmony are on your side. You don't even have to try  you're already stunning."
+      "Libra, balance will almost find itself today. Enjoy it.",
+      "Beauty and harmony are on your side. You don't even have to try.",
+      "Everything will look beautiful today. Even if you do nothing for it."
     ],
     scorpio: [
-      "Scorpio, your intensity is a superpower today. Just try not to scare random strangers with your gaze.",
-      "Depth is your style today. Dive into something interesting or into someone's secrets (with permission)."
+      "Scorpio, your intensity is a superpower today. Just try not to scare strangers.",
+      "Depth is your style today. Dive into anything you want.",
+      "You see what others miss today. That's your advantage."
     ],
     sagittarius: [
-      "Sagittarius, you're craving freedom and adventure. Even a trip to the corner store can become a quest.",
-      "Optimism is overflowing. Infect everyone around you. They need it."
+      "Sagittarius, you're craving freedom and adventure. Even a trip to the store is a quest.",
+      "Optimism is overflowing. Infect everyone around you.",
+      "The Universe is opening doors for you today. Walk in boldly."
     ],
     capricorn: [
       "Capricorn, you can loosen the metaphorical tie a little today. You're already in control.",
-      "Your efforts are being noticed. Even if it doesn't feel like it. The Universe keeps score."
+      "Your efforts are being noticed. Even if it doesn't feel like it.",
+      "You can allow yourself a small win without a big plan today."
     ],
     aquarius: [
-      "Aquarius, your weird ideas are the correct ones today. Don't try to be normal. It's boring.",
-      "Originality is at maximum. Use it while the stars are giving you a boost."
+      "Aquarius, your weird ideas are the correct ones today. Don't try to be normal.",
+      "Originality is at maximum. Use it while the stars are giving you a boost.",
+      "You're a breath of fresh air for everyone around you today."
     ],
     pisces: [
-      "Pisces, your imagination is running at full power. You could invent a whole world& or just a great playlist.",
-      "Intuition is your best navigator today. Trust the weird feelings."
+      "Pisces, your imagination is running at full power. You could invent a whole world.",
+      "Intuition is your best navigator today. Trust the weird feelings.",
+      "You can just go with the flow today. The flow is kind."
     ]
   }
 };
@@ -175,50 +229,50 @@ const DAILY_HOROSCOPES = {
 const CELEBRITIES = [
   {
     id: "taylor",
-    name: { ru: ""59;>@ !28DB", en: "Taylor Swift" },
-    emoji: "<�",
+    name: { ru: "Тейлор Свифт", en: "Taylor Swift" },
+    emoji: "🎤",
     sign: "sagittarius",
     funny: {
       ru: [
-        "K >10 C<55B5 ?@52@0I0BL 1>;L 2 E8BK. !>2<5AB8<>ABL >?0A=0O, => >G5=L ?@>4C:B82=0O.",
-        "=0 =0?8H5B > 20A 0;L1><. K 1C45B5 2 B8B@0E :0: �24>E=>25=85�.",
-        "0H0 A>2<5AB8<>ABL 72CG8B :0: =>2K9 B@5: 87 Folklore  :@0A82>, 3@CAB=> 8 35=80;L=>."
+        "Вы оба умеете превращать боль в хиты. Совместимость опасная, но очень продуктивная.",
+        "Она напишет о вас альбом. Вы будете в титрах как «вдохновение».",
+        "Ваша совместимость звучит как новый трек из Folklore — красиво и гениально."
       ],
       en: [
         "You both turn pain into hits. Dangerous but extremely productive compatibility.",
         "She'll write an album about you. You'll be credited as 'inspiration'.",
-        "Your compatibility sounds like a new Folklore track  beautiful, sad, and genius."
+        "Your compatibility sounds like a new Folklore track — beautiful and genius."
       ]
     }
   },
   {
     id: "zendaya",
-    name: { ru: "5=40O", en: "Zendaya" },
-    emoji: "(",
+    name: { ru: "Зендая", en: "Zendaya" },
+    emoji: "✨",
     sign: "virgo",
     funny: {
       ru: [
-        "K >10 A;8H:>< AB8;L=K5 4;O MB>3> <8@0. <5AB5 2K  E>4OG89 Pinterest.",
-        "=0 ?>A<>B@8B =0 20A 8 A:065B �cute�. -B> C65 ?>1540.",
-        "0H0 A>2<5AB8<>ABL 2K3;O48B :0: >1;>6:0 Vogue. >@>3>, G8AB>, <>I=>."
+        "Вы оба слишком стильные для этого мира. Вместе вы — ходячий Pinterest.",
+        "Она посмотрит на вас и скажет «cute». Это уже победа.",
+        "Ваша совместимость выглядит как обложка Vogue."
       ],
       en: [
         "You're both too stylish for this world. Together you're a walking Pinterest board.",
         "She'll look at you and say 'cute'. That's already a win.",
-        "Your compatibility looks like a Vogue cover. Expensive, clean, powerful."
+        "Your compatibility looks like a Vogue cover."
       ]
     }
   },
   {
     id: "timati",
-    name: { ru: ""8<0B8", en: "Timati" },
-    emoji: "=�",
+    name: { ru: "Тимати", en: "Timati" },
+    emoji: "🖤",
     sign: "gemini",
     funny: {
       ru: [
-        "K >10 ;N18B5, :>340 2AQ 1;5AB8B. <5AB5 >B:@>5B5 A0<K9 4>@>3>9 ;0@Q: 2> 2A5;5==>9.",
-        "!>2<5AB8<>ABL =0 C@>2=5 �40209 :C?8< 5IQ >48= 1@5=4�.",
-        "2Q74K H5?GCB: 2K 1K >B;8G=> A<>B@5;8AL =0 D>=5 GQ@=KE 468?>2."
+        "Вы оба любите, когда всё блестит. Вместе откроете самый дорогой ларёк во вселенной.",
+        "Совместимость на уровне «давай купим ещё один бренд».",
+        "Звёзды шепчут: вы бы отлично смотрелись на фоне чёрных джипов."
       ],
       en: [
         "You both love when everything shines. Together you'd open the most expensive stall in the universe.",
@@ -229,14 +283,14 @@ const CELEBRITIES = [
   },
   {
     id: "morgenshtern",
-    name: { ru: ">@35=HB5@=", en: "Morgenstern" },
-    emoji: ">�",
+    name: { ru: "Моргенштерн", en: "Morgenstern" },
+    emoji: "🦷",
     sign: "scorpio",
     funny: {
       ru: [
-        "%0>A 2AB@5B8; E0>A. <5AB5 2K <>65B5 A;CG09=> A>740BL =>2K9 60=@ <C7K:8.",
-        "!>2<5AB8<>ABL 27@K2=0O.  ?@O<>< 8 ?5@5=>A=>< A<KA;5.",
-        "2Q74K 2 H>:5, => 8< =@028BAO 20H 2091."
+        "Хаос встретил хаос. Вместе вы можете случайно создать новый жанр музыки.",
+        "Совместимость взрывная. В прямом и переносном смысле.",
+        "Звёзды в шоке, но им нравится ваш вайб."
       ],
       en: [
         "Chaos met chaos. Together you might accidentally invent a new music genre.",
@@ -247,32 +301,32 @@ const CELEBRITIES = [
   },
   {
     id: "dud",
-    name: { ru: ".@89 C4L", en: "Yuri Dud" },
-    emoji: "<�",
+    name: { ru: "Юрий Дудь", en: "Yuri Dud" },
+    emoji: "🎙️",
     sign: "scorpio",
     funny: {
       ru: [
-        "= 7040AB 20< =5C4>1=K9 2>?@>A. K >B25B8B5 5IQ 1>;55 =5C4>1=K<. 450;L=K9 ?>4:0AB.",
-        "!>2<5AB8<>ABL =0 C@>2=5 3;C1>:>3> 8=B5@2LN 2 3 G0A0 =>G8.",
-        "<5AB5 2K <>65B5 @0A:@KBL B09=C 2A5;5==>9& 8;8 E>BO 1K ?>G5<C 2A5 =>AOB H0?:8."
+        "Он задаст вам неудобный вопрос. Вы ответите ещё более неудобным. Идеальный подкаст.",
+        "Совместимость на уровне глубокого интервью в 3 часа ночи.",
+        "Вместе вы можете раскрыть тайну вселенной… или хотя бы почему все носят шапки."
       ],
       en: [
         "He'll ask you an uncomfortable question. You'll answer with an even more uncomfortable one. Perfect podcast.",
         "Compatibility level: deep interview at 3 a.m.",
-        "Together you could uncover the secret of the universe& or at least why everyone wears beanies."
+        "Together you could uncover the secret of the universe… or at least why everyone wears beanies."
       ]
     }
   },
   {
     id: "rihanna",
-    name: { ru: " 80==0", en: "Rihanna" },
-    emoji: "=Q",
+    name: { ru: "Рианна", en: "Rihanna" },
+    emoji: "👑",
     sign: "pisces",
     funny: {
       ru: [
-        "K >10 C<55B5 ?>O28BLAO, 2A5E >G0@>20BL 8 8AG57=CBL 2 70:0B5. 535=40@=>.",
-        "!>2<5AB8<>ABL C@>2=O �<K ?@>AB> ;CGH5 2A5E, 8 =0< MB> =5 =04> 4>:07K20BL�.",
-        "<5AB5 2K  MB> :>340 187=5A, <C7K:0 8 2091 AE>4OBAO 2 >4=>9 B>G:5."
+        "Вы оба умеете появиться, всех очаровать и исчезнуть в закате. Легендарно.",
+        "Совместимость уровня «мы просто лучше всех, и нам это не надо доказывать».",
+        "Вместе вы — это когда бизнес, музыка и вайб сходятся в одной точке."
       ],
       en: [
         "You both know how to show up, charm everyone, and disappear into the sunset. Legendary.",
@@ -283,14 +337,14 @@ const CELEBRITIES = [
   },
   {
     id: "elon",
-    name: { ru: ";>= 0A:", en: "Elon Musk" },
-    emoji: "=�",
+    name: { ru: "Илон Маск", en: "Elon Musk" },
+    emoji: "🚀",
     sign: "cancer",
     funny: {
       ru: [
-        "K >10 4C<05B5, GB> <>65B5 :>;>=878@>20BL 0@A 4> >1540.  :B>-B> 87 20A ?>GB8 ?@02.",
-        "!>2<5AB8<>ABL >?0A=0O: 2<5AB5 2K <>65B5 A;CG09=> 70?CAB8BL GB>-B> 2 :>A<>A.",
-        "2Q74K A>25BCNB: A=0G0;0 4>3>2>@8B5AL, :B> 3;02=K9 8=65=5@ >B=>H5=89."
+        "Вы оба думаете, что можете колонизировать Марс до обеда. И кто-то из вас почти прав.",
+        "Совместимость опасная: вместе вы можете случайно запустить что-то в космос.",
+        "Звёзды советуют: сначала договоритесь, кто главный инженер отношений."
       ],
       en: [
         "You both think you can colonize Mars before lunch. And one of you is almost right.",
@@ -301,14 +355,14 @@ const CELEBRITIES = [
   },
   {
     id: "biden",
-    name: { ru: "6> 0945=", en: "Joe Biden" },
-    emoji: "<f",
+    name: { ru: "Джо Байден", en: "Joe Biden" },
+    emoji: "🍦",
     sign: "scorpio",
     funny: {
       ru: [
-        "K >10 ;N18B5 <>@>65=>5 8 4;8==K5 ?0C7K. >=8<05B5 4@C3 4@C30 157 A;>2.",
-        "!>2<5AB8<>ABL A?>:>9=0O, :0: 2>A:@5A=K9 45=L. =>340 MB> 8<5==> B>, GB> =C6=>.",
-        "2Q74K 3>2>@OB: 2K 1K >B;8G=> A<>B@5;8AL =0 >4=>9 A:0<59:5."
+        "Вы оба любите мороженое и длинные паузы. Понимаете друг друга без слов.",
+        "Совместимость спокойная, как воскресный день. Иногда это именно то, что нужно.",
+        "Звёзды говорят: вы бы отлично смотрелись на одной скамейке."
       ],
       en: [
         "You both love ice cream and long pauses. You understand each other without words.",
@@ -316,19 +370,95 @@ const CELEBRITIES = [
         "The stars say: you'd look great sitting on the same bench."
       ]
     }
+  },
+  {
+    id: "gaga",
+    name: { ru: "Леди Гага", en: "Lady Gaga" },
+    emoji: "🎭",
+    sign: "aries",
+    funny: {
+      ru: [
+        "Вы оба умеете быть лишними в лучшем смысле этого слова. Вместе — взрыв.",
+        "Совместимость уровня «мы родились, чтобы устраивать шоу».",
+        "Звёзды говорят: вам нельзя давать микрофон одновременно. Или можно."
+      ],
+      en: [
+        "You both know how to be extra in the best way. Together — explosion.",
+        "Compatibility level: 'we were born to put on a show'.",
+        "The stars say: you shouldn't be given a microphone at the same time. Or maybe you should."
+      ]
+    }
+  },
+  {
+    id: "drake",
+    name: { ru: "Дрейк", en: "Drake" },
+    emoji: "🦉",
+    sign: "scorpio",
+    funny: {
+      ru: [
+        "Вы оба умеете быть чувствительными и успешными одновременно. Редкое сочетание.",
+        "Совместимость звучит как грустный, но очень дорогой трек.",
+        "Звёзды шепчут: вы бы отлично смотрелись в одном клипе."
+      ],
+      en: [
+        "You both know how to be sensitive and successful at the same time. Rare combo.",
+        "Compatibility sounds like a sad but very expensive track.",
+        "The stars whisper: you'd look great in the same music video."
+      ]
+    }
+  },
+  {
+    id: "putin",
+    name: { ru: "Владимир Путин", en: "Vladimir Putin" },
+    emoji: "🦅",
+    sign: "libra",
+    funny: {
+      ru: [
+        "Совместимость уровня «мы оба любим, когда всё под контролем».",
+        "Звёзды молчат. И это, возможно, лучший комментарий.",
+        "Вы оба умеете держать паузу. Долгую. Очень долгую."
+      ],
+      en: [
+        "Compatibility level: 'we both like when everything is under control'.",
+        "The stars are silent. And that might be the best comment.",
+        "You both know how to hold a pause. A long one. A very long one."
+      ]
+    }
+  },
+  {
+    id: "mask",
+    name: { ru: "Марк Цукерберг", en: "Mark Zuckerberg" },
+    emoji: "🤖",
+    sign: "taurus",
+    funny: {
+      ru: [
+        "Вы оба немного инопланетяне. Вместе можете создать новую социальную сеть.",
+        "Совместимость странная, но работает. Как и большинство его продуктов.",
+        "Звёзды говорят: вам стоит чаще моргать. Обоим."
+      ],
+      en: [
+        "You're both a bit alien. Together you could create a new social network.",
+        "Weird compatibility, but it works. Like most of his products.",
+        "The stars say: you should blink more often. Both of you."
+      ]
+    }
   }
 ];
 
 const CARDS = {
   ru: [
-    { title: "0@B0 >;LH>3> 0910", text: "!53>4=O B515 @07@5H5=> 1KBL 3;02=K< 8AB>G=8:>< E>@>H53> =0AB@>5=8O.  0740209 2091 15A?;0B=>." },
-    { title: "0@B0 5=82>3> 5@>O", text: ""K C65 ?>1548;, ?@>AB> ;Q60 =0 4820=5. AB0;>AL B>;L:> ?@8=OBL ?>74@02;5=8O." },
-    { title: "0@B0 !;CG09=>9 #40G8", text: "!53>4=O C40G0 ?@84QB G5@57 A0<CN =5>6840==CN 425@L. 065 G5@57 E>;>48;L=8:." },
-    { title: "0@B0 ;02=>3> 5@>O", text: "!N65B A53>4=O :@CB8BAO 2>:@C3 B51O. 0A;06409AO 8 =5 701K209 ?@> A0C=4B@5:." },
-    { title: "0@B0 >A<8G5A:>3> ><?;8<5=B0", text: "A5;5==0O A53>4=O ;8G=> >4>1@8;0 B2>9 ?;59;8AB, B2>9 AB8;L 8 B2>Q ACI5AB2>20=85." },
-    { title: "0@B0 O3:>3> %0>A0", text: "!53>4=O <>6=> =5<=>3> =0@CH8BL ?;0=K. %0>A 1C45B <8;K< 8 2 B2>N ?>;L7C." },
-    { title: "0@B0 =CB@5==53> !>;=F0", text: ""K A0<(0) A515 8AB>G=8: A25B0. >6=> =5 640BL E>@>H59 ?>3>4K  BK C65 >=0." },
-    { title: "0@B0 5>6840==>3> >2>@>B0", text: "5=L A45;05B AN@?@87. !:>@55 2A53> ?@8OB=K9. C4L 3>B>2(0) C;K1=CBLAO." }
+    { title: "Карта Большого Вайба", text: "Сегодня тебе разрешено быть главным источником хорошего настроения. Раздавай вайб бесплатно." },
+    { title: "Карта Ленивого Героя", text: "Ты уже победил, просто лёжа на диване. Осталось только принять поздравления." },
+    { title: "Карта Случайной Удачи", text: "Сегодня удача придёт через самую неожиданную дверь. Даже через холодильник." },
+    { title: "Карта Главного Героя", text: "Сюжет сегодня крутится вокруг тебя. Наслаждайся и не забывай про саундтрек." },
+    { title: "Карта Космического Комплимента", text: "Вселенная сегодня лично одобрила твой плейлист, твой стиль и твоё существование." },
+    { title: "Карта Мягкого Хаоса", text: "Сегодня можно немного нарушить планы. Хаос будет милым и в твою пользу." },
+    { title: "Карта Внутреннего Солнца", text: "Ты сам(а) себе источник света. Можно не ждать хорошей погоды — ты уже она." },
+    { title: "Карта Неожиданного Поворота", text: "День сделает сюрприз. Скорее всего приятный. Будь готов(а) улыбнуться." },
+    { title: "Карта Тихой Силы", text: "Сегодня твоя сила — в спокойствии. Не нужно никому ничего доказывать." },
+    { title: "Карта Хорошего Люда", text: "Сегодня вокруг тебя соберутся правильные люди. Или хотя бы один очень правильный." },
+    { title: "Карта Маленькой Победы", text: "Сегодня будет маленькая, но очень приятная победа. Заметь её." },
+    { title: "Карта Космического Отпуска", text: "Вселенная сегодня даёт тебе выходной. Можно ничего не достигать." }
   ],
   en: [
     { title: "Card of Big Vibe", text: "Today you're officially allowed to be the main source of good mood. Distribute the vibe for free." },
@@ -337,21 +467,32 @@ const CARDS = {
     { title: "Card of Main Character", text: "The plot revolves around you today. Enjoy it and don't forget the soundtrack." },
     { title: "Card of Cosmic Compliment", text: "The Universe personally approved your playlist, your style, and your existence today." },
     { title: "Card of Soft Chaos", text: "You can slightly ruin the plans today. The chaos will be cute and in your favor." },
-    { title: "Card of Inner Sun", text: "You are your own source of light. No need to wait for good weather  you already are it." },
-    { title: "Card of Unexpected Turn", text: "The day will throw a plot twist. Most likely a nice one. Be ready to smile." }
+    { title: "Card of Inner Sun", text: "You are your own source of light. No need to wait for good weather — you already are it." },
+    { title: "Card of Unexpected Turn", text: "The day will throw a plot twist. Most likely a nice one. Be ready to smile." },
+    { title: "Card of Quiet Strength", text: "Your strength today is in calmness. No need to prove anything to anyone." },
+    { title: "Card of Good People", text: "The right people will gather around you today. Or at least one very right person." },
+    { title: "Card of Small Victory", text: "There will be a small but very pleasant victory today. Notice it." },
+    { title: "Card of Cosmic Day Off", text: "The Universe is giving you a day off today. You can achieve nothing." }
   ]
 };
 
 const RANDOM_FORTUNES = {
   ru: [
-    "!53>4=O BK =094QHL GB>-B>, GB> 8A:0;(0) >G5=L 402=>. >7<>6=>, MB> 1C45B 70@O4:0 >B B5;5D>=0.",
-    "A5;5==0O 3>B>28B B515 <0;5=L:89, => >G5=L ?@8OB=K9 AN@?@87. 5 <>@309.",
-    "B>-B> A53>4=O ?>4C<05B > B515 E>@>H>. G5=L E>@>H>.  C;K1=QBAO.",
-    ""K A;CG09=> A:065HL D@07C, :>B>@0O AB0=5B GL8<-B> 45287>< =0 25AL 3>4.",
-    "!53>4=O 1C45B <><5=B, :>340 BK ?>9<QHL: � O 254L @50;L=> :@CB>9(0O)�.",
-    "2Q74K A>25BCNB :C?8BL A515 GB>-B> 2:CA=>5. -B> >D8F80;L=0O @5:><5=40F8O.",
-    ""2>O mel:>ABL A53>4=O  MB> AC?5@A8;L=>ABL. A?>;L7C9 5Q, GB>1K 2A5E @0AA<5H8BL.",
-    "!53>4=O <>6=> 703040BL 65;0=85. A5;5==0O A53>4=O 2 E>@>H5< =0AB@>5=88 8 A;CH05B."
+    "Сегодня ты найдёшь что-то, что искал(а) очень давно. Возможно, это будет зарядка от телефона.",
+    "Вселенная готовит тебе маленький, но очень приятный сюрприз. Не моргай.",
+    "Кто-то сегодня подумает о тебе хорошо. Очень хорошо. И улыбнётся.",
+    "Ты случайно скажешь фразу, которая станет чьим-то девизом на весь год.",
+    "Сегодня будет момент, когда ты поймёшь: «А я ведь реально крутой(ая)».",
+    "Звёзды советуют купить себе что-то вкусное. Это официальная рекомендация.",
+    "Твоя melкость сегодня — это суперсильность. Используй её, чтобы всех рассмешить.",
+    "Сегодня можно загадать желание. Вселенная сегодня в хорошем настроении и слушает.",
+    "Кто-то сегодня скажет тебе именно то, что нужно было услышать.",
+    "Сегодня удача будет выглядеть как обычный день. Не пропусти её.",
+    "Ты сегодня кому-то очень сильно понравишься. Даже если не заметишь.",
+    "Вселенная сегодня ставит тебе +10 к харизме. Пользуйся.",
+    "Сегодня будет смешной момент. Запомни его — он пригодится.",
+    "Кто-то из прошлого сегодня мелькнёт в мыслях. Это нормально.",
+    "Сегодня можно рискнуть чуть больше обычного. Звёзды не против."
   ],
   en: [
     "Today you'll find something you've been looking for for a long time. Possibly a phone charger.",
@@ -361,23 +502,36 @@ const RANDOM_FORTUNES = {
     "There will be a moment today when you realize: 'Damn, I really am cool'.",
     "The stars officially recommend buying yourself something tasty.",
     "Your silliness is a superpower today. Use it to make everyone laugh.",
-    "You can make a wish today. The Universe is in a good mood and listening."
+    "You can make a wish today. The Universe is in a good mood and listening.",
+    "Someone will say exactly what you needed to hear today.",
+    "Luck today will look like an ordinary day. Don't miss it.",
+    "Someone will really like you today. Even if you don't notice.",
+    "The Universe is giving you +10 to charisma today. Use it.",
+    "There will be a funny moment today. Remember it — it will come in handy.",
+    "Someone from the past will flash through your mind today. That's normal.",
+    "You can take a slightly bigger risk than usual today. The stars don't mind."
   ]
 };
 
 const ENERGY_PHRASES = {
   ru: [
-    ">A<8G5A:0O M=5@38O =0 <0:A8<C<5",
-    ""K A53>4=O :0: <0;5=L:0O A25@E=>20O",
-    "0@O4 2A5;5=A:>3> 20910",
-    "-=5@38O 3;02=>3> 35@>O",
-    "CAB >B A0<8E 72Q74"
+    "Космическая энергия на максимуме",
+    "Ты сегодня как маленькая сверхновая",
+    "Заряд вселенского вайба",
+    "Энергия главного героя",
+    "Буст от самих звёзд",
+    "Полный бак космического топлива",
+    "Сегодня ты — ходячий источник света",
+    "Энергия на уровне «можно свернуть горы»"
   ],
   en: [
     "Cosmic energy at maximum",
     "You're a tiny supernova today",
     "Universal vibe charge",
     "Main character energy",
-    "Boost straight from the stars"
+    "Boost straight from the stars",
+    "Full tank of cosmic fuel",
+    "Today you're a walking source of light",
+    "Energy level: 'can move mountains'"
   ]
 };
