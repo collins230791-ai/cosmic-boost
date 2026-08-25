@@ -1,8 +1,10 @@
 const tg = window.Telegram?.WebApp;
 const AI_URL = 'https://cosmic-boost.vercel.app/api/ai';
+const APP_LINK = 'https://t.me/CosmicBoostApp_bot/cosmicb';
 
 let lang = localStorage.getItem('cb_lang') || 'ru';
 let userSign = localStorage.getItem('cb_sign') || null;
+let streak = parseInt(localStorage.getItem('cb_streak') || '0', 10);
 
 const i18n = {
   ru: {
@@ -14,14 +16,19 @@ const i18n = {
     titleUniverse: "Спросить вселенную",
     titleProfile: "Профиль",
     titleCard: "Карта дня",
+    titleStreak: "Серия дней",
     navBoost: "Буст", navLazy: "Ленивый", navStars: "Звёзды", navUniverse: "Вселенная", navProfile: "Профиль",
     btnLazy: "Получить разрешение", btnCard: "Открыть карту", btnAsk: "Спросить ✨", btnClose: "Закрыть",
+    btnShare: "Поделиться",
     chooseSign: "Твой знак зодиака:", signNotSelected: "Знак не выбран", guest: "Гость",
     starsHint: "Выбери знаменитость", cardPlaceholder: "Нажми, чтобы открыть",
     horoscopePlaceholder: "Выбери знак в Профиле ✨",
     aiPlaceholder: "Напиши что угодно вселенной...",
     loading: "Вселенная думает...",
-    error: "Звёзды пока молчат. Попробуй ещё раз ✨"
+    error: "Звёзды пока молчат. Попробуй ещё раз ✨",
+    streakDays: "дней подряд",
+    streakNew: "Новый день серии! 🔥",
+    shareText: "Смотри, что мне сказала вселенная в Cosmic Boost ✨"
   },
   en: {
     subtitle: "Your daily charge from the universe",
@@ -32,14 +39,62 @@ const i18n = {
     titleUniverse: "Ask the Universe",
     titleProfile: "Profile",
     titleCard: "Card of the Day",
+    titleStreak: "Day streak",
     navBoost: "Boost", navLazy: "Lazy", navStars: "Stars", navUniverse: "Universe", navProfile: "Profile",
     btnLazy: "Get permission", btnCard: "Draw a card", btnAsk: "Ask ✨", btnClose: "Close",
+    btnShare: "Share",
     chooseSign: "Your zodiac sign:", signNotSelected: "Sign not selected", guest: "Guest",
     starsHint: "Choose a celebrity", cardPlaceholder: "Press to open",
     horoscopePlaceholder: "Choose your sign in Profile ✨",
     aiPlaceholder: "Write anything to the universe...",
     loading: "The universe is thinking...",
-    error: "The stars are silent. Try again ✨"
+    error: "The stars are silent. Try again ✨",
+    streakDays: "days in a row",
+    streakNew: "New streak day! 🔥",
+    shareText: "Look what the universe told me in Cosmic Boost ✨"
+  }
+};
+
+const ENERGY_COMMENTS = {
+  ru: {
+    low: [
+      "Энергии хватит только лежать в направлении мечты 🛋️",
+      "Сегодня ты — красивая батарея на 15%. Зарядка рекомендована",
+      "Космос шепчет: «Отдыхай. Мы прикроем»",
+      "Уровень: овощ в хорошем смысле. Это тоже путь"
+    ],
+    mid: [
+      "Нормальный человеческий уровень. Можно даже что-то сделать",
+      "Энергии хватит на дела и на мемасики",
+      "Сегодня ты на 60% космос и на 40% диван. Баланс!",
+      "Достаточно, чтобы улыбнуться незнакомцу и не пожалеть"
+    ],
+    high: [
+      "Ты сегодня как маленькая сверхновая 💥",
+      "Космическая энергия на максимуме. Осторожно, можно зажечь всех",
+      "Буст от самих звёзд. Используй по назначению",
+      "Энергия главного героя. Сюжет уже начался"
+    ]
+  },
+  en: {
+    low: [
+      "Energy only enough to lie in the direction of your dreams 🛋️",
+      "Today you're a beautiful 15% battery. Charging recommended",
+      "The cosmos whispers: «Rest. We got this»",
+      "Level: vegetable (in a good way). That's a path too"
+    ],
+    mid: [
+      "Normal human level. You can even do something",
+      "Enough energy for tasks and for memes",
+      "Today you're 60% cosmos and 40% couch. Balance!",
+      "Enough to smile at a stranger and not regret it"
+    ],
+    high: [
+      "You're a tiny supernova today 💥",
+      "Cosmic energy at maximum. Careful, you might set everyone on fire",
+      "Boost straight from the stars. Use it wisely",
+      "Main character energy. The plot has already started"
+    ]
   }
 };
 
@@ -47,23 +102,22 @@ function t(key) { return i18n[lang][key] || key; }
 function getToday() { return new Date().toISOString().slice(0, 10); }
 
 function haptic(type = 'light') {
-  if (tg?.HapticFeedback) {
+  try {
+    if (!tg?.HapticFeedback) return;
     if (type === 'success') tg.HapticFeedback.notificationOccurred('success');
     else if (type === 'error') tg.HapticFeedback.notificationOccurred('error');
+    else if (type === 'warning') tg.HapticFeedback.notificationOccurred('warning');
+    else if (type === 'heavy') tg.HapticFeedback.impactOccurred('heavy');
     else if (type === 'medium') tg.HapticFeedback.impactOccurred('medium');
+    else if (type === 'rigid') tg.HapticFeedback.impactOccurred('rigid');
+    else if (type === 'soft') tg.HapticFeedback.impactOccurred('soft');
     else tg.HapticFeedback.impactOccurred('light');
-  }
+  } catch (_) {}
 }
 
-// ===== AI =====
 function cleanText(s) {
   if (!s) return s;
-  return s
-    .replace(/\*\*/g, '')
-    .replace(/__/g, '')
-    .replace(/^#+\s*/gm, '')
-    .replace(/\n{3,}/g, '\n\n')
-    .trim();
+  return s.replace(/\*\*/g, '').replace(/__/g, '').replace(/^#+\s*/gm, '').replace(/\n{3,}/g, '\n\n').trim();
 }
 
 async function askAI(prompt) {
@@ -90,50 +144,103 @@ async function getCachedOrAI(name, prompt, fallbackArr) {
   const key = cacheKey(name);
   const cached = localStorage.getItem(key);
   if (cached) return cached;
-
   const reply = await askAI(prompt);
   if (reply) {
     localStorage.setItem(key, reply);
     return reply;
   }
-  // fallback
-  if (fallbackArr && fallbackArr.length) {
-    const idx = Math.floor(Math.random() * fallbackArr.length);
-    return fallbackArr[idx];
-  }
+  if (fallbackArr?.length) return fallbackArr[Math.floor(Math.random() * fallbackArr.length)];
   return t('error');
+}
+
+// ===== STREAK =====
+function updateStreak() {
+  const today = getToday();
+  const last = localStorage.getItem('cb_last_visit');
+  if (last === today) return streak;
+
+  const yesterday = new Date();
+  yesterday.setDate(yesterday.getDate() - 1);
+  const yStr = yesterday.toISOString().slice(0, 10);
+
+  if (last === yStr) {
+    streak += 1;
+  } else if (last !== today) {
+    streak = 1;
+  }
+  localStorage.setItem('cb_streak', String(streak));
+  localStorage.setItem('cb_last_visit', today);
+  return streak;
+}
+
+// ===== ENERGY =====
+function getDailyEnergy() {
+  const seed = getToday().split('-').reduce((a, b) => a + parseInt(b, 10), 0);
+  // pseudo-random 15-98 based on date
+  const n = Math.abs(Math.sin(seed * 999)) * 10000;
+  return 15 + Math.floor((n % 84));
+}
+
+function energyComment(pct) {
+  const bag = ENERGY_COMMENTS[lang] || ENERGY_COMMENTS.ru;
+  let arr;
+  if (pct < 35) arr = bag.low;
+  else if (pct < 70) arr = bag.mid;
+  else arr = bag.high;
+  return arr[Math.floor((pct + getToday().length) % arr.length)];
+}
+
+// ===== SHARE =====
+function shareResult(text) {
+  haptic('medium');
+  const full = `${text}\n\n${t('shareText')}\n${APP_LINK}`;
+  if (tg?.openTelegramLink) {
+    const url = `https://t.me/share/url?url=${encodeURIComponent(APP_LINK)}&text=${encodeURIComponent(text + '\n\n' + t('shareText'))}`;
+    tg.openTelegramLink(url);
+  } else if (navigator.share) {
+    navigator.share({ text: full }).catch(() => copyText(full));
+  } else {
+    copyText(full);
+  }
+}
+
+function copyText(text) {
+  if (navigator.clipboard) {
+    navigator.clipboard.writeText(text).then(() => {
+      if (tg?.showPopup) tg.showPopup({ message: lang === 'ru' ? 'Скопировано!' : 'Copied!' });
+    });
+  }
 }
 
 // ===== UI =====
 function updateUI() {
   document.querySelectorAll('.lang-btn').forEach(b => b.classList.toggle('active', b.dataset.lang === lang));
-  document.getElementById('subtitle').textContent = t('subtitle');
-  document.getElementById('title-compliment').textContent = t('titleCompliment');
-  document.getElementById('title-horoscope').textContent = t('titleHoroscope');
-  document.getElementById('title-lazy').textContent = t('titleLazy');
-  document.getElementById('title-stars').textContent = t('titleStars');
-  document.getElementById('title-universe').textContent = t('titleUniverse');
-  document.getElementById('title-profile').textContent = t('titleProfile');
-  document.getElementById('title-card').textContent = t('titleCard');
-  document.getElementById('nav-boost').textContent = t('navBoost');
-  document.getElementById('nav-lazy').textContent = t('navLazy');
-  document.getElementById('nav-stars').textContent = t('navStars');
-  document.getElementById('nav-universe').textContent = t('navUniverse');
-  document.getElementById('nav-profile').textContent = t('navProfile');
-  document.getElementById('btn-lazy').textContent = t('btnLazy');
-  document.getElementById('btn-card').textContent = t('btnCard');
-  document.getElementById('btn-ask').textContent = t('btnAsk');
-  document.getElementById('modal-close-btn').textContent = t('btnClose');
-  document.getElementById('choose-sign-label').textContent = t('chooseSign');
-  document.getElementById('stars-hint').textContent = t('starsHint');
-  document.getElementById('ai-input').placeholder = t('aiPlaceholder');
+  const map = {
+    'subtitle': 'subtitle', 'title-compliment': 'titleCompliment', 'title-horoscope': 'titleHoroscope',
+    'title-lazy': 'titleLazy', 'title-stars': 'titleStars', 'title-universe': 'titleUniverse',
+    'title-profile': 'titleProfile', 'title-card': 'titleCard',
+    'nav-boost': 'navBoost', 'nav-lazy': 'navLazy', 'nav-stars': 'navStars',
+    'nav-universe': 'navUniverse', 'nav-profile': 'navProfile',
+    'btn-lazy': 'btnLazy', 'btn-card': 'btnCard', 'btn-ask': 'btnAsk',
+    'modal-close-btn': 'btnClose', 'choose-sign-label': 'chooseSign', 'stars-hint': 'starsHint'
+  };
+  Object.entries(map).forEach(([id, key]) => {
+    const el = document.getElementById(id);
+    if (el) el.textContent = t(key);
+  });
+  const aiInput = document.getElementById('ai-input');
+  if (aiInput) aiInput.placeholder = t('aiPlaceholder');
 
-  // Energy (static, fast)
-  const energy = 70 + Math.floor(Math.random() * 30);
+  // Streak
+  const s = updateStreak();
+  const streakEl = document.getElementById('streak-value');
+  if (streakEl) streakEl.textContent = `${s} ${t('streakDays')}`;
+
+  // Energy
+  const energy = getDailyEnergy();
   document.getElementById('energy-value').textContent = energy + '%';
   document.getElementById('energy-fill').style.width = energy + '%';
-  const phrases = ENERGY_PHRASES[lang] || ENERGY_PHRASES.ru;
-  document.getElementById('energy-label').textContent = phrases[Math.floor(Math.random() * phrases.length)];
+  document.getElementById('energy-label').textContent = energyComment(energy);
 
   if (userSign && ZODIAC[userSign]) {
     document.getElementById('user-sign').textContent = ZODIAC[userSign].emoji + ' ' + ZODIAC[userSign][lang];
@@ -150,30 +257,23 @@ function updateUI() {
 async function loadBoostContent() {
   const compEl = document.getElementById('compliment-text');
   const horEl = document.getElementById('horoscope-text');
-
   compEl.textContent = t('loading');
-  if (!userSign) {
-    horEl.textContent = t('horoscopePlaceholder');
-  } else {
-    horEl.textContent = t('loading');
-  }
+  if (!userSign) horEl.textContent = t('horoscopePlaceholder');
+  else horEl.textContent = t('loading');
 
-  // Compliment
   const compPrompt = lang === 'ru'
-    ? 'Напиши один короткий тёплый и смешной комплимент от вселенной человеку. 1-2 предложения. С эмодзи.'
-    : 'Write one short warm and funny compliment from the universe to a person. 1-2 sentences. With emoji.';
+    ? 'Напиши один короткий тёплый и смешной комплимент от вселенной. 1-2 предложения. С эмодзи. Без markdown.'
+    : 'Write one short warm funny compliment from the universe. 1-2 sentences. With emoji. No markdown.';
   const compliment = await getCachedOrAI('compliment', compPrompt, COMPLIMENTS[lang]);
   compEl.textContent = compliment;
 
-  // Horoscope
   if (userSign) {
     const signName = ZODIAC[userSign][lang];
     const horPrompt = lang === 'ru'
-      ? `Напиши короткий весёлый гороскоп на сегодня для знака ${signName}. 2-3 предложения, с юмором и теплом. С эмодзи.`
-      : `Write a short fun horoscope for today for ${signName}. 2-3 sentences, with humor and warmth. With emoji.`;
+      ? `Короткий весёлый гороскоп на сегодня для ${signName}. 2-3 предложения, юмор и тепло. Эмодзи. Без markdown.`
+      : `Short fun horoscope for today for ${signName}. 2-3 sentences, humor and warmth. Emoji. No markdown.`;
     const fallback = (DAILY_HOROSCOPES[lang] && DAILY_HOROSCOPES[lang][userSign]) || [];
-    const horoscope = await getCachedOrAI('horoscope', horPrompt, fallback);
-    horEl.textContent = horoscope;
+    horEl.textContent = await getCachedOrAI('horoscope', horPrompt, fallback);
   }
 }
 
@@ -181,18 +281,19 @@ function setLang(l) {
   lang = l;
   localStorage.setItem('cb_lang', lang);
   updateUI();
-  haptic();
+  haptic('light');
 }
 
 function showScreen(name) {
   document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
   document.getElementById('screen-' + name).classList.add('active');
   document.querySelectorAll('.nav-item').forEach(n => n.classList.toggle('active', n.dataset.screen === name));
-  haptic('light');
+  haptic('soft');
 }
 
 function renderZodiac() {
   const grid = document.getElementById('profile-zodiac-grid');
+  if (!grid) return;
   grid.innerHTML = '';
   Object.keys(ZODIAC).forEach(key => {
     const z = ZODIAC[key];
@@ -202,10 +303,9 @@ function renderZodiac() {
     item.onclick = () => {
       userSign = key;
       localStorage.setItem('cb_sign', key);
-      // clear cached horoscope so it regenerates
       localStorage.removeItem(cacheKey('horoscope'));
-      updateUI();
       haptic('medium');
+      updateUI();
     };
     grid.appendChild(item);
   });
@@ -213,16 +313,12 @@ function renderZodiac() {
 
 function renderCelebrities() {
   const list = document.getElementById('celeb-list');
+  if (!list) return;
   list.innerHTML = '';
   CELEBRITIES.forEach(celeb => {
     const item = document.createElement('div');
     item.className = 'celeb-item';
-    item.innerHTML = `
-      <div class="celeb-emoji">${celeb.emoji}</div>
-      <div class="celeb-info">
-        <div class="celeb-name">${celeb.name[lang]}</div>
-        <div class="celeb-sign">${ZODIAC[celeb.sign].emoji} ${ZODIAC[celeb.sign][lang]}</div>
-      </div>`;
+    item.innerHTML = `<div class="celeb-emoji">${celeb.emoji}</div><div class="celeb-info"><div class="celeb-name">${celeb.name[lang]}</div><div class="celeb-sign">${ZODIAC[celeb.sign].emoji} ${ZODIAC[celeb.sign][lang]}</div></div>`;
     item.onclick = () => showCelebAI(celeb);
     list.appendChild(item);
   });
@@ -230,23 +326,22 @@ function renderCelebrities() {
 
 async function showCelebAI(celeb) {
   if (!userSign) {
-    showModal(`<div class="result-emoji">✨</div><div class="result-title">${lang==='ru'?'Сначала выбери знак в Профиле!':'Choose your sign in Profile first!'}</div>`);
+    showModal(`<div class="result-emoji">✨</div><div class="result-title">${lang==='ru'?'Сначала выбери знак в Профиле!':'Choose sign in Profile first!'}</div>`);
     return;
   }
   showModal(`<div class="result-emoji">${celeb.emoji}</div><div class="result-title">${t('loading')}</div>`);
   haptic('medium');
-
   const mySign = ZODIAC[userSign][lang];
   const prompt = lang === 'ru'
-    ? `Напиши очень смешную и тёплую совместимость между человеком знака ${mySign} и знаменитостью ${celeb.name.ru}. 2-3 предложения. С эмодзи. В конце напиши процент совместимости от 55 до 98.`
-    : `Write a very funny and warm compatibility between a ${mySign} person and celebrity ${celeb.name.en}. 2-3 sentences. With emoji. End with a compatibility percent from 55 to 98.`;
-
-  const reply = await askAI(prompt);
-  const text = reply || (celeb.funny[lang][0] || t('error'));
+    ? `Очень смешная тёплая совместимость: ${mySign} и ${celeb.name.ru}. 2-3 предложения + процент 55-98. Эмодзи. Без markdown.`
+    : `Very funny warm compatibility: ${mySign} and ${celeb.name.en}. 2-3 sentences + percent 55-98. Emoji. No markdown.`;
+  const reply = await askAI(prompt) || (celeb.funny[lang][0] || t('error'));
   document.getElementById('modal-content').innerHTML = `
     <div class="result-emoji">${celeb.emoji}</div>
     <div class="result-title">${celeb.name[lang]}</div>
-    <p style="font-size:15px;line-height:1.5;margin-top:12px">${text}</p>`;
+    <p style="font-size:15px;line-height:1.5;margin-top:12px">${reply}</p>
+    <button class="btn btn-secondary mt-16" onclick="shareResult(\`${celeb.name[lang]}: ${reply.replace(/`/g,'')}\`)">${t('btnShare')}</button>`;
+  haptic('success');
 }
 
 async function getLazy() {
@@ -254,10 +349,11 @@ async function getLazy() {
   el.textContent = t('loading');
   haptic('medium');
   const prompt = lang === 'ru'
-    ? 'Напиши короткий смешной «гороскоп для ленивых» — разрешение сегодня ничего не делать. 2 предложения. С теплом и юмором. С эмодзи.'
-    : 'Write a short funny "lazy horoscope" — permission to do nothing today. 2 sentences. With warmth and humor. With emoji.';
-  const reply = await getCachedOrAI('lazy', prompt, LAZY_HOROSCOPES[lang]);
-  el.textContent = reply;
+    ? 'Смешной гороскоп для ленивых — разрешение ничего не делать. 2 предложения. Тепло и юмор. Эмодзи. Без markdown.'
+    : 'Funny lazy horoscope — permission to do nothing. 2 sentences. Warmth and humor. Emoji. No markdown.';
+  el.textContent = await getCachedOrAI('lazy', prompt, LAZY_HOROSCOPES[lang]);
+  document.getElementById('lazy-share')?.classList.remove('hidden');
+  haptic('success');
 }
 
 async function drawCard() {
@@ -265,48 +361,44 @@ async function drawCard() {
   const textEl = document.getElementById('card-text');
   titleEl.textContent = t('loading');
   textEl.textContent = '';
-  haptic('medium');
-
+  haptic('heavy');
   const prompt = lang === 'ru'
-    ? 'Придумай название и текст одной весёлой «карты дня» в космическом стиле. Формат: сначала короткое название (2-4 слова), потом с новой строки текст на 1-2 предложения. С эмодзи.'
-    : 'Invent a title and text for one fun "card of the day" in cosmic style. Format: first a short title (2-4 words), then on a new line the text in 1-2 sentences. With emoji.';
-
+    ? 'Придумай весёлую карту дня. Сначала короткое название (2-4 слова), с новой строки текст 1-2 предложения. Эмодзи. Без markdown.'
+    : 'Invent a fun card of the day. First a short title (2-4 words), then on new line text 1-2 sentences. Emoji. No markdown.';
   const reply = await askAI(prompt);
   if (reply) {
     const parts = reply.split('\n').filter(Boolean);
     titleEl.textContent = parts[0] || 'Карта дня';
     textEl.textContent = parts.slice(1).join(' ') || reply;
   } else {
-    const cards = CARDS[lang];
-    const c = cards[Math.floor(Math.random() * cards.length)];
+    const c = CARDS[lang][Math.floor(Math.random() * CARDS[lang].length)];
     titleEl.textContent = c.title;
     textEl.textContent = c.text;
   }
+  document.getElementById('card-share')?.classList.remove('hidden');
   haptic('success');
 }
 
 function renderQuickBtns() {
   const box = document.getElementById('quick-btns');
+  if (!box) return;
   const btns = lang === 'ru' ? [
-    { t: '😢 Мне грустно', p: 'Мне грустно. Подбодри меня по-космически, тепло и с юмором.' },
-    { t: '💪 Подбодри', p: 'Подбодри меня! Коротко, мощно, с юмором и эмодзи.' },
-    { t: '🎯 Что делать?', p: 'Что мне сегодня делать? Дай один смешной и полезный космический совет.' },
-    { t: '✨ Дай совет', p: 'Дай мне один короткий мудрый и смешной совет от вселенной.' }
+    { t: '😢 Мне грустно', p: 'Мне грустно. Подбодри меня по-космически, тепло и с юмором. Без markdown.' },
+    { t: '💪 Подбодри', p: 'Подбодри меня! Коротко, мощно, с юмором и эмодзи. Без markdown.' },
+    { t: '🎯 Что делать?', p: 'Что мне сегодня делать? Один смешной полезный космический совет. Без markdown.' },
+    { t: '✨ Дай совет', p: 'Один короткий мудрый и смешной совет от вселенной. Без markdown.' }
   ] : [
-    { t: '😢 I feel sad', p: 'I feel sad. Cheer me up in a cosmic, warm and funny way.' },
-    { t: '💪 Cheer me up', p: 'Cheer me up! Short, powerful, with humor and emoji.' },
-    { t: '🎯 What to do?', p: 'What should I do today? Give one funny and useful cosmic advice.' },
-    { t: '✨ Give advice', p: 'Give me one short wise and funny piece of advice from the universe.' }
+    { t: '😢 I feel sad', p: 'I feel sad. Cheer me up cosmically, warm and funny. No markdown.' },
+    { t: '💪 Cheer me up', p: 'Cheer me up! Short, powerful, humor and emoji. No markdown.' },
+    { t: '🎯 What to do?', p: 'What should I do today? One funny useful cosmic advice. No markdown.' },
+    { t: '✨ Give advice', p: 'One short wise funny advice from the universe. No markdown.' }
   ];
   box.innerHTML = '';
   btns.forEach(b => {
     const btn = document.createElement('button');
     btn.className = 'quick-btn';
     btn.textContent = b.t;
-    btn.onclick = () => {
-      document.getElementById('ai-input').value = b.p;
-      askUniverse();
-    };
+    btn.onclick = () => { document.getElementById('ai-input').value = b.p; askUniverse(); };
     box.appendChild(btn);
   });
 }
@@ -316,13 +408,12 @@ async function askUniverse() {
   const result = document.getElementById('ai-result');
   const msg = (input.value || '').trim();
   if (msg.length < 2) return;
-
   result.style.display = 'block';
   result.innerHTML = `<div class="ai-loading">${t('loading')}</div>`;
   haptic('medium');
-
   const reply = await askAI(msg);
-  result.innerHTML = `<div class="ai-reply">${reply || t('error')}</div>`;
+  result.innerHTML = `<div class="ai-reply">${reply || t('error')}</div>
+    <button class="btn btn-secondary mt-12" onclick="shareResult(\`${(reply||'').replace(/`/g,'')}\`)">${t('btnShare')}</button>`;
   haptic(reply ? 'success' : 'error');
 }
 
