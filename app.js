@@ -437,6 +437,122 @@ function spendEnergy(cost = ENERGY_COST) {
   return true;
 }
 
+
+const QUEST_TYPES = [
+  { id: 'card', icon: '🃏', ru: 'Открой карту дня', en: 'Draw the card of the day', screen: 'profile', action: 'card' },
+  { id: 'universe', icon: '🌌', ru: 'Спроси вселенную', en: 'Ask the universe', screen: 'universe', action: 'universe' },
+  { id: 'lazy', icon: '😴', ru: 'Возьми разрешение ничего не делать', en: 'Get permission to do nothing', screen: 'lazy', action: 'lazy' },
+  { id: 'stars', icon: '🌟', ru: 'Проверь совместимость со звездой', en: 'Check celebrity compatibility', screen: 'stars', action: 'stars' },
+];
+
+function questKey() {
+  return 'cb_quest_' + getToday();
+}
+
+function getTodayQuest() {
+  const key = questKey();
+  let raw = localStorage.getItem(key);
+  if (raw) {
+    try { return JSON.parse(raw); } catch (_) {}
+  }
+  // pick by day seed
+  const seed = getToday().split('-').reduce((a, b) => a + parseInt(b, 10), 0);
+  const q = QUEST_TYPES[seed % QUEST_TYPES.length];
+  const data = { id: q.id, done: false };
+  localStorage.setItem(key, JSON.stringify(data));
+  return data;
+}
+
+function setQuestDone() {
+  const data = getTodayQuest();
+  if (data.done) return false;
+  data.done = true;
+  localStorage.setItem(questKey(), JSON.stringify(data));
+  // reward: +12% energy (cap 100)
+  const cur = getEnergy();
+  setEnergy(Math.min(100, cur + 12));
+  refreshEnergyUI();
+  unlockBadge('quest_' + getToday().slice(5), lang === 'ru' ? '✅ Задание дня' : '✅ Daily quest');
+  return true;
+}
+
+function renderDailyQuest() {
+  const card = document.getElementById('daily-quest');
+  if (!card) return;
+  const data = getTodayQuest();
+  const meta = QUEST_TYPES.find(q => q.id === data.id) || QUEST_TYPES[0];
+  const icon = document.getElementById('quest-icon');
+  const label = document.getElementById('quest-label');
+  const title = document.getElementById('quest-title');
+  const status = document.getElementById('quest-status');
+  const btn = document.getElementById('quest-btn');
+
+  if (icon) icon.textContent = meta.icon;
+  if (label) label.textContent = lang === 'ru' ? 'Задание дня' : 'Daily quest';
+  if (title) title.textContent = lang === 'ru' ? meta.ru : meta.en;
+
+  if (data.done) {
+    card.classList.add('done');
+    if (status) status.textContent = lang === 'ru' ? 'Выполнено · +12% энергии' : 'Done · +12% energy';
+    if (btn) {
+      btn.textContent = lang === 'ru' ? 'Готово ✓' : 'Done ✓';
+      btn.disabled = true;
+      btn.style.opacity = '0.6';
+    }
+  } else {
+    card.classList.remove('done');
+    if (status) status.textContent = lang === 'ru' ? 'Награда: +12% энергии' : 'Reward: +12% energy';
+    if (btn) {
+      btn.textContent = lang === 'ru' ? 'Выполнить' : 'Do it';
+      btn.disabled = false;
+      btn.style.opacity = '1';
+    }
+  }
+}
+
+function doDailyQuest() {
+  const data = getTodayQuest();
+  if (data.done) return;
+  const meta = QUEST_TYPES.find(q => q.id === data.id) || QUEST_TYPES[0];
+  haptic('medium');
+  showScreen(meta.screen);
+  // gentle hint
+  if (meta.action === 'card') {
+    setTimeout(() => {
+      if (tg?.showPopup) tg.showPopup({ message: lang === 'ru' ? 'Открой карту дня ниже 🃏' : 'Draw the card below 🃏', buttons: [{ type: 'ok' }] });
+    }, 400);
+  } else if (meta.action === 'universe') {
+    setTimeout(() => {
+      if (tg?.showPopup) tg.showPopup({ message: lang === 'ru' ? 'Задай любой вопрос вселенной 🌌' : 'Ask the universe anything 🌌', buttons: [{ type: 'ok' }] });
+    }, 400);
+  } else if (meta.action === 'lazy') {
+    setTimeout(() => {
+      if (tg?.showPopup) tg.showPopup({ message: lang === 'ru' ? 'Нажми «Получить разрешение» 😴' : 'Tap “Get permission” 😴', buttons: [{ type: 'ok' }] });
+    }, 400);
+  } else if (meta.action === 'stars') {
+    setTimeout(() => {
+      if (tg?.showPopup) tg.showPopup({ message: lang === 'ru' ? 'Выбери знаменитость 🌟' : 'Pick a celebrity 🌟', buttons: [{ type: 'ok' }] });
+    }, 400);
+  }
+}
+
+function tryCompleteQuest(actionId) {
+  const data = getTodayQuest();
+  if (data.done || data.id !== actionId) return;
+  if (setQuestDone()) {
+    renderDailyQuest();
+    haptic('success');
+    if (tg?.showPopup) {
+      tg.showPopup({
+        title: lang === 'ru' ? 'Задание дня' : 'Daily quest',
+        message: lang === 'ru' ? 'Готово! +12% космической энергии ✨' : 'Done! +12% cosmic energy ✨',
+        buttons: [{ type: 'ok' }]
+      });
+    }
+  }
+}
+
+
 function getDailyEnergy() {
   return getEnergy();
 }
@@ -747,6 +863,14 @@ function updateUI() {
   const s = updateStreak();
   const streakEl = document.getElementById('streak-value');
   if (streakEl) streakEl.textContent = `${s} ${t('streakDays')}`;
+  renderStreakUI(s);
+  renderCollection();
+  renderDailyQuest();
+
+  const titleCol = document.getElementById('title-collection');
+  if (titleCol) titleCol.textContent = lang === 'ru' ? 'Коллекция карт' : 'Card collection';
+  const colHint = document.getElementById('collection-hint');
+  if (colHint) colHint.textContent = lang === 'ru' ? 'Собери 7 карт — получи бейдж' : 'Collect 7 cards — get a badge';
 
   refreshEnergyUI();
 
@@ -896,6 +1020,7 @@ async function showCelebAI(celeb) {
     <div class="result-title">${celeb.name[lang]}</div>
     <p style="font-size:15px;line-height:1.5;margin-top:12px">${reply}</p>
     <button class="btn btn-secondary mt-16" onclick="shareSmart(\`${String(celeb.name[lang]+': '+reply).replace(/`/g,'')}\`)">${t('btnShare')}</button>`;
+  tryCompleteQuest('stars');
   haptic('success');
 }
 
@@ -909,6 +1034,7 @@ async function getLazy() {
     : `Funny lazy horoscope for ${n} — permission to do nothing. Address by name. 2 sentences. Warmth and humor. Emoji. No markdown.`;
   el.textContent = await getCachedOrAI('lazy', prompt, LAZY_HOROSCOPES[lang], { cost: ENERGY_COST });
   document.getElementById('lazy-share')?.classList.remove('hidden');
+  tryCompleteQuest('lazy');
   haptic('success');
 }
 
@@ -941,6 +1067,7 @@ async function drawCard() {
   if (tTitle && tText && !/думает|thinking|Loading|Загрузка/i.test(tTitle)) {
     addToCollection(tTitle, tText);
     renderCollection();
+    tryCompleteQuest('card');
   }
   haptic('success');
 }
@@ -981,6 +1108,7 @@ async function askUniverse() {
   const reply = await askAI(msg);
   result.innerHTML = `<div class="ai-reply">${reply || t('error')}</div>
     <button class="btn btn-secondary mt-12" onclick="shareSmart(\`${String(reply||'').replace(/`/g,'')}\`)">${t('btnShare')}</button>`;
+  if (reply) tryCompleteQuest('universe');
   haptic(reply ? 'success' : 'error');
 }
 
