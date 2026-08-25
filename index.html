@@ -51,19 +51,13 @@
       <div class="card">
         <div class="card-title"><img class="title-img" src="icons/boost.png" alt=""> <span id="title-compliment">Комплимент от вселенной</span></div>
         <div class="compliment-text" id="compliment-text">Загрузка...</div>
-        <div class="share-row mt-12">
-          <button class="btn btn-secondary" onclick="shareResult(document.getElementById('compliment-text').textContent)">Поделиться</button>
-          <button class="btn btn-story" onclick="shareToStory(document.getElementById('compliment-text').textContent)">📱 Stories</button>
-        </div>
+        <button class="btn btn-secondary mt-12" onclick="shareSmart(document.getElementById('compliment-text').textContent)">Поделиться</button>
       </div>
 
       <div class="card">
         <div class="card-title"><img class="title-img" src="icons/boost.png" alt=""> <span id="title-horoscope">Твой прогноз на сегодня</span></div>
         <div class="horoscope-text" id="horoscope-text">Выбери знак в Профиле ✨</div>
-        <div class="share-row mt-12">
-          <button class="btn btn-secondary" onclick="shareResult(document.getElementById('horoscope-text').textContent)">Поделиться</button>
-          <button class="btn btn-story" onclick="shareToStory(document.getElementById('horoscope-text').textContent)">📱 Stories</button>
-        </div>
+        <button class="btn btn-secondary mt-12" onclick="shareSmart(document.getElementById('horoscope-text').textContent)">Поделиться</button>
       </div>
     </div>
 
@@ -73,10 +67,7 @@
         <div class="card-title"><img class="title-img" src="icons/lazy.png" alt=""> <span id="title-lazy">Гороскоп для ленивых</span></div>
         <div class="lazy-text" id="lazy-text">Нажми кнопку</div>
         <button class="btn btn-primary mt-16" id="btn-lazy" onclick="getLazy()">Получить разрешение</button>
-        <div class="share-row mt-10 hidden" id="lazy-share">
-          <button class="btn btn-secondary" onclick="shareResult(document.getElementById('lazy-text').textContent)">Поделиться</button>
-          <button class="btn btn-story" onclick="shareToStory(document.getElementById('lazy-text').textContent)">📱 Stories</button>
-        </div>
+        <button class="btn btn-secondary mt-10 hidden" id="lazy-share" onclick="shareSmart(document.getElementById('lazy-text').textContent)">Поделиться</button>
       </div>
     </div>
 
@@ -114,6 +105,19 @@
         </div>
         <div class="text-soft mb-8" id="choose-sign-label" style="font-size:13px">Твой знак зодиака:</div>
         <div class="zodiac-grid" id="profile-zodiac-grid"></div>
+        <div class="birth-block mt-16">
+          <div class="text-soft mb-8" style="font-size:13px" id="birth-label">Дата рождения:</div>
+          <input type="date" id="birth-date" class="name-input" style="text-align:left">
+          <button class="btn btn-secondary mt-10" id="btn-save-birth" onclick="saveBirthDate()">Сохранить дату</button>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-title"><img class="title-img" src="icons/universe.png" alt=""> <span id="title-relocate">Куда тебе переехать</span></div>
+        <div class="text-soft mb-8" id="relocate-hint" style="font-size:13px">По дате рождения и вайбу — с юмором</div>
+        <div id="relocate-text">Нажми кнопку</div>
+        <button class="btn btn-primary mt-16" id="btn-relocate" onclick="getRelocate()">Узнать 🌍</button>
+        <button class="btn btn-secondary mt-10 hidden" id="relocate-share" onclick="shareSmart(document.getElementById('relocate-text').textContent)">Поделиться</button>
       </div>
 
       <div class="card">
@@ -123,10 +127,7 @@
           <div class="card-text" id="card-text"></div>
         </div>
         <button class="btn btn-primary mt-16" id="btn-card" onclick="drawCard()">Открыть карту</button>
-        <div class="share-row mt-10 hidden" id="card-share">
-          <button class="btn btn-secondary" onclick="shareResult(document.getElementById('card-title').textContent + ' — ' + document.getElementById('card-text').textContent)">Поделиться</button>
-          <button class="btn btn-story" onclick="shareToStory(document.getElementById('card-title').textContent + ' — ' + document.getElementById('card-text').textContent)">📱 Stories</button>
-        </div>
+        <button class="btn btn-secondary mt-10 hidden" id="card-share" onclick="shareSmart(document.getElementById('card-title').textContent + ' — ' + document.getElementById('card-text').textContent)">Поделиться</button>
       </div>
     </div>
   </div>
