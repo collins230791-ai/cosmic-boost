@@ -2,6 +2,20 @@ import { ImageResponse } from '@vercel/og';
 
 export const config = { runtime: 'edge' };
 
+function fromBase64Url(str) {
+  try {
+    let s = String(str || '').replace(/-/g, '+').replace(/_/g, '/');
+    while (s.length % 4) s += '=';
+    // decode base64 to bytes then UTF-8
+    const binary = atob(s);
+    const bytes = new Uint8Array(binary.length);
+    for (let i = 0; i < binary.length; i++) bytes[i] = binary.charCodeAt(i);
+    return new TextDecoder().decode(bytes);
+  } catch {
+    return '';
+  }
+}
+
 function wrapText(text, maxLen = 28) {
   const words = String(text || '').replace(/\s+/g, ' ').trim().split(' ');
   const lines = [];
@@ -16,13 +30,18 @@ function wrapText(text, maxLen = 28) {
     }
   }
   if (line) lines.push(line);
-  return lines.slice(0, 6).join('\n');
+  return lines.slice(0, 7).join('\n');
 }
 
 export default async function handler(req) {
   try {
     const { searchParams } = new URL(req.url);
-    let text = searchParams.get('text') || 'Cosmic Boost ✨';
+    // Prefer base64 param "t" (safe from double-encoding by Telegram)
+    let text = fromBase64Url(searchParams.get('t') || '');
+    if (!text) {
+      // fallback for plain text param
+      text = searchParams.get('text') || 'Cosmic Boost ✨';
+    }
     text = text.slice(0, 180);
     const lines = wrapText(text, 26);
 
@@ -62,7 +81,7 @@ export default async function handler(req) {
               props: {
                 style: {
                   position: 'absolute',
-                  top: '42%',
+                  top: '40%',
                   left: '50%',
                   transform: 'translate(-50%, -50%)',
                   display: 'flex',
@@ -71,7 +90,7 @@ export default async function handler(req) {
                   justifyContent: 'center',
                   width: '860px',
                   padding: '36px 40px',
-                  backgroundColor: 'rgba(10, 8, 24, 0.78)',
+                  backgroundColor: 'rgba(10, 8, 24, 0.82)',
                   borderRadius: '28px',
                   border: '2px solid rgba(196, 76, 255, 0.55)',
                 },
@@ -80,7 +99,7 @@ export default async function handler(req) {
                     type: 'div',
                     props: {
                       style: {
-                        fontSize: 42,
+                        fontSize: 40,
                         fontWeight: 700,
                         color: 'white',
                         textAlign: 'center',
@@ -97,14 +116,9 @@ export default async function handler(req) {
           ],
         },
       },
-      {
-        width: 1080,
-        height: 1920,
-      }
+      { width: 1080, height: 1920 }
     );
   } catch (e) {
-    return new Response('Failed to generate image: ' + (e?.message || 'error'), {
-      status: 500,
-    });
+    return new Response('Failed: ' + (e?.message || 'error'), { status: 500 });
   }
 }
