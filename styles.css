@@ -605,3 +605,40 @@ body {
 
 .hidden { display: none !important; }
 .mt-10 { margin-top: 10px; }
+
+/* Cosmic loader */
+.cosmo-loader {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  padding: 12px 0;
+  min-height: 48px;
+}
+.cosmo-loader-sm {
+  min-height: 32px;
+  padding: 4px 0;
+}
+.cosmo-orbit {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  border: 2px solid rgba(196,76,255,0.25);
+  border-top-color: #c44cff;
+  border-right-color: #ff6b9d;
+  animation: spin 0.9s linear infinite;
+}
+.cosmo-loader-text {
+  font-size: 13px;
+  color: rgba(255,255,255,0.55);
+  font-style: italic;
+}
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+/* Light theme soft override */
+body.tg-light {
+  background: linear-gradient(135deg, #1a1535 0%, #2a2550 50%, #1e1a3a 100%);
+}
