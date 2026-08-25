@@ -469,6 +469,13 @@ function initTelegram() {
   }
 }
 
+function hideSplash() {
+  const s = document.getElementById('splash');
+  if (!s) return;
+  s.classList.add('hide');
+  setTimeout(() => s.remove(), 600);
+}
+
 document.addEventListener('DOMContentLoaded', async () => {
   try {
     initTelegram();
@@ -478,6 +485,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     const timeout = new Promise(r => setTimeout(r, 600));
     await Promise.race([cloudPromise, timeout]);
     updateUI();
+    hideSplash();
     // If cloud finishes later with a sign, refresh once
     cloudPromise.then(() => {
       if (userSign) updateUI();
@@ -485,5 +493,6 @@ document.addEventListener('DOMContentLoaded', async () => {
   } catch (e) {
     console.error(e);
     try { updateUI(); } catch (_) {}
+    hideSplash();
   }
 });
