@@ -797,3 +797,85 @@ body.tg-light {
 #birth-modal.active {
   display: flex;
 }
+
+
+/* Collection + streak milestones */
+.streak-milestones {
+  display: flex;
+  gap: 6px;
+  margin-top: 8px;
+  flex-wrap: wrap;
+}
+.milestone {
+  font-size: 11px;
+  padding: 3px 8px;
+  border-radius: 10px;
+  background: rgba(255,255,255,0.06);
+  border: 1px solid rgba(255,255,255,0.1);
+  color: rgba(255,255,255,0.45);
+}
+.milestone.done {
+  background: rgba(255, 107, 157, 0.2);
+  border-color: rgba(255, 107, 157, 0.5);
+  color: #ffb4d0;
+}
+.streak-reward {
+  margin-top: 10px;
+  padding: 10px 12px;
+  border-radius: 12px;
+  background: linear-gradient(135deg, rgba(255,107,157,0.2), rgba(196,76,255,0.2));
+  font-size: 13px;
+  line-height: 1.4;
+}
+.collection-progress {
+  margin-bottom: 12px;
+}
+.collection-count {
+  font-size: 13px;
+  font-weight: 600;
+  margin-bottom: 6px;
+  color: #c44cff;
+}
+.collection-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+  gap: 8px;
+}
+.collection-item {
+  background: rgba(255,255,255,0.06);
+  border: 1px solid rgba(196,76,255,0.25);
+  border-radius: 12px;
+  padding: 10px;
+  font-size: 12px;
+  line-height: 1.35;
+}
+.collection-item .ci-title {
+  font-weight: 700;
+  font-size: 13px;
+  margin-bottom: 4px;
+  color: #ff9ec8;
+}
+.collection-item .ci-date {
+  font-size: 10px;
+  opacity: 0.45;
+  margin-top: 6px;
+}
+.badge-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 12px;
+}
+.badge {
+  font-size: 12px;
+  padding: 6px 10px;
+  border-radius: 14px;
+  background: rgba(255, 215, 0, 0.15);
+  border: 1px solid rgba(255, 215, 0, 0.4);
+  color: #ffd93d;
+}
+.collection-empty {
+  font-size: 13px;
+  opacity: 0.5;
+  padding: 8px 0;
+}
