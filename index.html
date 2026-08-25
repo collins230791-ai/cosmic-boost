@@ -131,11 +131,21 @@
   </div>
 
   <nav class="bottom-nav">
-    <button class="nav-item active" data-screen="boost" onclick="showScreen('boost')"><span class="nav-icon">🚀</span><span id="nav-boost">Буст</span></button>
-    <button class="nav-item" data-screen="lazy" onclick="showScreen('lazy')"><span class="nav-icon">😴</span><span id="nav-lazy">Ленивый</span></button>
-    <button class="nav-item" data-screen="stars" onclick="showScreen('stars')"><span class="nav-icon">🌟</span><span id="nav-stars">Звёзды</span></button>
-    <button class="nav-item" data-screen="universe" onclick="showScreen('universe')"><span class="nav-icon">🌌</span><span id="nav-universe">Вселенная</span></button>
-    <button class="nav-item" data-screen="profile" onclick="showScreen('profile')"><span class="nav-icon">👤</span><span id="nav-profile">Профиль</span></button>
+    <button class="nav-item active" data-screen="boost" onclick="showScreen('boost')">
+      <img class="nav-img" src="icons/boost.png" alt=""><span id="nav-boost">Буст</span>
+    </button>
+    <button class="nav-item" data-screen="lazy" onclick="showScreen('lazy')">
+      <img class="nav-img" src="icons/lazy.png" alt=""><span id="nav-lazy">Ленивый</span>
+    </button>
+    <button class="nav-item" data-screen="stars" onclick="showScreen('stars')">
+      <img class="nav-img" src="icons/stars.png" alt=""><span id="nav-stars">Звёзды</span>
+    </button>
+    <button class="nav-item" data-screen="universe" onclick="showScreen('universe')">
+      <img class="nav-img" src="icons/universe.png" alt=""><span id="nav-universe">Вселенная</span>
+    </button>
+    <button class="nav-item" data-screen="profile" onclick="showScreen('profile')">
+      <img class="nav-img" src="icons/profile.png" alt=""><span id="nav-profile">Профиль</span>
+    </button>
   </nav>
 
   <div class="overlay" id="result-overlay" onclick="closeModal(event)">
