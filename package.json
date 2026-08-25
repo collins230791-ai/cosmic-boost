@@ -1,0 +1,7 @@
+{
+  "name": "cosmic-boost",
+  "private": true,
+  "dependencies": {
+    "@vercel/og": "^0.6.8"
+  }
+}
