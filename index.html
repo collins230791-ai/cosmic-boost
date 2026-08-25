@@ -30,6 +30,18 @@
 
     <!-- BOOST -->
     <div class="screen active" id="screen-boost">
+      <div class="card quest-card" id="daily-quest">
+        <div class="quest-row">
+          <span class="quest-icon" id="quest-icon">✨</span>
+          <div style="flex:1">
+            <div class="quest-label" id="quest-label">Задание дня</div>
+            <div class="quest-title" id="quest-title">...</div>
+            <div class="quest-status" id="quest-status"></div>
+          </div>
+        </div>
+        <button class="btn btn-primary mt-12" id="quest-btn" onclick="doDailyQuest()">Выполнить</button>
+      </div>
+
       <div class="card streak-card">
         <div class="streak-row">
           <span class="streak-fire">🔥</span>
