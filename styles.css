@@ -724,3 +724,24 @@ body.tg-light {
   opacity: 0.85;
   transform: scale(0.98);
 }
+
+
+/* Nav image icons */
+.nav-img {
+  width: 28px;
+  height: 28px;
+  border-radius: 8px;
+  object-fit: cover;
+  display: block;
+  margin: 0 auto 2px;
+  box-shadow: 0 0 10px rgba(196, 76, 255, 0.35);
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+.nav-item.active .nav-img {
+  transform: scale(1.12);
+  box-shadow: 0 0 14px rgba(255, 107, 157, 0.55);
+  border: 1.5px solid rgba(255, 107, 157, 0.7);
+}
+.nav-item {
+  gap: 2px;
+}
