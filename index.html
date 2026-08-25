@@ -49,7 +49,7 @@
       </div>
 
       <div class="card">
-        <div class="card-title"><span class="emoji">💌</span> <span id="title-compliment">Комплимент от вселенной</span></div>
+        <div class="card-title"><img class="title-img" src="icons/boost.png" alt=""> <span id="title-compliment">Комплимент от вселенной</span></div>
         <div class="compliment-text" id="compliment-text">Загрузка...</div>
         <div class="share-row mt-12">
           <button class="btn btn-secondary" onclick="shareResult(document.getElementById('compliment-text').textContent)">Поделиться</button>
@@ -58,7 +58,7 @@
       </div>
 
       <div class="card">
-        <div class="card-title"><span class="emoji">🔮</span> <span id="title-horoscope">Твой прогноз на сегодня</span></div>
+        <div class="card-title"><img class="title-img" src="icons/boost.png" alt=""> <span id="title-horoscope">Твой прогноз на сегодня</span></div>
         <div class="horoscope-text" id="horoscope-text">Выбери знак в Профиле ✨</div>
         <div class="share-row mt-12">
           <button class="btn btn-secondary" onclick="shareResult(document.getElementById('horoscope-text').textContent)">Поделиться</button>
@@ -70,7 +70,7 @@
     <!-- LAZY -->
     <div class="screen" id="screen-lazy">
       <div class="card">
-        <div class="card-title"><span class="emoji">😴</span> <span id="title-lazy">Гороскоп для ленивых</span></div>
+        <div class="card-title"><img class="title-img" src="icons/lazy.png" alt=""> <span id="title-lazy">Гороскоп для ленивых</span></div>
         <div class="lazy-text" id="lazy-text">Нажми кнопку</div>
         <button class="btn btn-primary mt-16" id="btn-lazy" onclick="getLazy()">Получить разрешение</button>
         <div class="share-row mt-10 hidden" id="lazy-share">
@@ -83,7 +83,7 @@
     <!-- STARS -->
     <div class="screen" id="screen-stars">
       <div class="card">
-        <div class="card-title"><span class="emoji">🌟</span> <span id="title-stars">С кем из звёзд совместим(а)</span></div>
+        <div class="card-title"><img class="title-img" src="icons/stars.png" alt=""> <span id="title-stars">С кем из звёзд совместим(а)</span></div>
         <div class="text-soft mb-8" id="stars-hint" style="font-size:13px">Выбери знаменитость</div>
         <div class="celeb-list" id="celeb-list"></div>
       </div>
@@ -92,7 +92,7 @@
     <!-- UNIVERSE -->
     <div class="screen" id="screen-universe">
       <div class="card">
-        <div class="card-title"><span class="emoji">🌌</span> <span id="title-universe">Спросить вселенную</span></div>
+        <div class="card-title"><img class="title-img" src="icons/universe.png" alt=""> <span id="title-universe">Спросить вселенную</span></div>
         <div class="quick-btns" id="quick-btns"></div>
         <textarea id="ai-input" class="ai-input" rows="3" placeholder="Напиши что угодно..."></textarea>
         <button class="btn btn-primary mt-12" id="btn-ask" onclick="askUniverse()">Спросить ✨</button>
@@ -103,7 +103,7 @@
     <!-- PROFILE -->
     <div class="screen" id="screen-profile">
       <div class="card">
-        <div class="card-title"><span class="emoji">👤</span> <span id="title-profile">Профиль</span></div>
+        <div class="card-title"><img class="title-img" src="icons/profile.png" alt=""> <span id="title-profile">Профиль</span></div>
         <div class="user-info">
           <div class="user-avatar" id="user-avatar">?</div>
           <div>
@@ -116,7 +116,7 @@
       </div>
 
       <div class="card">
-        <div class="card-title"><span class="emoji">🃏</span> <span id="title-card">Карта дня</span></div>
+        <div class="card-title"><img class="title-img" src="icons/stars.png" alt=""> <span id="title-card">Карта дня</span></div>
         <div class="day-card" id="day-card">
           <div class="day-card-title" id="card-title">Нажми, чтобы открыть</div>
           <div class="card-text" id="card-text"></div>
