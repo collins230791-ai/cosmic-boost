@@ -345,6 +345,37 @@ function applyTelegramTheme() {
 
 
 
+
+function lifePathNumber(iso) {
+  if (!iso) return null;
+  const digits = iso.replace(/\D/g, '').split('').map(Number);
+  let sum = digits.reduce((a, b) => a + b, 0);
+  while (sum > 9 && sum !== 11 && sum !== 22 && sum !== 33) {
+    sum = String(sum).split('').map(Number).reduce((a, b) => a + b, 0);
+  }
+  return sum;
+}
+
+async function getNumerology() {
+  const el = document.getElementById('numerology-text');
+  if (!birthDate) {
+    if (tg?.showAlert) tg.showAlert(lang === 'ru' ? 'Сначала сохрани дату рождения' : 'Save birth date first');
+    return;
+  }
+  setLoading(el, true);
+  haptic('medium');
+  const num = lifePathNumber(birthDate);
+  const n = nameForAI();
+  const prompt = lang === 'ru'
+    ? `Человека зовут ${n}, дата рождения ${birthDate}, число судьбы (life path) = ${num}. Напиши короткое тёплое и слегка смешное описание этого числа судьбы лично для ${n}: сильные стороны, на что обратить внимание, один мини-совет на сегодня. 3-4 предложения. Эмодзи. Без markdown. Не будь эзотерическим гуру — вайб Cosmic Boost.`
+    : `Person is named ${n}, birth date ${birthDate}, life path number = ${num}. Write a short warm slightly funny description of this life path for ${n}: strengths, what to watch, one mini tip for today. 3-4 sentences. Emoji. No markdown. Not guru-style — Cosmic Boost vibe.`;
+  const reply = await askAI(prompt);
+  const header = lang === 'ru' ? `Число судьбы: ${num}\n\n` : `Life path: ${num}\n\n`;
+  el.textContent = reply ? (header + reply) : (lang === 'ru' ? `Число судьбы: ${num}. Звёзды пока молчат ✨` : `Life path: ${num}. Stars are quiet ✨`);
+  document.getElementById('numerology-share')?.classList.remove('hidden');
+  haptic(reply ? 'success' : 'error');
+}
+
 async function saveBirthDate() {
   const el = document.getElementById('birth-date');
   const v = el?.value || '';
@@ -488,6 +519,15 @@ function updateUI() {
   if (birthLabel) birthLabel.textContent = lang === 'ru' ? 'Дата рождения:' : 'Birth date:';
   const btnBirth = document.getElementById('btn-save-birth');
   if (btnBirth) btnBirth.textContent = lang === 'ru' ? 'Сохранить дату' : 'Save date';
+  const titleNum = document.getElementById('title-numerology');
+  if (titleNum) titleNum.textContent = lang === 'ru' ? 'Число судьбы' : 'Life path number';
+  const numHint = document.getElementById('numerology-hint');
+  if (numHint) numHint.textContent = lang === 'ru' ? 'По дате рождения — коротко и с вайбом' : 'From birth date — short and fun';
+  const btnNum = document.getElementById('btn-numerology');
+  if (btnNum) btnNum.textContent = lang === 'ru' ? 'Рассчитать ✨' : 'Calculate ✨';
+  const numText = document.getElementById('numerology-text');
+  if (numText && !birthDate) numText.textContent = lang === 'ru' ? 'Сохрани дату рождения выше' : 'Save your birth date above';
+
   const titleRel = document.getElementById('title-relocate');
   if (titleRel) titleRel.textContent = lang === 'ru' ? 'Куда тебе переехать' : 'Where should you move';
   const relHint = document.getElementById('relocate-hint');
