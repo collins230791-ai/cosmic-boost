@@ -209,23 +209,50 @@ function shareResult(text) {
 
 function shareToStory(text) {
   haptic('medium');
-  const caption = (text || '').slice(0, 200);
-  if (tg?.shareToStory) {
+  // Short clean caption — Telegram limit ~200, and short text is more readable
+  let caption = cleanText(String(text || ''))
+    .replace(/\s+/g, ' ')
+    .trim();
+  if (caption.length > 160) {
+    caption = caption.slice(0, 157) + '...';
+  }
+  // Avoid empty / loading states
+  if (!caption || caption.includes('Связываемся') || caption.includes('Connecting') || caption.includes('Загрузка') || caption.includes('думают')) {
+    if (tg?.showAlert) tg.showAlert(lang === 'ru' ? 'Сначала дождись текста ✨' : 'Wait for the text first ✨');
+    return;
+  }
+
+  if (typeof tg?.shareToStory === 'function') {
     try {
+      // First try with widget link
       tg.shareToStory(STORY_BG, {
         text: caption,
-        widget_link: {
-          url: APP_LINK,
-          name: 'Cosmic Boost'
-        }
+        widget_link: { url: APP_LINK, name: 'Cosmic Boost' }
       });
       return;
-    } catch (e) {
-      console.error('shareToStory failed', e);
+    } catch (e1) {
+      console.error('shareToStory+widget failed', e1);
+      try {
+        // Fallback without widget
+        tg.shareToStory(STORY_BG, { text: caption });
+        return;
+      } catch (e2) {
+        console.error('shareToStory failed', e2);
+      }
     }
   }
-  // Fallback: share to chat if Stories not supported
-  shareResult(text);
+
+  // Not supported — explain + share to chat
+  if (tg?.showPopup) {
+    tg.showPopup({
+      title: 'Stories',
+      message: lang === 'ru'
+        ? 'Stories доступны в актуальной версии Telegram. Отправляю в чат.'
+        : 'Stories need a recent Telegram version. Sharing to chat instead.',
+      buttons: [{ type: 'ok' }]
+    });
+  }
+  shareResult(caption);
 }
 
 // ===== Theme =====
