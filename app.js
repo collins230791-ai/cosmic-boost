@@ -59,14 +59,44 @@ const i18n = {
 
 const ENERGY_COMMENTS = {
   ru: {
-    low: ["Энергии хватит только лежать в направлении мечты 🛋️","Сегодня ты — красивая батарея на 15%. Зарядка рекомендована","Космос шепчет: «Отдыхай. Мы прикроем»","Уровень: овощ в хорошем смысле. Это тоже путь"],
-    mid: ["Нормальный человеческий уровень. Можно даже что-то сделать","Энергии хватит на дела и на мемасики","Сегодня ты на 60% космос и на 40% диван. Баланс!","Достаточно, чтобы улыбнуться незнакомцу и не пожалеть"],
-    high: ["Ты сегодня как маленькая сверхновая 💥","Космическая энергия на максимуме. Осторожно, можно зажечь всех","Буст от самих звёзд. Используй по назначению","Энергия главного героя. Сюжет уже начался"]
+    low: [
+      "Энергии хватит только лежать в направлении мечты 🛋️",
+      "Сегодня ты — красивая батарея на {n}%. Зарядка рекомендована",
+      "Космос шепчет: «Отдыхай. Мы прикроем»",
+      "Уровень: овощ в хорошем смысле. Это тоже путь"
+    ],
+    mid: [
+      "Нормальный человеческий уровень — {n}%. Можно даже что-то сделать",
+      "Энергии хватит на дела и на мемасики",
+      "Сегодня ты на {n}% космос. Остальное — диван. Баланс!",
+      "Достаточно, чтобы улыбнуться незнакомцу и не пожалеть"
+    ],
+    high: [
+      "Ты сегодня как маленькая сверхновая — {n}% 💥",
+      "Космическая энергия на {n}%. Осторожно, можно зажечь всех",
+      "Буст от самих звёзд. Используй по назначению",
+      "Энергия главного героя ({n}%). Сюжет уже начался"
+    ]
   },
   en: {
-    low: ["Energy only enough to lie toward your dreams 🛋️","Today you're a beautiful 15% battery. Charging recommended","The cosmos whispers: «Rest. We got this»","Level: vegetable (in a good way). That's a path too"],
-    mid: ["Normal human level. You can even do something","Enough energy for tasks and memes","Today you're 60% cosmos and 40% couch. Balance!","Enough to smile at a stranger and not regret it"],
-    high: ["You're a tiny supernova today 💥","Cosmic energy at maximum. Careful — you might set everyone on fire","Boost straight from the stars. Use it wisely","Main character energy. The plot has already started"]
+    low: [
+      "Energy only enough to lie toward your dreams 🛋️",
+      "Today you're a beautiful {n}% battery. Charging recommended",
+      "The cosmos whispers: «Rest. We got this»",
+      "Level: vegetable (in a good way). That's a path too"
+    ],
+    mid: [
+      "Normal human level — {n}%. You can even do something",
+      "Enough energy for tasks and memes",
+      "Today you're {n}% cosmos. The rest is couch. Balance!",
+      "Enough to smile at a stranger and not regret it"
+    ],
+    high: [
+      "You're a tiny supernova — {n}% 💥",
+      "Cosmic energy at {n}%. Careful — you might set everyone on fire",
+      "Boost straight from the stars. Use it wisely",
+      "Main character energy ({n}%). The plot has already started"
+    ]
   }
 };
 
@@ -213,7 +243,8 @@ function getDailyEnergy() {
 function energyComment(pct) {
   const bag = ENERGY_COMMENTS[lang] || ENERGY_COMMENTS.ru;
   const arr = pct < 35 ? bag.low : pct < 70 ? bag.mid : bag.high;
-  return arr[Math.floor((pct + getToday().length) % arr.length)];
+  const raw = arr[Math.floor((pct + getToday().length) % arr.length)];
+  return String(raw).replace(/\{n\}/g, String(pct));
 }
 
 // ===== Share =====
