@@ -113,6 +113,14 @@
       </div>
 
       <div class="card">
+        <div class="card-title"><img class="title-img" src="icons/stars.png" alt=""> <span id="title-numerology">Число судьбы</span></div>
+        <div class="text-soft mb-8" id="numerology-hint" style="font-size:13px">По дате рождения — коротко и с вайбом</div>
+        <div id="numerology-text">Сохрани дату рождения выше</div>
+        <button class="btn btn-primary mt-16" id="btn-numerology" onclick="getNumerology()">Рассчитать ✨</button>
+        <button class="btn btn-secondary mt-10 hidden" id="numerology-share" onclick="shareSmart(document.getElementById('numerology-text').textContent)">Поделиться</button>
+      </div>
+
+      <div class="card">
         <div class="card-title"><img class="title-img" src="icons/universe.png" alt=""> <span id="title-relocate">Куда тебе переехать</span></div>
         <div class="text-soft mb-8" id="relocate-hint" style="font-size:13px">По дате рождения и вайбу — с юмором</div>
         <div id="relocate-text">Нажми кнопку</div>
