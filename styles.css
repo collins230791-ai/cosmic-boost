@@ -699,3 +699,28 @@ body.tg-light {
   0%, 100% { transform: scale(1); box-shadow: 0 0 40px rgba(196, 76, 255, 0.35); }
   50% { transform: scale(1.03); box-shadow: 0 0 70px rgba(196, 76, 255, 0.55); }
 }
+
+
+/* Share row + Stories button */
+.share-row {
+  display: flex;
+  gap: 8px;
+}
+.share-row .btn {
+  flex: 1;
+  margin-top: 0;
+}
+.btn-story {
+  background: linear-gradient(135deg, #ff6b9d 0%, #c44cff 100%);
+  color: white;
+  border: none;
+  border-radius: 14px;
+  padding: 12px 14px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+}
+.btn-story:active {
+  opacity: 0.85;
+  transform: scale(0.98);
+}
