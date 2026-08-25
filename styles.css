@@ -642,3 +642,48 @@ body {
 body.tg-light {
   background: linear-gradient(135deg, #1a1535 0%, #2a2550 50%, #1e1a3a 100%);
 }
+
+
+/* Splash screen */
+.splash {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  background: #0a0818;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  transition: opacity 0.5s ease, visibility 0.5s ease;
+}
+.splash.hide {
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+}
+.splash-img {
+  width: min(72vw, 280px);
+  height: min(72vw, 280px);
+  object-fit: cover;
+  border-radius: 28px;
+  box-shadow: 0 0 60px rgba(196, 76, 255, 0.45);
+  animation: splashPulse 2.5s ease-in-out infinite;
+}
+.splash-title {
+  margin-top: 24px;
+  font-size: 28px;
+  font-weight: 800;
+  background: linear-gradient(90deg, #ff6b9d, #c44cff, #00d4ff);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+.splash-sub {
+  margin-top: 8px;
+  font-size: 13px;
+  color: rgba(255,255,255,0.5);
+}
+@keyframes splashPulse {
+  0%, 100% { transform: scale(1); box-shadow: 0 0 40px rgba(196, 76, 255, 0.35); }
+  50% { transform: scale(1.03); box-shadow: 0 0 70px rgba(196, 76, 255, 0.55); }
+}
