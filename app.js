@@ -196,18 +196,27 @@ function cacheKey(name) {
   return `cb_ai_${name}_${lang}_${getToday()}_${userSign || 'none'}`;
 }
 
-async function getCachedOrAI(name, prompt, fallbackArr) {
+async function getCachedOrAI(name, prompt, fallbackArr, opts = {}) {
   const key = cacheKey(name);
   const cached = localStorage.getItem(key);
   if (cached) return cached;
+  // New generation costs energy (unless free)
+  if (!opts.free) {
+    if (!spendEnergy(opts.cost || ENERGY_COST)) {
+      if (fallbackArr?.length) return fallbackArr[Math.floor(Math.random() * fallbackArr.length)];
+      return lang === 'ru'
+        ? 'Не хватает энергии для связи с космосом. Завтра будет полный заряд ✨'
+        : 'Not enough energy to reach the cosmos. Full charge tomorrow ✨';
+    }
+  }
   const reply = await askAI(prompt);
   if (reply) {
     localStorage.setItem(key, reply);
     return reply;
   }
+  // refund half on failure? skip for simplicity
   if (fallbackArr?.length) {
-    const fb = fallbackArr[Math.floor(Math.random() * fallbackArr.length)];
-    return fb;
+    return fallbackArr[Math.floor(Math.random() * fallbackArr.length)];
   }
   return t('error');
 }
@@ -365,10 +374,30 @@ function renderCollection() {
 }
 
 
-function getDailyEnergy() {
-  const seed = getToday().split('-').reduce((a, b) => a + parseInt(b, 10), 0);
-  const n = Math.abs(Math.sin(seed * 999)) * 10000;
-  return 15 + Math.floor(n % 84);
+const ENERGY_COST = 18; // % per AI action
+const ENERGY_MAX = 100;
+const ENERGY_START = 100;
+
+function energyStorageKey() {
+  return 'cb_energy_' + getToday();
+}
+
+function getEnergy() {
+  const key = energyStorageKey();
+  const raw = localStorage.getItem(key);
+  if (raw === null || raw === undefined) {
+    // new day — full charge
+    localStorage.setItem(key, String(ENERGY_START));
+    return ENERGY_START;
+  }
+  const n = parseInt(raw, 10);
+  return Number.isFinite(n) ? Math.max(0, Math.min(ENERGY_MAX, n)) : ENERGY_START;
+}
+
+function setEnergy(n) {
+  const v = Math.max(0, Math.min(ENERGY_MAX, Math.round(n)));
+  localStorage.setItem(energyStorageKey(), String(v));
+  return v;
 }
 
 function energyComment(pct) {
@@ -376,6 +405,40 @@ function energyComment(pct) {
   const arr = pct < 35 ? bag.low : pct < 70 ? bag.mid : bag.high;
   const raw = arr[Math.floor((pct + getToday().length) % arr.length)];
   return String(raw).replace(/\{n\}/g, String(pct));
+}
+
+function refreshEnergyUI() {
+  const energy = getEnergy();
+  const val = document.getElementById('energy-value');
+  const fill = document.getElementById('energy-fill');
+  const label = document.getElementById('energy-label');
+  if (val) val.textContent = energy + '%';
+  if (fill) fill.style.width = energy + '%';
+  if (label) label.textContent = energyComment(energy);
+  return energy;
+}
+
+/** Returns true if spent successfully, false if not enough */
+function spendEnergy(cost = ENERGY_COST) {
+  const cur = getEnergy();
+  if (cur < cost) {
+    haptic('error');
+    const msg = lang === 'ru'
+      ? `Мало космической энергии (${cur}%). Зайди завтра — вселенная зарядит до 100%, или поделись приложением с другом ✨`
+      : `Low cosmic energy (${cur}%). Come back tomorrow for a full charge, or share the app with a friend ✨`;
+    if (tg?.showPopup) tg.showPopup({ title: lang === 'ru' ? 'Энергия' : 'Energy', message: msg, buttons: [{ type: 'ok' }] });
+    else if (tg?.showAlert) tg.showAlert(msg);
+    else alert(msg);
+    return false;
+  }
+  setEnergy(cur - cost);
+  refreshEnergyUI();
+  haptic('medium');
+  return true;
+}
+
+function getDailyEnergy() {
+  return getEnergy();
 }
 
 // ===== Share =====
@@ -493,6 +556,7 @@ async function getNumerology() {
     if (tg?.showAlert) tg.showAlert(lang === 'ru' ? 'Сначала сохрани дату рождения' : 'Save birth date first');
     return;
   }
+  if (!spendEnergy()) return;
   setLoading(el, true);
   haptic('medium');
   const num = lifePathNumber(birthDate);
@@ -551,6 +615,7 @@ function signFromDate(iso) {
 
 async function getRelocate() {
   const el = document.getElementById('relocate-text');
+  if (!spendEnergy()) return;
   setLoading(el, true);
   haptic('medium');
   const n = nameForAI();
@@ -683,10 +748,7 @@ function updateUI() {
   const streakEl = document.getElementById('streak-value');
   if (streakEl) streakEl.textContent = `${s} ${t('streakDays')}`;
 
-  const energy = getDailyEnergy();
-  document.getElementById('energy-value').textContent = energy + '%';
-  document.getElementById('energy-fill').style.width = energy + '%';
-  document.getElementById('energy-label').textContent = energyComment(energy);
+  refreshEnergyUI();
 
   const nameEl = document.getElementById('user-name');
   if (nameEl) nameEl.textContent = displayName();
@@ -733,21 +795,39 @@ async function loadBoostContent() {
   else setLoading(horEl, true);
 
   const n = nameForAI();
+  const compKey = cacheKey('compliment');
+  const horKey = cacheKey('horoscope');
+  const hasComp = !!localStorage.getItem(compKey);
+  const hasHor = !userSign || !!localStorage.getItem(horKey);
+
+  // One energy charge for today's boost pack if anything needs AI
+  if ((!hasComp || !hasHor) && !spendEnergy(20)) {
+    compEl.textContent = hasComp
+      ? localStorage.getItem(compKey)
+      : (lang === 'ru' ? 'Не хватает энергии на комплимент. Завтра будет полный заряд ✨' : 'Not enough energy for a compliment. Full charge tomorrow ✨');
+    if (userSign) {
+      horEl.textContent = hasHor
+        ? localStorage.getItem(horKey)
+        : (lang === 'ru' ? 'Не хватает энергии на прогноз ✨' : 'Not enough energy for a forecast ✨');
+    }
+    return;
+  }
+
   const compPrompt = lang === 'ru'
     ? `Напиши один короткий тёплый и смешной комплимент от вселенной для человека по имени ${n}. Обратись по имени. 1-2 предложения. С эмодзи. Без markdown.`
     : `Write one short warm funny compliment from the universe for a person named ${n}. Address them by name. 1-2 sentences. With emoji. No markdown.`;
-  compEl.textContent = await getCachedOrAI('compliment', compPrompt, COMPLIMENTS[lang]);
+  compEl.textContent = await getCachedOrAI('compliment', compPrompt, COMPLIMENTS[lang], { free: true });
 
   if (userSign) {
     const signName = ZODIAC[userSign][lang];
-    const n = nameForAI();
     const horPrompt = lang === 'ru'
       ? `Короткий весёлый гороскоп на сегодня для ${signName}, обратись к человеку по имени ${n}. 2-3 предложения, юмор и тепло. Эмодзи. Без markdown.`
       : `Short fun horoscope for today for ${signName}, address the person as ${n}. 2-3 sentences, humor and warmth. Emoji. No markdown.`;
     const fallback = (DAILY_HOROSCOPES[lang] && DAILY_HOROSCOPES[lang][userSign]) || [];
-    horEl.textContent = await getCachedOrAI('horoscope', horPrompt, fallback);
+    horEl.textContent = await getCachedOrAI('horoscope', horPrompt, fallback, { free: true });
   }
 }
+
 
 function setLang(l) {
   lang = l;
@@ -803,6 +883,7 @@ async function showCelebAI(celeb) {
     showModal(`<div class="result-emoji">✨</div><div class="result-title">${lang==='ru'?'Сначала выбери знак в Профиле!':'Choose sign in Profile first!'}</div>`);
     return;
   }
+  if (!spendEnergy()) return;
   showModal(`<div class="cosmo-loader"><div class="cosmo-orbit"></div><div class="cosmo-loader-text">${t('loading')}</div></div>`);
   haptic('medium');
   const mySign = ZODIAC[userSign][lang];
@@ -826,7 +907,7 @@ async function getLazy() {
   const prompt = lang === 'ru'
     ? `Смешной гороскоп для ленивых для ${n} — разрешение ничего не делать. Обратись по имени. 2 предложения. Тепло и юмор. Эмодзи. Без markdown.`
     : `Funny lazy horoscope for ${n} — permission to do nothing. Address by name. 2 sentences. Warmth and humor. Emoji. No markdown.`;
-  el.textContent = await getCachedOrAI('lazy', prompt, LAZY_HOROSCOPES[lang]);
+  el.textContent = await getCachedOrAI('lazy', prompt, LAZY_HOROSCOPES[lang], { cost: ENERGY_COST });
   document.getElementById('lazy-share')?.classList.remove('hidden');
   haptic('success');
 }
@@ -834,6 +915,10 @@ async function getLazy() {
 async function drawCard() {
   const titleEl = document.getElementById('card-title');
   const textEl = document.getElementById('card-text');
+  // already have card today in collection? free redraw same day from cache - still cost once
+  if (!spendEnergy()) {
+    return;
+  }
   titleEl.innerHTML = `<div class="cosmo-loader cosmo-loader-sm"><div class="cosmo-orbit"></div></div>`;
   textEl.textContent = t('loadingShort');
   haptic('heavy');
@@ -889,6 +974,7 @@ async function askUniverse() {
   const result = document.getElementById('ai-result');
   const msg = (input.value || '').trim();
   if (msg.length < 2) return;
+  if (!spendEnergy()) return;
   result.style.display = 'block';
   result.innerHTML = `<div class="cosmo-loader"><div class="cosmo-orbit"></div><div class="cosmo-loader-text">${t('loading')}</div></div>`;
   haptic('medium');
