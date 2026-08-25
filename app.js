@@ -86,17 +86,30 @@ function cleanText(s) {
 // ===== CloudStorage (Telegram) with localStorage fallback =====
 function cloudGet(key) {
   return new Promise((resolve) => {
-    if (tg?.CloudStorage?.getItem) {
-      tg.CloudStorage.getItem(key, (err, value) => resolve(err ? null : value));
-    } else resolve(localStorage.getItem(key));
+    if (!tg?.CloudStorage?.getItem) {
+      resolve(localStorage.getItem(key));
+      return;
+    }
+    let done = false;
+    const finish = (v) => { if (!done) { done = true; resolve(v); } };
+    setTimeout(() => finish(localStorage.getItem(key)), 800);
+    try {
+      tg.CloudStorage.getItem(key, (err, value) => finish(err ? localStorage.getItem(key) : (value ?? localStorage.getItem(key))));
+    } catch (_) {
+      finish(localStorage.getItem(key));
+    }
   });
 }
 function cloudSet(key, value) {
   return new Promise((resolve) => {
     localStorage.setItem(key, value);
-    if (tg?.CloudStorage?.setItem) {
-      tg.CloudStorage.setItem(key, value, () => resolve());
-    } else resolve();
+    if (!tg?.CloudStorage?.setItem) { resolve(); return; }
+    let done = false;
+    const finish = () => { if (!done) { done = true; resolve(); } };
+    setTimeout(finish, 800);
+    try {
+      tg.CloudStorage.setItem(key, value, () => finish());
+    } catch (_) { finish(); }
   });
 }
 
@@ -457,8 +470,20 @@ function initTelegram() {
 }
 
 document.addEventListener('DOMContentLoaded', async () => {
-  initTelegram();
-  createStars();
-  await loadProfileFromCloud();
-  updateUI();
+  try {
+    initTelegram();
+    createStars();
+    // Don't block UI if cloud is slow
+    const cloudPromise = loadProfileFromCloud();
+    const timeout = new Promise(r => setTimeout(r, 600));
+    await Promise.race([cloudPromise, timeout]);
+    updateUI();
+    // If cloud finishes later with a sign, refresh once
+    cloudPromise.then(() => {
+      if (userSign) updateUI();
+    }).catch(() => {});
+  } catch (e) {
+    console.error(e);
+    try { updateUI(); } catch (_) {}
+  }
 });
