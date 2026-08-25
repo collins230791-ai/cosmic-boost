@@ -1,6 +1,7 @@
 const tg = window.Telegram?.WebApp;
 const AI_URL = 'https://cosmic-boost.vercel.app/api/ai';
 const APP_LINK = 'https://t.me/CosmicBoostApp_bot/cosmicb';
+const AI_TIMEOUT_MS = 4500;
 
 let lang = localStorage.getItem('cb_lang') || 'ru';
 let userSign = localStorage.getItem('cb_sign') || null;
@@ -18,16 +19,15 @@ const i18n = {
     titleCard: "Карта дня",
     titleStreak: "Серия дней",
     navBoost: "Буст", navLazy: "Ленивый", navStars: "Звёзды", navUniverse: "Вселенная", navProfile: "Профиль",
-    btnLazy: "Получить разрешение", btnCard: "Открыть карту", btnAsk: "Спросить ✨", btnClose: "Закрыть",
-    btnShare: "Поделиться",
+    btnLazy: "Получить разрешение", btnCard: "Открыть карту", btnAsk: "Спросить ✨", btnClose: "Закрыть", btnShare: "Поделиться",
     chooseSign: "Твой знак зодиака:", signNotSelected: "Знак не выбран", guest: "Гость",
     starsHint: "Выбери знаменитость", cardPlaceholder: "Нажми, чтобы открыть",
     horoscopePlaceholder: "Выбери знак в Профиле ✨",
     aiPlaceholder: "Напиши что угодно вселенной...",
-    loading: "Вселенная думает...",
-    error: "Звёзды пока молчат. Попробуй ещё раз ✨",
+    loading: "Связываемся с космосом...",
+    loadingShort: "Звёзды думают...",
+    error: "Звёзды сейчас вне зоны доступа. Попробуй чуть позже ✨",
     streakDays: "дней подряд",
-    streakNew: "Новый день серии! 🔥",
     shareText: "Смотри, что мне сказала вселенная в Cosmic Boost ✨"
   },
   en: {
@@ -41,60 +41,29 @@ const i18n = {
     titleCard: "Card of the Day",
     titleStreak: "Day streak",
     navBoost: "Boost", navLazy: "Lazy", navStars: "Stars", navUniverse: "Universe", navProfile: "Profile",
-    btnLazy: "Get permission", btnCard: "Draw a card", btnAsk: "Ask ✨", btnClose: "Close",
-    btnShare: "Share",
+    btnLazy: "Get permission", btnCard: "Draw a card", btnAsk: "Ask ✨", btnClose: "Close", btnShare: "Share",
     chooseSign: "Your zodiac sign:", signNotSelected: "Sign not selected", guest: "Guest",
     starsHint: "Choose a celebrity", cardPlaceholder: "Press to open",
     horoscopePlaceholder: "Choose your sign in Profile ✨",
     aiPlaceholder: "Write anything to the universe...",
-    loading: "The universe is thinking...",
-    error: "The stars are silent. Try again ✨",
+    loading: "Connecting to the cosmos...",
+    loadingShort: "Stars are thinking...",
+    error: "Stars are currently out of range. Try a bit later ✨",
     streakDays: "days in a row",
-    streakNew: "New streak day! 🔥",
     shareText: "Look what the universe told me in Cosmic Boost ✨"
   }
 };
 
 const ENERGY_COMMENTS = {
   ru: {
-    low: [
-      "Энергии хватит только лежать в направлении мечты 🛋️",
-      "Сегодня ты — красивая батарея на 15%. Зарядка рекомендована",
-      "Космос шепчет: «Отдыхай. Мы прикроем»",
-      "Уровень: овощ в хорошем смысле. Это тоже путь"
-    ],
-    mid: [
-      "Нормальный человеческий уровень. Можно даже что-то сделать",
-      "Энергии хватит на дела и на мемасики",
-      "Сегодня ты на 60% космос и на 40% диван. Баланс!",
-      "Достаточно, чтобы улыбнуться незнакомцу и не пожалеть"
-    ],
-    high: [
-      "Ты сегодня как маленькая сверхновая 💥",
-      "Космическая энергия на максимуме. Осторожно, можно зажечь всех",
-      "Буст от самих звёзд. Используй по назначению",
-      "Энергия главного героя. Сюжет уже начался"
-    ]
+    low: ["Энергии хватит только лежать в направлении мечты 🛋️","Сегодня ты — красивая батарея на 15%. Зарядка рекомендована","Космос шепчет: «Отдыхай. Мы прикроем»","Уровень: овощ в хорошем смысле. Это тоже путь"],
+    mid: ["Нормальный человеческий уровень. Можно даже что-то сделать","Энергии хватит на дела и на мемасики","Сегодня ты на 60% космос и на 40% диван. Баланс!","Достаточно, чтобы улыбнуться незнакомцу и не пожалеть"],
+    high: ["Ты сегодня как маленькая сверхновая 💥","Космическая энергия на максимуме. Осторожно, можно зажечь всех","Буст от самих звёзд. Используй по назначению","Энергия главного героя. Сюжет уже начался"]
   },
   en: {
-    low: [
-      "Energy only enough to lie in the direction of your dreams 🛋️",
-      "Today you're a beautiful 15% battery. Charging recommended",
-      "The cosmos whispers: «Rest. We got this»",
-      "Level: vegetable (in a good way). That's a path too"
-    ],
-    mid: [
-      "Normal human level. You can even do something",
-      "Enough energy for tasks and for memes",
-      "Today you're 60% cosmos and 40% couch. Balance!",
-      "Enough to smile at a stranger and not regret it"
-    ],
-    high: [
-      "You're a tiny supernova today 💥",
-      "Cosmic energy at maximum. Careful, you might set everyone on fire",
-      "Boost straight from the stars. Use it wisely",
-      "Main character energy. The plot has already started"
-    ]
+    low: ["Energy only enough to lie toward your dreams 🛋️","Today you're a beautiful 15% battery. Charging recommended","The cosmos whispers: «Rest. We got this»","Level: vegetable (in a good way). That's a path too"],
+    mid: ["Normal human level. You can even do something","Enough energy for tasks and memes","Today you're 60% cosmos and 40% couch. Balance!","Enough to smile at a stranger and not regret it"],
+    high: ["You're a tiny supernova today 💥","Cosmic energy at maximum. Careful — you might set everyone on fire","Boost straight from the stars. Use it wisely","Main character energy. The plot has already started"]
   }
 };
 
@@ -104,34 +73,57 @@ function getToday() { return new Date().toISOString().slice(0, 10); }
 function haptic(type = 'light') {
   try {
     if (!tg?.HapticFeedback) return;
-    if (type === 'success') tg.HapticFeedback.notificationOccurred('success');
-    else if (type === 'error') tg.HapticFeedback.notificationOccurred('error');
-    else if (type === 'warning') tg.HapticFeedback.notificationOccurred('warning');
-    else if (type === 'heavy') tg.HapticFeedback.impactOccurred('heavy');
-    else if (type === 'medium') tg.HapticFeedback.impactOccurred('medium');
-    else if (type === 'rigid') tg.HapticFeedback.impactOccurred('rigid');
-    else if (type === 'soft') tg.HapticFeedback.impactOccurred('soft');
-    else tg.HapticFeedback.impactOccurred('light');
+    const map = { success: () => tg.HapticFeedback.notificationOccurred('success'), error: () => tg.HapticFeedback.notificationOccurred('error'), warning: () => tg.HapticFeedback.notificationOccurred('warning'), heavy: () => tg.HapticFeedback.impactOccurred('heavy'), medium: () => tg.HapticFeedback.impactOccurred('medium'), rigid: () => tg.HapticFeedback.impactOccurred('rigid'), soft: () => tg.HapticFeedback.impactOccurred('soft'), light: () => tg.HapticFeedback.impactOccurred('light') };
+    (map[type] || map.light)();
   } catch (_) {}
 }
 
 function cleanText(s) {
   if (!s) return s;
-  return s.replace(/\*\*/g, '').replace(/__/g, '').replace(/^#+\s*/gm, '').replace(/\n{3,}/g, '\n\n').trim();
+  return String(s).replace(/\*\*/g, '').replace(/__/g, '').replace(/^#+\s*/gm, '').replace(/\n{3,}/g, '\n\n').trim();
 }
 
+// ===== CloudStorage (Telegram) with localStorage fallback =====
+function cloudGet(key) {
+  return new Promise((resolve) => {
+    if (tg?.CloudStorage?.getItem) {
+      tg.CloudStorage.getItem(key, (err, value) => resolve(err ? null : value));
+    } else resolve(localStorage.getItem(key));
+  });
+}
+function cloudSet(key, value) {
+  return new Promise((resolve) => {
+    localStorage.setItem(key, value);
+    if (tg?.CloudStorage?.setItem) {
+      tg.CloudStorage.setItem(key, value, () => resolve());
+    } else resolve();
+  });
+}
+
+async function loadProfileFromCloud() {
+  const [sign, savedLang] = await Promise.all([cloudGet('cb_sign'), cloudGet('cb_lang')]);
+  if (sign) userSign = sign;
+  if (savedLang === 'ru' || savedLang === 'en') lang = savedLang;
+}
+
+// ===== AI with timeout =====
 async function askAI(prompt) {
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), AI_TIMEOUT_MS);
   try {
     const res = await fetch(AI_URL, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ message: prompt, lang })
+      body: JSON.stringify({ message: prompt, lang }),
+      signal: controller.signal
     });
+    clearTimeout(timer);
     if (!res.ok) throw new Error('fail');
     const data = await res.json();
     return cleanText(data.reply) || null;
   } catch (e) {
-    console.error(e);
+    clearTimeout(timer);
+    console.error('AI error/timeout', e);
     return null;
   }
 }
@@ -149,74 +141,77 @@ async function getCachedOrAI(name, prompt, fallbackArr) {
     localStorage.setItem(key, reply);
     return reply;
   }
-  if (fallbackArr?.length) return fallbackArr[Math.floor(Math.random() * fallbackArr.length)];
+  if (fallbackArr?.length) {
+    const fb = fallbackArr[Math.floor(Math.random() * fallbackArr.length)];
+    return fb;
+  }
   return t('error');
 }
 
-// ===== STREAK =====
+function setLoading(el, on = true) {
+  if (!el) return;
+  if (on) {
+    el.innerHTML = `<div class="cosmo-loader"><div class="cosmo-orbit"></div><div class="cosmo-loader-text">${t('loading')}</div></div>`;
+  }
+}
+
+// ===== Streak / Energy =====
 function updateStreak() {
   const today = getToday();
   const last = localStorage.getItem('cb_last_visit');
   if (last === today) return streak;
-
   const yesterday = new Date();
   yesterday.setDate(yesterday.getDate() - 1);
   const yStr = yesterday.toISOString().slice(0, 10);
-
-  if (last === yStr) {
-    streak += 1;
-  } else if (last !== today) {
-    streak = 1;
-  }
+  if (last === yStr) streak += 1;
+  else streak = 1;
   localStorage.setItem('cb_streak', String(streak));
   localStorage.setItem('cb_last_visit', today);
   return streak;
 }
 
-// ===== ENERGY =====
 function getDailyEnergy() {
   const seed = getToday().split('-').reduce((a, b) => a + parseInt(b, 10), 0);
-  // pseudo-random 15-98 based on date
   const n = Math.abs(Math.sin(seed * 999)) * 10000;
-  return 15 + Math.floor((n % 84));
+  return 15 + Math.floor(n % 84);
 }
 
 function energyComment(pct) {
   const bag = ENERGY_COMMENTS[lang] || ENERGY_COMMENTS.ru;
-  let arr;
-  if (pct < 35) arr = bag.low;
-  else if (pct < 70) arr = bag.mid;
-  else arr = bag.high;
+  const arr = pct < 35 ? bag.low : pct < 70 ? bag.mid : bag.high;
   return arr[Math.floor((pct + getToday().length) % arr.length)];
 }
 
-// ===== SHARE =====
+// ===== Share =====
 function shareResult(text) {
   haptic('medium');
-  const full = `${text}\n\n${t('shareText')}\n${APP_LINK}`;
   if (tg?.openTelegramLink) {
     const url = `https://t.me/share/url?url=${encodeURIComponent(APP_LINK)}&text=${encodeURIComponent(text + '\n\n' + t('shareText'))}`;
     tg.openTelegramLink(url);
   } else if (navigator.share) {
-    navigator.share({ text: full }).catch(() => copyText(full));
-  } else {
-    copyText(full);
+    navigator.share({ text: text + '\n\n' + t('shareText') + '\n' + APP_LINK }).catch(() => {});
   }
 }
 
-function copyText(text) {
-  if (navigator.clipboard) {
-    navigator.clipboard.writeText(text).then(() => {
-      if (tg?.showPopup) tg.showPopup({ message: lang === 'ru' ? 'Скопировано!' : 'Copied!' });
-    });
-  }
+// ===== Theme =====
+function applyTelegramTheme() {
+  if (!tg?.themeParams) return;
+  const p = tg.themeParams;
+  const root = document.documentElement;
+  if (p.bg_color) root.style.setProperty('--tg-bg', p.bg_color);
+  if (p.text_color) root.style.setProperty('--tg-text', p.text_color);
+  if (p.button_color) root.style.setProperty('--tg-button', p.button_color);
+  if (p.secondary_bg_color) root.style.setProperty('--tg-secondary', p.secondary_bg_color);
+  // Keep cosmic dark aesthetic as base, but soften if light theme
+  const isLight = p.bg_color && parseInt(p.bg_color.replace('#','').slice(0,2), 16) > 180;
+  document.body.classList.toggle('tg-light', !!isLight);
 }
 
 // ===== UI =====
 function updateUI() {
   document.querySelectorAll('.lang-btn').forEach(b => b.classList.toggle('active', b.dataset.lang === lang));
   const map = {
-    'subtitle': 'subtitle', 'title-compliment': 'titleCompliment', 'title-horoscope': 'titleHoroscope',
+    subtitle: 'subtitle', 'title-compliment': 'titleCompliment', 'title-horoscope': 'titleHoroscope',
     'title-lazy': 'titleLazy', 'title-stars': 'titleStars', 'title-universe': 'titleUniverse',
     'title-profile': 'titleProfile', 'title-card': 'titleCard',
     'nav-boost': 'navBoost', 'nav-lazy': 'navLazy', 'nav-stars': 'navStars',
@@ -231,12 +226,10 @@ function updateUI() {
   const aiInput = document.getElementById('ai-input');
   if (aiInput) aiInput.placeholder = t('aiPlaceholder');
 
-  // Streak
   const s = updateStreak();
   const streakEl = document.getElementById('streak-value');
   if (streakEl) streakEl.textContent = `${s} ${t('streakDays')}`;
 
-  // Energy
   const energy = getDailyEnergy();
   document.getElementById('energy-value').textContent = energy + '%';
   document.getElementById('energy-fill').style.width = energy + '%';
@@ -257,15 +250,14 @@ function updateUI() {
 async function loadBoostContent() {
   const compEl = document.getElementById('compliment-text');
   const horEl = document.getElementById('horoscope-text');
-  compEl.textContent = t('loading');
+  setLoading(compEl, true);
   if (!userSign) horEl.textContent = t('horoscopePlaceholder');
-  else horEl.textContent = t('loading');
+  else setLoading(horEl, true);
 
   const compPrompt = lang === 'ru'
     ? 'Напиши один короткий тёплый и смешной комплимент от вселенной. 1-2 предложения. С эмодзи. Без markdown.'
     : 'Write one short warm funny compliment from the universe. 1-2 sentences. With emoji. No markdown.';
-  const compliment = await getCachedOrAI('compliment', compPrompt, COMPLIMENTS[lang]);
-  compEl.textContent = compliment;
+  compEl.textContent = await getCachedOrAI('compliment', compPrompt, COMPLIMENTS[lang]);
 
   if (userSign) {
     const signName = ZODIAC[userSign][lang];
@@ -280,6 +272,7 @@ async function loadBoostContent() {
 function setLang(l) {
   lang = l;
   localStorage.setItem('cb_lang', lang);
+  cloudSet('cb_lang', lang);
   updateUI();
   haptic('light');
 }
@@ -300,9 +293,10 @@ function renderZodiac() {
     const item = document.createElement('div');
     item.className = 'zodiac-item' + (userSign === key ? ' selected' : '');
     item.innerHTML = `<span class="zodiac-emoji">${z.emoji}</span><span class="zodiac-name">${z[lang]}</span>`;
-    item.onclick = () => {
+    item.onclick = async () => {
       userSign = key;
       localStorage.setItem('cb_sign', key);
+      await cloudSet('cb_sign', key);
       localStorage.removeItem(cacheKey('horoscope'));
       haptic('medium');
       updateUI();
@@ -329,7 +323,7 @@ async function showCelebAI(celeb) {
     showModal(`<div class="result-emoji">✨</div><div class="result-title">${lang==='ru'?'Сначала выбери знак в Профиле!':'Choose sign in Profile first!'}</div>`);
     return;
   }
-  showModal(`<div class="result-emoji">${celeb.emoji}</div><div class="result-title">${t('loading')}</div>`);
+  showModal(`<div class="cosmo-loader"><div class="cosmo-orbit"></div><div class="cosmo-loader-text">${t('loading')}</div></div>`);
   haptic('medium');
   const mySign = ZODIAC[userSign][lang];
   const prompt = lang === 'ru'
@@ -340,13 +334,13 @@ async function showCelebAI(celeb) {
     <div class="result-emoji">${celeb.emoji}</div>
     <div class="result-title">${celeb.name[lang]}</div>
     <p style="font-size:15px;line-height:1.5;margin-top:12px">${reply}</p>
-    <button class="btn btn-secondary mt-16" onclick="shareResult(\`${celeb.name[lang]}: ${reply.replace(/`/g,'')}\`)">${t('btnShare')}</button>`;
+    <button class="btn btn-secondary mt-16" onclick="shareResult(\`${String(celeb.name[lang]+': '+reply).replace(/`/g,'')}\`)">${t('btnShare')}</button>`;
   haptic('success');
 }
 
 async function getLazy() {
   const el = document.getElementById('lazy-text');
-  el.textContent = t('loading');
+  setLoading(el, true);
   haptic('medium');
   const prompt = lang === 'ru'
     ? 'Смешной гороскоп для ленивых — разрешение ничего не делать. 2 предложения. Тепло и юмор. Эмодзи. Без markdown.'
@@ -359,12 +353,12 @@ async function getLazy() {
 async function drawCard() {
   const titleEl = document.getElementById('card-title');
   const textEl = document.getElementById('card-text');
-  titleEl.textContent = t('loading');
-  textEl.textContent = '';
+  titleEl.innerHTML = `<div class="cosmo-loader cosmo-loader-sm"><div class="cosmo-orbit"></div></div>`;
+  textEl.textContent = t('loadingShort');
   haptic('heavy');
   const prompt = lang === 'ru'
     ? 'Придумай весёлую карту дня. Сначала короткое название (2-4 слова), с новой строки текст 1-2 предложения. Эмодзи. Без markdown.'
-    : 'Invent a fun card of the day. First a short title (2-4 words), then on new line text 1-2 sentences. Emoji. No markdown.';
+    : 'Invent a fun card of the day. First short title (2-4 words), then on new line text 1-2 sentences. Emoji. No markdown.';
   const reply = await askAI(prompt);
   if (reply) {
     const parts = reply.split('\n').filter(Boolean);
@@ -409,11 +403,11 @@ async function askUniverse() {
   const msg = (input.value || '').trim();
   if (msg.length < 2) return;
   result.style.display = 'block';
-  result.innerHTML = `<div class="ai-loading">${t('loading')}</div>`;
+  result.innerHTML = `<div class="cosmo-loader"><div class="cosmo-orbit"></div><div class="cosmo-loader-text">${t('loading')}</div></div>`;
   haptic('medium');
   const reply = await askAI(msg);
   result.innerHTML = `<div class="ai-reply">${reply || t('error')}</div>
-    <button class="btn btn-secondary mt-12" onclick="shareResult(\`${(reply||'').replace(/`/g,'')}\`)">${t('btnShare')}</button>`;
+    <button class="btn btn-secondary mt-12" onclick="shareResult(\`${String(reply||'').replace(/`/g,'')}\`)">${t('btnShare')}</button>`;
   haptic(reply ? 'success' : 'error');
 }
 
@@ -445,8 +439,13 @@ function initTelegram() {
   if (!tg) return;
   tg.ready();
   tg.expand();
-  tg.setHeaderColor('#0f0c29');
-  tg.setBackgroundColor('#0f0c29');
+  try {
+    tg.setHeaderColor('#0f0c29');
+    tg.setBackgroundColor('#0f0c29');
+  } catch (_) {}
+  applyTelegramTheme();
+  tg.onEvent?.('themeChanged', applyTelegramTheme);
+
   const user = tg.initDataUnsafe?.user;
   if (user) {
     document.getElementById('user-name').textContent = user.first_name + (user.last_name ? ' '+user.last_name : '');
@@ -457,8 +456,9 @@ function initTelegram() {
   }
 }
 
-document.addEventListener('DOMContentLoaded', () => {
+document.addEventListener('DOMContentLoaded', async () => {
   initTelegram();
   createStars();
+  await loadProfileFromCloud();
   updateUI();
 });
