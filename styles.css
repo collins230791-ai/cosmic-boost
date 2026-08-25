@@ -879,3 +879,43 @@ body.tg-light {
   opacity: 0.5;
   padding: 8px 0;
 }
+
+
+/* Daily quest */
+.quest-card {
+  border: 1px solid rgba(255, 215, 0, 0.25);
+  background: linear-gradient(135deg, rgba(255, 215, 0, 0.08), rgba(196, 76, 255, 0.1));
+}
+.quest-row {
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+}
+.quest-icon {
+  font-size: 28px;
+  line-height: 1;
+}
+.quest-label {
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: rgba(255, 215, 0, 0.8);
+  margin-bottom: 2px;
+}
+.quest-title {
+  font-size: 15px;
+  font-weight: 600;
+  line-height: 1.35;
+}
+.quest-status {
+  font-size: 12px;
+  margin-top: 4px;
+  color: rgba(255,255,255,0.55);
+}
+.quest-card.done {
+  border-color: rgba(80, 220, 140, 0.35);
+  background: linear-gradient(135deg, rgba(80, 220, 140, 0.1), rgba(196, 76, 255, 0.08));
+}
+.quest-card.done .quest-status {
+  color: #7dffa8;
+}
