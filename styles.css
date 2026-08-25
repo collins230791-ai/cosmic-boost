@@ -919,3 +919,20 @@ body.tg-light {
 .quest-card.done .quest-status {
   color: #7dffa8;
 }
+
+
+/* Social proof */
+.social-proof {
+  text-align: center;
+  font-size: 13px;
+  color: rgba(255, 255, 255, 0.65);
+  padding: 8px 12px;
+  margin-bottom: 10px;
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(196, 76, 255, 0.2);
+}
+.social-proof strong {
+  color: #ff9ec8;
+  font-weight: 700;
+}
