@@ -6,6 +6,7 @@ const AI_TIMEOUT_MS = 4500;
 
 let lang = localStorage.getItem('cb_lang') || 'ru';
 let userSign = localStorage.getItem('cb_sign') || null;
+let userName = localStorage.getItem('cb_name') || '';
 let streak = parseInt(localStorage.getItem('cb_streak') || '0', 10);
 
 const i18n = {
@@ -126,9 +127,14 @@ function cloudSet(key, value) {
 }
 
 async function loadProfileFromCloud() {
-  const [sign, savedLang] = await Promise.all([cloudGet('cb_sign'), cloudGet('cb_lang')]);
+  const [sign, savedLang, name] = await Promise.all([
+    cloudGet('cb_sign'),
+    cloudGet('cb_lang'),
+    cloudGet('cb_name')
+  ]);
   if (sign) userSign = sign;
   if (savedLang === 'ru' || savedLang === 'en') lang = savedLang;
+  if (name) userName = name;
 }
 
 // ===== AI with timeout =====
@@ -275,6 +281,49 @@ function applyTelegramTheme() {
   document.body.classList.toggle('tg-light', !!isLight);
 }
 
+
+function openNameModal() {
+  const modal = document.getElementById('name-modal');
+  const input = document.getElementById('name-input');
+  const title = document.getElementById('name-modal-title');
+  const sub = document.getElementById('name-modal-sub');
+  const btn = document.getElementById('name-save-btn');
+  if (title) title.textContent = lang === 'ru' ? 'Как тебя зовут?' : 'What is your name?';
+  if (sub) sub.textContent = lang === 'ru'
+    ? 'Вселенная хочет обращаться к тебе по имени'
+    : 'The universe wants to call you by name';
+  if (btn) btn.textContent = lang === 'ru' ? 'Поехали 🚀' : "Let's go 🚀";
+  if (input) {
+    input.placeholder = lang === 'ru' ? 'Твоё имя' : 'Your name';
+    input.value = userName || '';
+  }
+  modal?.classList.add('active');
+  setTimeout(() => input?.focus(), 200);
+}
+
+async function saveName() {
+  const input = document.getElementById('name-input');
+  const raw = (input?.value || '').trim();
+  if (raw.length < 1) {
+    if (tg?.showAlert) tg.showAlert(lang === 'ru' ? 'Введи имя ✨' : 'Enter a name ✨');
+    return;
+  }
+  userName = raw.slice(0, 24);
+  localStorage.setItem('cb_name', userName);
+  await cloudSet('cb_name', userName);
+  document.getElementById('name-modal')?.classList.remove('active');
+  haptic('success');
+  updateUI();
+}
+
+function displayName() {
+  return userName || (lang === 'ru' ? 'Гость' : 'Guest');
+}
+
+function nameForAI() {
+  return userName ? userName : (lang === 'ru' ? 'друг' : 'friend');
+}
+
 // ===== UI =====
 function updateUI() {
   document.querySelectorAll('.lang-btn').forEach(b => b.classList.toggle('active', b.dataset.lang === lang));
@@ -303,6 +352,9 @@ function updateUI() {
   document.getElementById('energy-fill').style.width = energy + '%';
   document.getElementById('energy-label').textContent = energyComment(energy);
 
+  const nameEl = document.getElementById('user-name');
+  if (nameEl) nameEl.textContent = displayName();
+
   if (userSign && ZODIAC[userSign]) {
     document.getElementById('user-sign').textContent = ZODIAC[userSign].emoji + ' ' + ZODIAC[userSign][lang];
   } else {
@@ -322,16 +374,18 @@ async function loadBoostContent() {
   if (!userSign) horEl.textContent = t('horoscopePlaceholder');
   else setLoading(horEl, true);
 
+  const n = nameForAI();
   const compPrompt = lang === 'ru'
-    ? 'Напиши один короткий тёплый и смешной комплимент от вселенной. 1-2 предложения. С эмодзи. Без markdown.'
-    : 'Write one short warm funny compliment from the universe. 1-2 sentences. With emoji. No markdown.';
+    ? `Напиши один короткий тёплый и смешной комплимент от вселенной для человека по имени ${n}. Обратись по имени. 1-2 предложения. С эмодзи. Без markdown.`
+    : `Write one short warm funny compliment from the universe for a person named ${n}. Address them by name. 1-2 sentences. With emoji. No markdown.`;
   compEl.textContent = await getCachedOrAI('compliment', compPrompt, COMPLIMENTS[lang]);
 
   if (userSign) {
     const signName = ZODIAC[userSign][lang];
+    const n = nameForAI();
     const horPrompt = lang === 'ru'
-      ? `Короткий весёлый гороскоп на сегодня для ${signName}. 2-3 предложения, юмор и тепло. Эмодзи. Без markdown.`
-      : `Short fun horoscope for today for ${signName}. 2-3 sentences, humor and warmth. Emoji. No markdown.`;
+      ? `Короткий весёлый гороскоп на сегодня для ${signName}, обратись к человеку по имени ${n}. 2-3 предложения, юмор и тепло. Эмодзи. Без markdown.`
+      : `Short fun horoscope for today for ${signName}, address the person as ${n}. 2-3 sentences, humor and warmth. Emoji. No markdown.`;
     const fallback = (DAILY_HOROSCOPES[lang] && DAILY_HOROSCOPES[lang][userSign]) || [];
     horEl.textContent = await getCachedOrAI('horoscope', horPrompt, fallback);
   }
@@ -413,9 +467,10 @@ async function getLazy() {
   const el = document.getElementById('lazy-text');
   setLoading(el, true);
   haptic('medium');
+  const n = nameForAI();
   const prompt = lang === 'ru'
-    ? 'Смешной гороскоп для ленивых — разрешение ничего не делать. 2 предложения. Тепло и юмор. Эмодзи. Без markdown.'
-    : 'Funny lazy horoscope — permission to do nothing. 2 sentences. Warmth and humor. Emoji. No markdown.';
+    ? `Смешной гороскоп для ленивых для ${n} — разрешение ничего не делать. Обратись по имени. 2 предложения. Тепло и юмор. Эмодзи. Без markdown.`
+    : `Funny lazy horoscope for ${n} — permission to do nothing. Address by name. 2 sentences. Warmth and humor. Emoji. No markdown.`;
   el.textContent = await getCachedOrAI('lazy', prompt, LAZY_HOROSCOPES[lang]);
   document.getElementById('lazy-share')?.classList.remove('hidden');
   haptic('success');
@@ -522,8 +577,12 @@ function initTelegram() {
 
   const user = tg.initDataUnsafe?.user;
   if (user) {
-    document.getElementById('user-name').textContent = user.first_name + (user.last_name ? ' '+user.last_name : '');
     document.getElementById('user-avatar').textContent = (user.first_name?.[0] || '?').toUpperCase();
+    // Suggest Telegram name if we don't have one yet
+    if (!userName && user.first_name) {
+      userName = user.first_name;
+      // don't auto-save — user confirms in modal
+    }
   }
   if (!localStorage.getItem('cb_lang') && user?.language_code) {
     lang = user.language_code.startsWith('ru') ? 'ru' : 'en';
@@ -541,19 +600,25 @@ document.addEventListener('DOMContentLoaded', async () => {
   try {
     initTelegram();
     createStars();
-    // Don't block UI if cloud is slow
     const cloudPromise = loadProfileFromCloud();
     const timeout = new Promise(r => setTimeout(r, 600));
     await Promise.race([cloudPromise, timeout]);
     updateUI();
     hideSplash();
-    // If cloud finishes later with a sign, refresh once
     cloudPromise.then(() => {
-      if (userSign) updateUI();
-    }).catch(() => {});
+      if (userSign || userName) updateUI();
+      if (!userName) setTimeout(openNameModal, 400);
+    }).catch(() => {
+      if (!userName) setTimeout(openNameModal, 400);
+    });
+    // if cloud timed out and no local name
+    if (!userName && !localStorage.getItem('cb_name')) {
+      setTimeout(() => { if (!userName) openNameModal(); }, 700);
+    }
   } catch (e) {
     console.error(e);
     try { updateUI(); } catch (_) {}
     hideSplash();
+    if (!userName) setTimeout(openNameModal, 500);
   }
 });
