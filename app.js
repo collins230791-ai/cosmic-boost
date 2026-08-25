@@ -434,6 +434,11 @@ async function getRelocate() {
   haptic(reply ? 'success' : 'error');
 }
 
+function maybeOnboard() {
+  if (!userName) openNameModal();
+  else if (!birthDate) openBirthModal();
+}
+
 function openNameModal() {
   const modal = document.getElementById('name-modal');
   const input = document.getElementById('name-input');
@@ -466,6 +471,54 @@ async function saveName() {
   document.getElementById('name-modal')?.classList.remove('active');
   haptic('success');
   updateUI();
+  // Next step: birth date
+  if (!birthDate) {
+    setTimeout(openBirthModal, 300);
+  }
+}
+
+function openBirthModal() {
+  const modal = document.getElementById('birth-modal');
+  const input = document.getElementById('birth-modal-input');
+  const title = document.getElementById('birth-modal-title');
+  const sub = document.getElementById('birth-modal-sub');
+  const btn = document.getElementById('birth-save-btn');
+  if (title) title.textContent = lang === 'ru' ? 'Когда ты родился(ась)?' : 'When were you born?';
+  if (sub) sub.textContent = lang === 'ru'
+    ? 'Для знака, числа судьбы и космических советов'
+    : 'For your sign, life path and cosmic tips';
+  if (btn) btn.textContent = lang === 'ru' ? 'Дальше ✨' : 'Next ✨';
+  if (input) input.value = birthDate || '';
+  modal?.classList.add('active');
+}
+
+async function saveBirthFromModal() {
+  const input = document.getElementById('birth-modal-input');
+  const v = input?.value || '';
+  if (!v) {
+    if (tg?.showAlert) tg.showAlert(lang === 'ru' ? 'Выбери дату' : 'Pick a date');
+    return;
+  }
+  birthDate = v;
+  localStorage.setItem('cb_birth', birthDate);
+  await cloudSet('cb_birth', birthDate);
+  const sign = signFromDate(birthDate);
+  if (sign) {
+    userSign = sign;
+    localStorage.setItem('cb_sign', sign);
+    await cloudSet('cb_sign', sign);
+    localStorage.removeItem(cacheKey('horoscope'));
+  }
+  document.getElementById('birth-modal')?.classList.remove('active');
+  haptic('success');
+  updateUI();
+  // Auto-load numerology text hint
+  const numEl = document.getElementById('numerology-text');
+  if (numEl && birthDate) {
+    numEl.textContent = lang === 'ru'
+      ? 'Дата сохранена. Нажми «Рассчитать» — или зайди в Профиль'
+      : 'Date saved. Tap Calculate — or open Profile';
+  }
 }
 
 function displayName() {
@@ -774,15 +827,10 @@ document.addEventListener('DOMContentLoaded', async () => {
     updateUI();
     hideSplash();
     cloudPromise.then(() => {
-      if (userSign || userName) updateUI();
-      if (!userName) setTimeout(openNameModal, 400);
-    }).catch(() => {
-      if (!userName) setTimeout(openNameModal, 400);
-    });
-    // if cloud timed out and no local name
-    if (!userName && !localStorage.getItem('cb_name')) {
-      setTimeout(() => { if (!userName) openNameModal(); }, 700);
-    }
+      if (userSign || userName || birthDate) updateUI();
+      setTimeout(maybeOnboard, 400);
+    }).catch(() => setTimeout(maybeOnboard, 400));
+    setTimeout(maybeOnboard, 700);
   } catch (e) {
     console.error(e);
     try { updateUI(); } catch (_) {}
