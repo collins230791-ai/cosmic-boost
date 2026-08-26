@@ -576,7 +576,7 @@ function shareCardUrl(text, type) {
   params.set('type', type || 'boost');
   params.set('lang', lang === 'en' ? 'en' : 'ru');
   if (userName) params.set('n', toBase64Url(userName));
-  return 'https://cosmic-boost.vercel.app/api/story-card?' + params.toString();
+  return 'https://cosmic-boost.vercel.app/story-card.png?' + params.toString();
 }
 
 function shareSmart(text, type) {
@@ -607,7 +607,7 @@ function shareSmart(text, type) {
   shareResult(body);
 }
 
-function shareToStory(text, type) {
+async function shareToStory(text, type) {
   haptic('medium');
   let caption = cleanText(String(text || '')).replace(/\s+/g, ' ').trim();
   if (caption.length > 200) caption = caption.slice(0, 197) + '...';
@@ -619,6 +619,12 @@ function shareToStory(text, type) {
 
   // Live card: typed background + text + brand
   const mediaUrl = shareCardUrl(caption, type);
+
+  // Telegram re-downloads media_url from its servers on "Next".
+  // Warm our edge cache first so that fetch is a HIT, not a 3s generate.
+  try {
+    await fetch(mediaUrl, { cache: 'reload' });
+  } catch (_) {}
 
   if (typeof tg?.shareToStory === 'function') {
     const isPremium = !!tg?.initDataUnsafe?.user?.is_premium;
