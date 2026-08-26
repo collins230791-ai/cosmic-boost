@@ -19,6 +19,12 @@ const SKUS = {
     label: '24h unlimited',
     amount: 49,
   },
+  synastry: {
+    title: 'Полный разбор связи',
+    description: 'Где вы срастаетесь, где срыв и что делать на этой неделе',
+    label: 'Full bond reading',
+    amount: 75,
+  },
 };
 
 export default async function handler(req, res) {
