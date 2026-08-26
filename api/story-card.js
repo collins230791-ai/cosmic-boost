@@ -46,18 +46,23 @@ const TYPES = {
     labels: { ru: 'Число судьбы', en: 'Destiny number' },
   },
 };
+TYPES.horoscope = { ...TYPES.card, labels: { ru: 'Гороскоп', en: 'Horoscope' } };
+TYPES.relocate = { ...TYPES.number, labels: { ru: 'Куда переехать', en: 'Where to move' } };
+TYPES.universe = { ...TYPES.stars, labels: { ru: 'Вселенная', en: 'Universe' } };
+TYPES.compliment = TYPES.boost;
+TYPES.numerology = TYPES.number;
 
 const TYPE_ALIAS = {
   boost: 'boost',
   compliment: 'boost',
-  horoscope: 'card',
+  horoscope: 'horoscope',
   card: 'card',
   lazy: 'lazy',
   stars: 'stars',
-  universe: 'stars',
+  universe: 'universe',
   number: 'number',
-  numerology: 'number',
-  relocate: 'number',
+  numerology: 'numerology',
+  relocate: 'relocate',
 };
 
 function fromBase64Url(str) {
@@ -73,7 +78,7 @@ function fromBase64Url(str) {
   }
 }
 
-function wrapText(text, maxLen = 26) {
+function wrapText(text, maxLen = 38) {
   const words = String(text || '').replace(/\s+/g, ' ').trim().split(' ');
   const lines = [];
   let line = '';
@@ -102,8 +107,8 @@ export default async function handler(req) {
     const name = fromBase64Url(searchParams.get('n') || '').slice(0, 24);
     const label = searchParams.get('label') || theme.labels[lang];
 
-    const lines = wrapText(text, 28);
-    const fontSize = lines.length > 7 ? 34 : lines.length > 5 ? 38 : lines.length > 3 ? 42 : 46;
+    const lines = wrapText(text, 38);
+    const fontSize = lines.length > 7 ? 36 : lines.length > 5 ? 40 : lines.length > 3 ? 44 : 48;
 
     const lineNodes = lines.map((line) => ({
       type: 'div',
@@ -148,9 +153,9 @@ export default async function handler(req) {
                   flexDirection: 'column',
                   alignItems: 'center',
                   justifyContent: 'center',
-                  width: '860px',
-                  maxHeight: '980px',
-                  padding: '36px 40px',
+                  width: '940px',
+                  maxHeight: '900px',
+                  padding: '32px 36px',
                   backgroundColor: theme.veil,
                   borderRadius: '36px',
                 },
@@ -200,18 +205,18 @@ export default async function handler(req) {
               props: {
                 style: {
                   position: 'absolute',
-                  bottom: 86,
+                  bottom: 240,
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
-                  fontSize: 34,
+                  fontSize: 32,
                   fontWeight: 700,
                   color: typeKey === 'boost' ? '#5A3D1C' : '#3A2A18',
                   fontFamily: 'sans-serif',
                   letterSpacing: '0.02em',
                   textShadow: '0 1px 8px rgba(255,255,255,0.35)',
                 },
-                children: 'Cosmic Boost ✦',
+                children: 'Cosmic Boost',
               },
             },
           ],
