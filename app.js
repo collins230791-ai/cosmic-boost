@@ -607,7 +607,7 @@ function shareSmart(text, type) {
   shareResult(body);
 }
 
-async function shareToStory(text, type) {
+function shareToStory(text, type) {
   haptic('medium');
   let caption = cleanText(String(text || '')).replace(/\s+/g, ' ').trim();
   if (caption.length > 200) caption = caption.slice(0, 197) + '...';
@@ -617,72 +617,22 @@ async function shareToStory(text, type) {
     return;
   }
 
-  // Live card: typed background + text + brand
   const mediaUrl = shareCardUrl(caption, type);
 
-  const captionLink = 'Cosmic Boost — t.me/CosmicBoostApp_bot/cosmicb';
-  const userId = tg?.initDataUnsafe?.user?.id;
-
-  // Reliable path: bot sends the card into the user's chat.
-  // From a Telegram-hosted photo, "Add to Story" works even when
-  // shareToStory(media_url) dies on "Next".
-  let sentToBot = false;
-  if (userId) {
-    try {
-      const r = await fetch('https://cosmic-boost.vercel.app/api/send-card', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ userId, photo: mediaUrl, caption: captionLink })
-      });
-      const data = await r.json().catch(() => ({}));
-      sentToBot = r.ok && data.ok;
-    } catch (e) {
-      console.error('send-card', e);
-    }
-  }
-
   if (typeof tg?.shareToStory === 'function') {
-    const isPremium = !!tg?.initDataUnsafe?.user?.is_premium;
-    const storyOpts = { text: captionLink };
-    if (isPremium) {
-      storyOpts.widget_link = { url: APP_LINK, name: 'Cosmic Boost' };
+    const opts = {};
+    if (tg?.initDataUnsafe?.user?.is_premium) {
+      opts.widget_link = { url: APP_LINK, name: 'Cosmic Boost' };
     }
     try {
-      tg.shareToStory(mediaUrl, storyOpts);
+      if (opts.widget_link) tg.shareToStory(mediaUrl, opts);
+      else tg.shareToStory(mediaUrl);
+      return;
     } catch (e1) {
       console.error('shareToStory failed', e1);
     }
   }
 
-  if (sentToBot) {
-    if (tg?.showPopup) {
-      tg.showPopup({
-        title: lang === 'ru' ? 'Карточка готова' : 'Card is ready',
-        message: lang === 'ru'
-          ? 'Отправил картинку в чат с ботом. Если сторис не уйдёт из редактора — открой фото в чате → «Добавить в историю».'
-          : 'Sent the card to the bot chat. If Stories editor fails, open the photo there → Add to Story.',
-        buttons: [
-          { id: 'open', type: 'default', text: lang === 'ru' ? 'Открыть чат' : 'Open chat' },
-          { type: 'ok' }
-        ]
-      }, (id) => {
-        if (id === 'open' && tg?.openTelegramLink) {
-          tg.openTelegramLink('https://t.me/CosmicBoostApp_bot');
-        }
-      });
-    }
-    return;
-  }
-
-  if (tg?.showPopup) {
-    tg.showPopup({
-      title: 'Stories',
-      message: lang === 'ru'
-        ? 'Stories доступны в актуальной версии Telegram. Отправляю в чат.'
-        : 'Stories need a recent Telegram version. Sharing to chat instead.',
-      buttons: [{ type: 'ok' }]
-    });
-  }
   shareResult(caption);
 }
 
