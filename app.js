@@ -455,7 +455,7 @@ function spendEnergy(cost = ENERGY_COST) {
           { type: 'ok' }
         ]
       }, (id) => { if (id === 'shop') showScreen('profile'); });
-    else if (tg?.showAlert) tg.showAlert(msg);
+    } else if (tg?.showAlert) tg.showAlert(msg);
     else alert(msg);
     return false;
   }
