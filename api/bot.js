@@ -153,6 +153,36 @@ export default async function handler(req, res) {
     return res.status(200).json({ ok: true });
   }
 
+  if (update.pre_checkout_query) {
+    await fetch(`https://api.telegram.org/bot${TOKEN}/answerPreCheckoutQuery`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        pre_checkout_query_id: update.pre_checkout_query.id,
+        ok: true,
+      }),
+    });
+    return res.status(200).json({ ok: true });
+  }
+
+  if (update.message?.successful_payment) {
+    const pay = update.message.successful_payment;
+    try {
+      if (hasRedis()) {
+        await redis(['LPUSH', 'cb:stars:paid', JSON.stringify({
+          at: Date.now(),
+          userId: update.message.from?.id,
+          payload: pay.invoice_payload,
+          stars: pay.total_amount,
+        })]);
+        await redis(['LTRIM', 'cb:stars:paid', 0, 199]);
+      }
+    } catch (e) {
+      console.error('stars log', e);
+    }
+    return res.status(200).json({ ok: true });
+  }
+
   const message = update.message;
   if (!message) {
     return res.status(200).json({ ok: true });
