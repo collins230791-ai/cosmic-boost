@@ -3,7 +3,7 @@ const AI_URL = 'https://cosmic-boost.vercel.app/api/ai';
 const REF_URL = 'https://cosmic-boost.vercel.app/api/ref';
 const APP_LINK = 'https://t.me/CosmicBoostApp_bot/cosmicb';
 const STORY_BG = 'https://cosmic-boost.vercel.app/story-bg.jpg';
-const AI_TIMEOUT_MS = 4500;
+const AI_TIMEOUT_MS = 10000;
 
 let lang = localStorage.getItem('cb_lang') || 'ru';
 let userSign = localStorage.getItem('cb_sign') || null;
@@ -186,6 +186,10 @@ function initDataPayload(extra) {
 
 // ===== AI with timeout =====
 async function askAI(prompt, kind) {
+  if (!tg?.initData) {
+    console.warn('AI skipped: no initData');
+    return null;
+  }
   const controller = new AbortController();
   const timer = setTimeout(() => controller.abort(), AI_TIMEOUT_MS);
   try {
@@ -196,8 +200,10 @@ async function askAI(prompt, kind) {
       signal: controller.signal
     });
     clearTimeout(timer);
-    if (!res.ok) throw new Error('fail');
-    const data = await res.json();
+    const data = await res.json().catch(() => ({}));
+    if (res.status === 401) return null;
+    if (res.status === 402) return null;
+    if (!res.ok) throw new Error(data.error || 'fail');
     return cleanText(data.reply) || null;
   } catch (e) {
     clearTimeout(timer);
@@ -1132,6 +1138,39 @@ function elementOfSign(sign) {
   }[sign] || null;
 }
 
+
+function synastryFallback(facts) {
+  const a = facts.me.name;
+  const b = facts.other.name;
+  const pair = (facts.me.element || '?') + '-' + (facts.other.element || '?');
+  const ru = {
+    'fire-water': `${a} разжигает, ${b} держит берег. Вместе это не «не пара», это костёр у воды: тепло есть, но если не договориться о паузе — один выгорает, второй тушит всё подряд. На этой неделе не доказывай правоту вечером. Сядьте и назовите, чего каждому не хватило за день.`,
+    'water-fire': `${b} разжигает, ${a} держит берег. Связь живая, но ритмы разные: одному нужно действие, другому — тишина после. Трение не в чувствах, а в темпе. На этой неделе один вечер без разбора отношений — просто рядом.`,
+    'fire-fire': `Два огня. С ${b} тебе легко разогнаться и так же легко сжечь запас. Искра не проблема, проблема — кто тушит свет в комнате. На этой неделе один конкретный план на двоих, не три больших обещания.`,
+    'water-water': `С ${b} легко утонуть в настроении друг друга. Это глубоко и липко: обида живёт дольше, чем событие. На этой неделе проговаривайте факт, не догадку. Одна фраза «мне сейчас тяжело», без суда.`,
+    'earth-air': `${a} хочет опору, ${b} хочет воздух. Не враги — разный кислород. Ссора часто не про любовь, а про «ты не слышишь темп». На этой неделе один совместный бытовой жест и один разговор без телефона.`,
+    'air-earth': `${b} заземляет, ${a} разгоняет мысль. Если не признать обе скорости, начнёте обвинять. На этой неделе пусть земля выберет место, воздух — тему разговора.`,
+    'fire-earth': `Огонь и земля. С ${b} можно построить, если не требовать мгновенного жара взад. Трение в ожидании. На этой неделе одна понятная договорённость вместо намёка.`,
+    'earth-fire': `Земля и огонь. ${b} вспыхивает, тебе нужна почва. Не гаси живое — направь. На этой неделе скажи, что уже работает, прежде чем чинить.`,
+    'air-water': `Воздух и вода. Много слов или много чувств — редко в одном такте. С ${b} легко недопонять молчание. На этой неделе сначала спросите «ты рядом или тебе нужно побыть», потом делайте выводы.`,
+    'water-air': `Вода и воздух. ${b} разберёт словами то, что ты ещё только чувствуешь. Это не холодность. На этой неделе не требуй мгновенного анализа вечером.`,
+    'air-air': `Два воздуха. Легко и остроумно, пока не понадобится тело и быт. С ${b} идея живёт дольше, чем маршрут. На этой неделе одно простое совместное дело руками, не перепиской.`,
+    'earth-earth': `Две земли. Надёжно до тяжести. С ${b} можно застрять в «правильно». На этой неделе разрешите одну глупость без пользы.`,
+    'fire-air': `Огонь и воздух. Разгон без тормоза. С ${b} легко начать и забыть доесть. На этой неделе закройте одно начатое, не открывайте третье.`,
+    'air-fire': `Воздух и огонь. Искра есть. Риск — вы оба убежите в следующее. На этой неделе 20 минут глаз в глаза без ленты.`,
+    'water-earth': `Вода и земля. Можно вырастить, можно заболотить. С ${b} важны берега. На этой неделе назовите одну границу без вины.`,
+    'earth-water': `Земля и вода. Плодородно, если не держать всё внутри. На этой неделе один раз скажи чувство целиком, не намёком.`
+  };
+  const en = {
+    'fire-water': `${a} lights, ${b} keeps the shore. Not a mismatch — a fire by water. Agree on a pause this week before anyone douses everything.`,
+    'water-fire': `${b} lights, ${a} keeps the shore. The rub is pace, not love. One evening together without analyzing the bond.`
+  };
+  const bag = lang === 'ru' ? ru : en;
+  return bag[pair] || (lang === 'ru'
+    ? `У ${a} и ${b} разные ритмы, и это не приговор. Трение будет там, где один хочет скорость, а второй — ясность. На этой неделе один честный разговор без суда: что каждому нужно, чтобы остаться рядом.`
+    : `${a} and ${b} move at different speeds. That is not a verdict. Talk once this week about what each of you needs to stay close.`);
+}
+
 async function runSynastry() {
   const otherName = (document.getElementById('other-name')?.value || '').trim();
   const otherBirth = document.getElementById('other-birth')?.value || '';
@@ -1161,8 +1200,6 @@ async function runSynastry() {
     }
     return;
   }
-  if (!spendEnergy()) return;
-
   const otherSign = signFromDate(otherBirth);
   const facts = {
     me: {
@@ -1210,11 +1247,12 @@ Me: name ${facts.me.name}, sun ${signA}, element ${facts.me.element || 'unknown'
 Other: name ${facts.other.name}, sun ${signB}, element ${facts.other.element || 'unknown'}, life path ${facts.other.lifePath}, bond: ${bondWord}.
 Write 4-5 sentences: 1) where you fuse, 2) where it will rub, 3) how it feels in the body/day, 4) one concrete tip for this week. No compatibility percent. No markdown.`;
 
-  const reply = await askAI(prompt, 'stars');
-  if (textEl) textEl.textContent = reply || t('error');
-  if (reply && shareBtn) shareBtn.classList.remove('hidden');
-  if (reply) tryCompleteQuest('stars');
-  haptic(reply ? 'success' : 'error');
+  let reply = await askAI(prompt, 'stars');
+  if (!reply) reply = synastryFallback(facts);
+  if (textEl) textEl.textContent = reply;
+  if (shareBtn) shareBtn.classList.remove('hidden');
+  tryCompleteQuest('stars');
+  haptic('success');
 }
 
 async function showCelebAI(celeb) {
