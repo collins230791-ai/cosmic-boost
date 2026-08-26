@@ -1,5 +1,6 @@
 const tg = window.Telegram?.WebApp;
 const AI_URL = 'https://cosmic-boost.vercel.app/api/ai';
+const REF_URL = 'https://cosmic-boost.vercel.app/api/ref';
 const APP_LINK = 'https://t.me/CosmicBoostApp_bot/cosmicb';
 const STORY_BG = 'https://cosmic-boost.vercel.app/story-bg.jpg';
 const AI_TIMEOUT_MS = 4500;
@@ -433,6 +434,7 @@ function spendEnergy(cost = ENERGY_COST) {
   }
   setEnergy(cur - cost);
   refreshEnergyUI();
+  renderRefLink();
   haptic('medium');
   return true;
 }
@@ -559,13 +561,20 @@ function getDailyEnergy() {
 }
 
 // ===== Share =====
+function myRefLink() {
+  const id = tg?.initDataUnsafe?.user?.id;
+  if (!id) return APP_LINK;
+  return APP_LINK + '?startapp=ref' + id;
+}
+
 function shareResult(text) {
   haptic('medium');
+  const link = myRefLink();
   if (tg?.openTelegramLink) {
-    const url = `https://t.me/share/url?url=${encodeURIComponent(APP_LINK)}&text=${encodeURIComponent(text + '\n\n' + t('shareText'))}`;
+    const url = `https://t.me/share/url?url=${encodeURIComponent(link)}&text=${encodeURIComponent(text + '\n\n' + t('shareText'))}`;
     tg.openTelegramLink(url);
   } else if (navigator.share) {
-    navigator.share({ text: text + '\n\n' + t('shareText') + '\n' + APP_LINK }).catch(() => {});
+    navigator.share({ text: text + '\n\n' + t('shareText') + '\n' + link }).catch(() => {});
   }
 }
 
@@ -1161,6 +1170,118 @@ function initTelegram() {
 }
 
 
+
+function currentStartParam() {
+  const fromTg = tg?.initDataUnsafe?.start_param;
+  if (fromTg) return String(fromTg);
+  try {
+    const q = new URLSearchParams(location.search);
+    return q.get('tgWebAppStartParam') || q.get('startapp') || q.get('ref') || '';
+  } catch {
+    return '';
+  }
+}
+
+function applyEnergyBonus(n) {
+  const add = Math.max(0, Number(n) || 0);
+  if (!add) return 0;
+  const next = Math.min(ENERGY_MAX, getEnergy() + add);
+  const gained = next - getEnergy();
+  setEnergy(next);
+  refreshEnergyUI();
+  return gained;
+}
+
+async function processReferral() {
+  const user = tg?.initDataUnsafe?.user;
+  if (!user?.id) return;
+  const startParam = currentStartParam();
+  if (!/^ref[_-]?\d+$/i.test(startParam)) return;
+  if (localStorage.getItem('cb_ref_claimed') === startParam) return;
+  try {
+    const r = await fetch(REF_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ userId: user.id, startParam })
+    });
+    const data = await r.json();
+    if (data?.applied) {
+      localStorage.setItem('cb_ref_claimed', startParam);
+      const got = applyEnergyBonus(data.inviteeBonus || 15);
+      if (got && tg?.showPopup) {
+        tg.showPopup({
+          title: lang === 'ru' ? 'Подарок от друга' : 'A gift from a friend',
+          message: lang === 'ru' ? `+${got}% энергии за переход по ссылке ✨` : `+${got}% energy for joining via invite ✨`,
+          buttons: [{ type: 'ok' }]
+        });
+      }
+    }
+  } catch (e) {
+    console.error('ref claim', e);
+  }
+}
+
+async function collectRefBonus() {
+  const user = tg?.initDataUnsafe?.user;
+  if (!user?.id) return;
+  try {
+    const r = await fetch(REF_URL + '?userId=' + encodeURIComponent(user.id));
+    const data = await r.json();
+    const countEl = document.getElementById('ref-count');
+    if (countEl) {
+      const n = Number(data?.count) || 0;
+      countEl.textContent = lang === 'ru' ? `Пришло друзей: ${n}` : `Friends joined: ${n}`;
+    }
+    if (Number(data?.bonus) > 0) {
+      const got = applyEnergyBonus(data.bonus);
+      if (got >= 3 && unlockBadge('ref', lang === 'ru' ? '🤝 Зов вселенной' : '🤝 Cosmic invite')) {
+        renderCollection();
+      }
+      if (got && tg?.showPopup) {
+        tg.showPopup({
+          title: lang === 'ru' ? 'Друг зашёл' : 'A friend joined',
+          message: lang === 'ru' ? `+${got}% энергии за приглашение ✨` : `+${got}% energy for your invite ✨`,
+          buttons: [{ type: 'ok' }]
+        });
+      }
+    }
+  } catch (e) {
+    console.error('ref bonus', e);
+  }
+}
+
+function renderRefLink() {
+  const input = document.getElementById('ref-link');
+  if (input) input.value = myRefLink();
+  const title = document.getElementById('title-ref');
+  if (title) title.textContent = lang === 'ru' ? 'Пригласи друга' : 'Invite a friend';
+  const hint = document.getElementById('ref-hint');
+  if (hint) hint.textContent = lang === 'ru'
+    ? 'Друг открыл приложение по твоей ссылке — тебе +25% энергии, ему +15%'
+    : 'A friend opens the app via your link — you get +25% energy, they get +15%';
+  const btn = document.getElementById('btn-copy-ref');
+  if (btn) btn.textContent = lang === 'ru' ? 'Скопировать ссылку' : 'Copy link';
+}
+
+function copyRefLink() {
+  const link = myRefLink();
+  const input = document.getElementById('ref-link');
+  if (input) input.value = link;
+  haptic('medium');
+  const done = () => {
+    if (tg?.showPopup) tg.showPopup({ message: lang === 'ru' ? 'Ссылка скопирована ✨' : 'Link copied ✨', buttons: [{ type: 'ok' }] });
+  };
+  if (navigator.clipboard?.writeText) {
+    navigator.clipboard.writeText(link).then(done).catch(() => {
+      input?.select();
+      done();
+    });
+  } else {
+    input?.select();
+    done();
+  }
+}
+
 function trackVisit() {
   try {
     const user = tg?.initDataUnsafe?.user;
@@ -1238,6 +1359,9 @@ document.addEventListener('DOMContentLoaded', async () => {
     await Promise.race([cloudPromise, timeout]);
     updateUI();
     trackVisit();
+    renderRefLink();
+    processReferral();
+    collectRefBonus();
     hideSplash();
     cloudPromise.then(() => {
       if (userSign || userName || birthDate) updateUI();
