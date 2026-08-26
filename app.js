@@ -621,16 +621,16 @@ function shareToStory(text, type) {
   const mediaUrl = shareCardUrl(caption, type);
 
   if (typeof tg?.shareToStory === 'function') {
+    const storyOpts = {
+      widget_link: { url: APP_LINK, name: 'Cosmic Boost' }
+    };
     try {
-      // Plain media first — more reliable for publishing
-      tg.shareToStory(mediaUrl);
+      tg.shareToStory(mediaUrl, storyOpts);
       return;
     } catch (e1) {
       console.error('shareToStory failed', e1);
       try {
-        tg.shareToStory(mediaUrl, {
-          widget_link: { url: APP_LINK, name: 'Cosmic Boost' }
-        });
+        tg.shareToStory(mediaUrl);
         return;
       } catch (e2) {
         console.error(e2);
