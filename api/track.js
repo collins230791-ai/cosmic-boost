@@ -1,3 +1,5 @@
+import { cors, userFromRequest } from '../lib/telegram.js';
+
 const mem = globalThis.__cbUsers || (globalThis.__cbUsers = new Map());
 const memDaily = globalThis.__cbDaily || (globalThis.__cbDaily = new Map());
 
@@ -97,8 +99,11 @@ export default async function handler(req, res) {
 
   try {
     const body = typeof req.body === 'string' ? JSON.parse(req.body || '{}') : (req.body || {});
-    const { userId, lang, name } = body;
-    if (!userId) return res.status(400).json({ error: 'userId required' });
+    const auth = userFromRequest(req);
+    if (!auth.user?.id) return res.status(401).json({ error: 'auth' });
+    const userId = auth.user.id;
+    const lang = body.lang || 'ru';
+    const name = body.name || auth.user.first_name || '';
     const result = await touchUser(userId, { lang, name });
     return res.status(200).json({ ok: true, ...result });
   } catch (e) {
