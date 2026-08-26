@@ -1091,15 +1091,60 @@ function renderZodiac() {
 
 function renderCelebrities() {
   const list = document.getElementById('celeb-list');
+  if (!list || list.dataset.locked === '1') return;
+}
+
+async function searchFamous() {
+  const q = (document.getElementById('celeb-query')?.value || '').trim();
+  const list = document.getElementById('celeb-list');
   if (!list) return;
-  list.innerHTML = '';
-  CELEBRITIES.forEach(celeb => {
-    const item = document.createElement('div');
-    item.className = 'celeb-item';
-    item.innerHTML = `<div class="celeb-emoji">${celeb.emoji}</div><div class="celeb-info"><div class="celeb-name">${celeb.name[lang]}</div><div class="celeb-sign">${ZODIAC[celeb.sign].emoji} ${ZODIAC[celeb.sign][lang]}</div></div>`;
-    item.onclick = () => showCelebAI(celeb);
-    list.appendChild(item);
-  });
+  if (q.length < 2) {
+    if (tg?.showAlert) tg.showAlert(lang === 'ru' ? 'Напиши имя или псевдоним' : 'Type a name or alias');
+    return;
+  }
+  list.dataset.locked = '1';
+  list.innerHTML = `<div class="text-soft" style="font-size:13px">${t('loadingShort')}</div>`;
+  haptic('medium');
+  try {
+    const r = await fetch('https://cosmic-boost.vercel.app/api/person', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ q, lang })
+    });
+    const data = await r.json();
+    const items = data.items || [];
+    if (!items.length) {
+      list.innerHTML = `<div class="text-soft" style="font-size:13px">${lang === 'ru' ? 'Не нашли дату рождения. Попробуй полное имя.' : 'No birth date found. Try the full name.'}</div>`;
+      return;
+    }
+    list.innerHTML = '';
+    items.forEach((person) => {
+      const sign = signFromDate(person.birth);
+      const signLabel = sign && ZODIAC[sign] ? (ZODIAC[sign].emoji + ' ' + ZODIAC[sign][lang]) : '';
+      const item = document.createElement('div');
+      item.className = 'celeb-item';
+      item.innerHTML = `<div class="celeb-emoji">✦</div><div class="celeb-info"><div class="celeb-name"></div><div class="celeb-sign"></div></div>`;
+      item.querySelector('.celeb-name').textContent = person.name;
+      item.querySelector('.celeb-sign').textContent = `${person.birth}${signLabel ? ' · ' + signLabel : ''}${person.desc ? ' · ' + person.desc : ''}`;
+      item.onclick = () => pickFamous(person);
+      list.appendChild(item);
+    });
+  } catch (e) {
+    console.error(e);
+    list.innerHTML = `<div class="text-soft" style="font-size:13px">${t('error')}</div>`;
+  }
+}
+
+function pickFamous(person) {
+  const nameEl = document.getElementById('other-name');
+  const birthEl = document.getElementById('other-birth');
+  if (nameEl) nameEl.value = String(person.name || '').slice(0, 24);
+  if (birthEl) birthEl.value = person.birth;
+  const crush = document.querySelector('.rel-chip[data-rel="crush"]');
+  if (crush) setRelType(crush);
+  haptic('medium');
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+  runSynastry();
 }
 
 
