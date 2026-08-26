@@ -107,7 +107,7 @@ export default async function handler(req) {
     const name = fromBase64Url(searchParams.get('n') || '').slice(0, 24);
     const label = searchParams.get('label') || theme.labels[lang];
 
-    const lines = wrapText(text, 38);
+    const lines = wrapText(text, 36);
     const fontSize = lines.length > 7 ? 36 : lines.length > 5 ? 40 : lines.length > 3 ? 44 : 48;
 
     const lineNodes = lines.map((line) => ({
@@ -197,28 +197,42 @@ export default async function handler(req) {
                         props: { style: { height: 4, display: 'flex' }, children: '' },
                       },
                   ...lineNodes,
+                  {
+                    type: 'div',
+                    props: {
+                      style: {
+                        marginTop: 28,
+                        fontSize: 22,
+                        fontWeight: 700,
+                        color: theme.color,
+                        opacity: 0.9,
+                        fontFamily: 'sans-serif',
+                        textAlign: 'center',
+                        textShadow: theme.shadow,
+                      },
+                      children: 'Cosmic Boost',
+                    },
+                  },
+                  {
+                    type: 'div',
+                    props: {
+                      style: {
+                        marginTop: 6,
+                        fontSize: 20,
+                        fontWeight: 500,
+                        color: theme.color,
+                        opacity: 0.75,
+                        fontFamily: 'sans-serif',
+                        textAlign: 'center',
+                        textShadow: theme.shadow,
+                      },
+                      children: 't.me/CosmicBoostApp_bot',
+                    },
+                  },
                 ],
               },
             },
-            {
-              type: 'div',
-              props: {
-                style: {
-                  position: 'absolute',
-                  bottom: 240,
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  fontSize: 32,
-                  fontWeight: 700,
-                  color: typeKey === 'boost' ? '#5A3D1C' : '#3A2A18',
-                  fontFamily: 'sans-serif',
-                  letterSpacing: '0.02em',
-                  textShadow: '0 1px 8px rgba(255,255,255,0.35)',
-                },
-                children: 'Cosmic Boost',
-              },
-            },
+
           ],
         },
       },
