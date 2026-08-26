@@ -567,8 +567,27 @@ function myRefLink() {
   return APP_LINK + '?startapp=ref' + id;
 }
 
-function shareResult(text) {
-  haptic('medium');
+async function cacheSharePayload(text, type) {
+  try {
+    const r = await fetch('https://cosmic-boost.vercel.app/api/share-cache', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        text,
+        type: type || 'boost',
+        name: userName || '',
+        lang,
+        fromId: tg?.initDataUnsafe?.user?.id || ''
+      })
+    });
+    const data = await r.json();
+    return data?.id || '';
+  } catch {
+    return '';
+  }
+}
+
+function fallbackShareLink(text) {
   const link = myRefLink();
   if (tg?.openTelegramLink) {
     const url = `https://t.me/share/url?url=${encodeURIComponent(link)}&text=${encodeURIComponent(text + '\n\n' + t('shareText'))}`;
@@ -576,6 +595,30 @@ function shareResult(text) {
   } else if (navigator.share) {
     navigator.share({ text: text + '\n\n' + t('shareText') + '\n' + link }).catch(() => {});
   }
+}
+
+async function shareResult(text, type) {
+  haptic('medium');
+  const id = await cacheSharePayload(text, type);
+  const q = id ? ('cb' + id) : '';
+  try {
+    if (typeof tg?.switchInlineQueryChosenChat === 'function') {
+      tg.switchInlineQueryChosenChat(q, {
+        allow_user_chats: true,
+        allow_bot_chats: true,
+        allow_group_chats: true,
+        allow_channel_chats: true
+      });
+      return;
+    }
+    if (typeof tg?.switchInlineQuery === 'function') {
+      tg.switchInlineQuery(q);
+      return;
+    }
+  } catch (e) {
+    console.error('inline share', e);
+  }
+  fallbackShareLink(text);
 }
 
 
@@ -609,11 +652,11 @@ function shareSmart(text, type) {
       ]
     }, (id) => {
       if (id === 'story') shareToStory(body, kind);
-      else if (id === 'chat') shareResult(body);
+      else if (id === 'chat') shareResult(body, kind);
     });
     return;
   }
-  shareResult(body);
+  shareResult(body, kind);
 }
 
 function shareToStory(text, type) {
