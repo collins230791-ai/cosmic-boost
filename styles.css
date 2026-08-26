@@ -936,3 +936,14 @@ body.tg-light {
   color: #ff9ec8;
   font-weight: 700;
 }
+
+.rel-row { display:flex; gap:8px; margin-top:12px; flex-wrap:wrap; }
+.rel-chip {
+  border:1px solid rgba(255,255,255,.14);
+  background:rgba(255,255,255,.06);
+  color:#d7c7ff;
+  border-radius:999px;
+  padding:8px 12px;
+  font-size:13px;
+}
+.rel-chip.active { background:rgba(168,120,255,.28); border-color:rgba(200,170,255,.45); color:#fff; }
