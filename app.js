@@ -570,9 +570,19 @@ function shareResult(text) {
 }
 
 
-function shareSmart(text) {
+function shareCardUrl(text, type) {
+  const params = new URLSearchParams();
+  params.set('t', toBase64Url(text));
+  params.set('type', type || 'boost');
+  params.set('lang', lang === 'en' ? 'en' : 'ru');
+  if (userName) params.set('n', toBase64Url(userName));
+  return 'https://cosmic-boost.vercel.app/api/story-card?' + params.toString();
+}
+
+function shareSmart(text, type) {
   haptic('medium');
   const body = cleanText(String(text || '')).trim();
+  const kind = type || 'boost';
   if (!body || /Связываемся|Connecting|Загрузка|думают|Loading/i.test(body)) {
     if (tg?.showAlert) tg.showAlert(lang === 'ru' ? 'Сначала дождись текста ✨' : 'Wait for the text first ✨');
     return;
@@ -589,7 +599,7 @@ function shareSmart(text) {
         { type: 'cancel' }
       ]
     }, (id) => {
-      if (id === 'story') shareToStory(body);
+      if (id === 'story') shareToStory(body, kind);
       else if (id === 'chat') shareResult(body);
     });
     return;
@@ -597,7 +607,7 @@ function shareSmart(text) {
   shareResult(body);
 }
 
-function shareToStory(text) {
+function shareToStory(text, type) {
   haptic('medium');
   let caption = cleanText(String(text || '')).replace(/\s+/g, ' ').trim();
   if (caption.length > 200) caption = caption.slice(0, 197) + '...';
@@ -607,8 +617,8 @@ function shareToStory(text) {
     return;
   }
 
-  // Image with text baked in the center (no Telegram caption needed)
-  const mediaUrl = 'https://cosmic-boost.vercel.app/api/story-card?t=' + toBase64Url(caption);
+  // Live card: typed background + text + brand
+  const mediaUrl = shareCardUrl(caption, type);
 
   if (typeof tg?.shareToStory === 'function') {
     try {
@@ -1022,7 +1032,7 @@ async function showCelebAI(celeb) {
     <div class="result-emoji">${celeb.emoji}</div>
     <div class="result-title">${celeb.name[lang]}</div>
     <p style="font-size:15px;line-height:1.5;margin-top:12px">${reply}</p>
-    <button class="btn btn-secondary mt-16" onclick="shareSmart(\`${String(celeb.name[lang]+': '+reply).replace(/`/g,'')}\`)">${t('btnShare')}</button>`;
+    <button class="btn btn-secondary mt-16" onclick="shareSmart(\`${String(celeb.name[lang]+': '+reply).replace(/`/g,'')}\`, 'stars')">${t('btnShare')}</button>`;
   tryCompleteQuest('stars');
   haptic('success');
 }
@@ -1110,7 +1120,7 @@ async function askUniverse() {
   haptic('medium');
   const reply = await askAI(msg);
   result.innerHTML = `<div class="ai-reply">${reply || t('error')}</div>
-    <button class="btn btn-secondary mt-12" onclick="shareSmart(\`${String(reply||'').replace(/`/g,'')}\`)">${t('btnShare')}</button>`;
+    <button class="btn btn-secondary mt-12" onclick="shareSmart(\`${String(reply||'').replace(/`/g,'')}\`, 'universe')">${t('btnShare')}</button>`;
   if (reply) tryCompleteQuest('universe');
   haptic(reply ? 'success' : 'error');
 }
