@@ -2,6 +2,64 @@ import { ImageResponse } from '@vercel/og';
 
 export const config = { runtime: 'edge' };
 
+const ORIGIN = 'https://cosmic-boost.vercel.app';
+
+const TYPES = {
+  boost: {
+    bg: `${ORIGIN}/share-bg/boost.jpg`,
+    color: '#2A2140',
+    labelColor: '#6B4E8A',
+    veil: 'rgba(255, 248, 242, 0.42)',
+    shadow: '0 2px 12px rgba(255,255,255,0.35)',
+    labels: { ru: 'Комплимент', en: 'Compliment' },
+  },
+  lazy: {
+    bg: `${ORIGIN}/share-bg/lazy.jpg`,
+    color: '#FFFFFF',
+    labelColor: 'rgba(255,230,255,0.92)',
+    veil: 'rgba(18, 8, 36, 0.28)',
+    shadow: '0 2px 18px rgba(0,0,0,0.45)',
+    labels: { ru: 'Ленивый', en: 'Lazy boost' },
+  },
+  card: {
+    bg: `${ORIGIN}/share-bg/card.jpg`,
+    color: '#FFF6E8',
+    labelColor: 'rgba(255, 214, 160, 0.95)',
+    veil: 'rgba(6, 12, 36, 0.22)',
+    shadow: '0 2px 18px rgba(0,0,0,0.4)',
+    labels: { ru: 'Карта дня', en: 'Card of the day' },
+  },
+  stars: {
+    bg: `${ORIGIN}/share-bg/stars.jpg`,
+    color: '#FFFFFF',
+    labelColor: 'rgba(180, 240, 255, 0.95)',
+    veil: 'rgba(6, 10, 40, 0.34)',
+    shadow: '0 2px 18px rgba(0,0,0,0.45)',
+    labels: { ru: 'Звёзды', en: 'Stars' },
+  },
+  number: {
+    bg: `${ORIGIN}/share-bg/number.jpg`,
+    color: '#FFE9B8',
+    labelColor: 'rgba(255, 214, 140, 0.95)',
+    veil: 'rgba(6, 10, 28, 0.18)',
+    shadow: '0 2px 18px rgba(0,0,0,0.4)',
+    labels: { ru: 'Число судьбы', en: 'Destiny number' },
+  },
+};
+
+const TYPE_ALIAS = {
+  boost: 'boost',
+  compliment: 'boost',
+  horoscope: 'card',
+  card: 'card',
+  lazy: 'lazy',
+  stars: 'stars',
+  universe: 'stars',
+  number: 'number',
+  numerology: 'number',
+  relocate: 'number',
+};
+
 function fromBase64Url(str) {
   try {
     let s = String(str || '').replace(/-/g, '+').replace(/_/g, '/');
@@ -15,7 +73,7 @@ function fromBase64Url(str) {
   }
 }
 
-function wrapText(text, maxLen = 28) {
+function wrapText(text, maxLen = 26) {
   const words = String(text || '').replace(/\s+/g, ' ').trim().split(' ');
   const lines = [];
   let line = '';
@@ -27,7 +85,7 @@ function wrapText(text, maxLen = 28) {
     } else line = next;
   }
   if (line) lines.push(line);
-  return lines.slice(0, 10); // more lines
+  return lines.slice(0, 10);
 }
 
 export default async function handler(req) {
@@ -36,23 +94,48 @@ export default async function handler(req) {
     let text = fromBase64Url(searchParams.get('t') || '');
     if (!text) text = searchParams.get('text') || 'Cosmic Boost ✨';
     text = text.slice(0, 220);
-    const lines = wrapText(text, 30);
-    const fontSize = lines.length > 6 ? 26 : lines.length > 4 ? 28 : 32;
+
+    const rawType = String(searchParams.get('type') || 'boost').toLowerCase();
+    const typeKey = TYPE_ALIAS[rawType] || 'boost';
+    const theme = TYPES[typeKey];
+    const lang = searchParams.get('lang') === 'en' ? 'en' : 'ru';
+    const name = fromBase64Url(searchParams.get('n') || '').slice(0, 24);
+    const label = searchParams.get('label') || theme.labels[lang];
+
+    const lines = wrapText(text, 28);
+    const fontSize = lines.length > 7 ? 34 : lines.length > 5 ? 38 : lines.length > 3 ? 42 : 46;
+
+    const lineNodes = lines.map((line) => ({
+      type: 'div',
+      props: {
+        style: {
+          fontSize,
+          fontWeight: 700,
+          color: theme.color,
+          textAlign: 'center',
+          lineHeight: 1.28,
+          fontFamily: 'sans-serif',
+          width: '100%',
+          textShadow: theme.shadow,
+        },
+        children: line,
+      },
+    }));
 
     return new ImageResponse(
       {
         type: 'div',
         props: {
           style: {
-            width: '720px',
-            height: '1280px',
+            width: '1080px',
+            height: '1920px',
             display: 'flex',
             flexDirection: 'column',
             alignItems: 'center',
             justifyContent: 'center',
             position: 'relative',
             backgroundColor: '#0a0818',
-            backgroundImage: 'url(https://cosmic-boost.vercel.app/story-bg.jpg)',
+            backgroundImage: `url(${theme.bg})`,
             backgroundSize: 'cover',
             backgroundPosition: 'center',
           },
@@ -65,36 +148,78 @@ export default async function handler(req) {
                   flexDirection: 'column',
                   alignItems: 'center',
                   justifyContent: 'center',
-                  width: '640px',
-                  maxHeight: '520px',
-                  padding: '28px 26px',
-                  backgroundColor: 'rgba(10, 8, 24, 0.88)',
-                  borderRadius: '24px',
-                  border: '2px solid rgba(196, 76, 255, 0.6)',
+                  width: '860px',
+                  maxHeight: '980px',
+                  padding: '36px 40px',
+                  backgroundColor: theme.veil,
+                  borderRadius: '36px',
                 },
-                children: lines.map((line) => ({
-                  type: 'div',
-                  props: {
-                    style: {
-                      fontSize,
-                      fontWeight: 700,
-                      color: 'white',
-                      textAlign: 'center',
-                      lineHeight: 1.3,
-                      fontFamily: 'sans-serif',
-                      width: '100%',
+                children: [
+                  {
+                    type: 'div',
+                    props: {
+                      style: {
+                        fontSize: 26,
+                        fontWeight: 600,
+                        color: theme.labelColor,
+                        letterSpacing: '0.12em',
+                        textTransform: 'uppercase',
+                        marginBottom: 14,
+                        fontFamily: 'sans-serif',
+                        textAlign: 'center',
+                      },
+                      children: label,
                     },
-                    children: line,
                   },
-                })),
+                  name
+                    ? {
+                        type: 'div',
+                        props: {
+                          style: {
+                            fontSize: 28,
+                            fontWeight: 600,
+                            color: theme.color,
+                            opacity: 0.88,
+                            marginBottom: 18,
+                            fontFamily: 'sans-serif',
+                            textAlign: 'center',
+                          },
+                          children: name,
+                        },
+                      }
+                    : {
+                        type: 'div',
+                        props: { style: { height: 4, display: 'flex' }, children: '' },
+                      },
+                  ...lineNodes,
+                ],
+              },
+            },
+            {
+              type: 'div',
+              props: {
+                style: {
+                  position: 'absolute',
+                  bottom: 86,
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  fontSize: 34,
+                  fontWeight: 700,
+                  color: typeKey === 'boost' ? '#5A3D1C' : '#3A2A18',
+                  fontFamily: 'sans-serif',
+                  letterSpacing: '0.02em',
+                  textShadow: '0 1px 8px rgba(255,255,255,0.35)',
+                },
+                children: 'Cosmic Boost ✦',
               },
             },
           ],
         },
       },
       {
-        width: 720,
-        height: 1280,
+        width: 1080,
+        height: 1920,
         headers: { 'Cache-Control': 'public, max-age=3600' },
       }
     );
