@@ -250,7 +250,10 @@ export default async function handler(req) {
       {
         width: 1080,
         height: 1920,
-        headers: { 'Cache-Control': 'public, max-age=3600' },
+        headers: {
+          'Cache-Control': 'public, max-age=86400, s-maxage=86400',
+          'Content-Disposition': 'inline; filename="story.png"',
+        },
       }
     );
   } catch (e) {
