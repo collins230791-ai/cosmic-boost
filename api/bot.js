@@ -1,4 +1,6 @@
 const mem = globalThis.__cbUsers || (globalThis.__cbUsers = new Map());
+const APP = 'https://cosmic-boost.vercel.app';
+const APP_LINK = 'https://t.me/CosmicBoostApp_bot/cosmicb';
 
 function hasRedis() {
   return !!(process.env.UPSTASH_REDIS_REST_URL && process.env.UPSTASH_REDIS_REST_TOKEN);
@@ -35,6 +37,80 @@ async function touchUser(chatId, meta = {}) {
   mem.set(id, JSON.parse(payload));
 }
 
+function toBase64Url(str) {
+  return Buffer.from(String(str || ''), 'utf8')
+    .toString('base64')
+    .replace(/\+/g, '-')
+    .replace(/\//g, '_')
+    .replace(/=+$/, '');
+}
+
+function cardUrl(item) {
+  const p = new URLSearchParams();
+  p.set('t', toBase64Url(item.text || 'Cosmic Boost'));
+  p.set('type', item.type || 'boost');
+  p.set('lang', item.lang === 'en' ? 'en' : 'ru');
+  if (item.name) p.set('n', toBase64Url(item.name));
+  return `${APP}/story-card.png?` + p.toString();
+}
+
+function refLink(fromId) {
+  if (!fromId) return APP_LINK;
+  return APP_LINK + '?startapp=ref' + fromId;
+}
+
+async function answerInline(token, inlineQueryId, item) {
+  const link = refLink(item?.fromId);
+  const photo = item ? cardUrl(item) : `${APP}/share-bg/boost.jpg`;
+  const caption = item
+    ? `${item.text}\n\nCosmic Boost — ${link}`.slice(0, 1024)
+    : 'Cosmic Boost — заряд от вселенной ✨';
+
+  const results = [
+    {
+      type: 'photo',
+      id: 'card1',
+      photo_url: photo,
+      thumbnail_url: photo,
+      photo_width: 1080,
+      photo_height: 1920,
+      title: 'Cosmic Boost',
+      caption,
+      reply_markup: {
+        inline_keyboard: [[
+          { text: '🚀 Открыть Cosmic Boost', url: link }
+        ]]
+      }
+    },
+    {
+      type: 'article',
+      id: 'open1',
+      title: 'Открыть Cosmic Boost',
+      description: 'Комплимент, гороскоп и ленивый буст',
+      thumb_url: `${APP}/icons/boost.png`,
+      input_message_content: {
+        message_text: `Смотри, что мне сказала вселенная ✨\n\n${link}`,
+      },
+      reply_markup: {
+        inline_keyboard: [[
+          { text: '🚀 Открыть Cosmic Boost', url: link }
+        ]]
+      }
+    }
+  ];
+
+  await fetch(`https://api.telegram.org/bot${token}/answerInlineQuery`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      inline_query_id: inlineQueryId,
+      results,
+      cache_time: 15,
+      is_personal: true,
+    }),
+  });
+}
+
 export default async function handler(req, res) {
   if (req.method !== 'POST') {
     return res.status(200).send('Cosmic Boost Bot is running');
@@ -45,9 +121,39 @@ export default async function handler(req, res) {
     return res.status(500).json({ error: 'BOT_TOKEN not set' });
   }
 
-  const update = req.body;
-  const message = update?.message;
+  const update = req.body || {};
 
+  if (update.inline_query) {
+    const iq = update.inline_query;
+    const raw = String(iq.query || '').trim();
+    const id = raw.replace(/^cb/i, '').replace(/[^a-f0-9]/gi, '');
+    let item = null;
+    if (id && hasRedis()) {
+      try {
+        const packed = await redis(['GET', 'cb:share:' + id]);
+        if (packed) item = JSON.parse(packed);
+      } catch (e) {
+        console.error('inline cache', e);
+      }
+    }
+    if (!item && iq.from) {
+      item = {
+        text: 'Заряд от вселенной ✨',
+        type: 'boost',
+        name: iq.from.first_name || '',
+        lang: (iq.from.language_code || 'ru').startsWith('ru') ? 'ru' : 'en',
+        fromId: String(iq.from.id),
+      };
+    }
+    try {
+      await answerInline(TOKEN, iq.id, item);
+    } catch (e) {
+      console.error('answerInline', e);
+    }
+    return res.status(200).json({ ok: true });
+  }
+
+  const message = update.message;
   if (!message) {
     return res.status(200).json({ ok: true });
   }
@@ -58,7 +164,6 @@ export default async function handler(req, res) {
   const lang = (from.language_code || 'ru').startsWith('ru') ? 'ru' : 'en';
   const name = from.first_name || '';
 
-  // Always track activity
   try {
     await touchUser(chatId, { lang, name });
   } catch (e) {
@@ -90,7 +195,7 @@ export default async function handler(req, res) {
           inline_keyboard: [[
             {
               text: '🚀 Открыть Cosmic Boost',
-              web_app: { url: 'https://cosmic-boost.vercel.app/' }
+              web_app: { url: APP + '/' }
             }
           ]]
         }
@@ -109,7 +214,7 @@ export default async function handler(req, res) {
           inline_keyboard: [[
             {
               text: '🚀 Открыть Cosmic Boost',
-              web_app: { url: 'https://cosmic-boost.vercel.app/' }
+              web_app: { url: APP + '/' }
             }
           ]]
         }
