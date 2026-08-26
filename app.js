@@ -171,15 +171,28 @@ async function loadProfileFromCloud() {
   if (birth) birthDate = birth;
 }
 
+function escapeHtml(str) {
+  return String(str || '')
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
+}
+
+function initDataPayload(extra) {
+  return Object.assign({ initData: tg?.initData || '' }, extra || {});
+}
+
 // ===== AI with timeout =====
-async function askAI(prompt) {
+async function askAI(prompt, kind) {
   const controller = new AbortController();
   const timer = setTimeout(() => controller.abort(), AI_TIMEOUT_MS);
   try {
     const res = await fetch(AI_URL, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ message: prompt, lang }),
+      body: JSON.stringify(initDataPayload({ message: prompt, lang, kind: kind || 'ai' })),
       signal: controller.signal
     });
     clearTimeout(timer);
@@ -1093,12 +1106,15 @@ async function showCelebAI(celeb) {
   const prompt = lang === 'ru'
     ? `Очень смешная тёплая совместимость: ${mySign} и ${celeb.name.ru}. 2-3 предложения + процент 55-98. Эмодзи. Без markdown.`
     : `Very funny warm compatibility: ${mySign} and ${celeb.name.en}. 2-3 sentences + percent 55-98. Emoji. No markdown.`;
-  const reply = await askAI(prompt) || (celeb.funny[lang][0] || t('error'));
+  const reply = await askAI(prompt, 'stars') || (celeb.funny[lang][0] || t('error'));
+  const safeReply = escapeHtml(reply);
+  const safeName = escapeHtml(celeb.name[lang]);
   document.getElementById('modal-content').innerHTML = `
     <div class="result-emoji">${celeb.emoji}</div>
-    <div class="result-title">${celeb.name[lang]}</div>
-    <p style="font-size:15px;line-height:1.5;margin-top:12px">${reply}</p>
-    <button class="btn btn-secondary mt-16" onclick="shareSmart(\`${String(celeb.name[lang]+': '+reply).replace(/`/g,'')}\`, 'stars')">${t('btnShare')}</button>`;
+    <div class="result-title">${safeName}</div>
+    <p style="font-size:15px;line-height:1.5;margin-top:12px">${safeReply}</p>
+    <button class="btn btn-secondary mt-16" id="celeb-share-btn">${t('btnShare')}</button>`;
+  document.getElementById('celeb-share-btn')?.addEventListener('click', () => shareSmart(celeb.name[lang] + ': ' + reply, 'stars'));
   tryCompleteQuest('stars');
   haptic('success');
 }
@@ -1130,7 +1146,7 @@ async function drawCard() {
   const prompt = lang === 'ru'
     ? 'Придумай весёлую карту дня. Сначала короткое название (2-4 слова), с новой строки текст 1-2 предложения. Эмодзи. Без markdown.'
     : 'Invent a fun card of the day. First short title (2-4 words), then on new line text 1-2 sentences. Emoji. No markdown.';
-  const reply = await askAI(prompt);
+  const reply = await askAI(prompt, 'card');
   if (reply) {
     const parts = reply.split('\n').filter(Boolean);
     titleEl.textContent = parts[0] || 'Карта дня';
@@ -1184,9 +1200,12 @@ async function askUniverse() {
   result.style.display = 'block';
   result.innerHTML = `<div class="cosmo-loader"><div class="cosmo-orbit"></div><div class="cosmo-loader-text">${t('loading')}</div></div>`;
   haptic('medium');
-  const reply = await askAI(msg);
-  result.innerHTML = `<div class="ai-reply">${reply || t('error')}</div>
-    <button class="btn btn-secondary mt-12" onclick="shareSmart(\`${String(reply||'').replace(/`/g,'')}\`, 'universe')">${t('btnShare')}</button>`;
+  const reply = await askAI(msg, 'universe');
+  result.innerHTML = `<div class="ai-reply"></div>
+    <button class="btn btn-secondary mt-12" id="universe-share-btn">${t('btnShare')}</button>`;
+  const replyEl = result.querySelector('.ai-reply');
+  if (replyEl) replyEl.textContent = reply || t('error');
+  document.getElementById('universe-share-btn')?.addEventListener('click', () => shareSmart(reply || '', 'universe'));
   if (reply) tryCompleteQuest('universe');
   haptic(reply ? 'success' : 'error');
 }
@@ -1273,7 +1292,7 @@ async function processReferral() {
     const r = await fetch(REF_URL, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ userId: user.id, startParam })
+      body: JSON.stringify(initDataPayload({ userId: user.id, startParam }))
     });
     const data = await r.json();
     if (data?.applied) {
@@ -1296,7 +1315,11 @@ async function collectRefBonus() {
   const user = tg?.initDataUnsafe?.user;
   if (!user?.id) return;
   try {
-    const r = await fetch(REF_URL + '?userId=' + encodeURIComponent(user.id));
+    const r = await fetch(REF_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(initDataPayload({ op: 'collect' }))
+    });
     const data = await r.json();
     const countEl = document.getElementById('ref-count');
     if (countEl) {
@@ -1410,7 +1433,7 @@ async function buyStars(sku) {
     const r = await fetch('https://cosmic-boost.vercel.app/api/stars', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ sku, userId })
+      body: JSON.stringify(initDataPayload({ sku, userId }))
     });
     const data = await r.json();
     if (!data?.url) {
@@ -1448,6 +1471,7 @@ function trackVisit() {
     };
     if (user?.id) {
       doFetch({
+        initData: tg?.initData || '',
         userId: user.id,
         lang: lang || 'ru',
         name: userName || user.first_name || ''
