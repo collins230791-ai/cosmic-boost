@@ -621,9 +621,15 @@ function shareToStory(text, type) {
   const mediaUrl = shareCardUrl(caption, type);
 
   if (typeof tg?.shareToStory === 'function') {
+    const isPremium = !!tg?.initDataUnsafe?.user?.is_premium;
     const storyOpts = {
-      widget_link: { url: APP_LINK, name: 'Cosmic Boost' }
+      text: 'Cosmic Boost — t.me/CosmicBoostApp_bot/cosmicb'
     };
+    // Links-on-stories are Premium-only. Passing widget_link
+    // to a free account can make "Next" fail silently.
+    if (isPremium) {
+      storyOpts.widget_link = { url: APP_LINK, name: 'Cosmic Boost' };
+    }
     try {
       tg.shareToStory(mediaUrl, storyOpts);
       return;
