@@ -1,3 +1,4 @@
+import { applySku } from '../lib/telegram.js';
 const mem = globalThis.__cbUsers || (globalThis.__cbUsers = new Map());
 const APP = 'https://cosmic-boost.vercel.app';
 const APP_LINK = 'https://t.me/CosmicBoostApp_bot/cosmicb';
@@ -168,10 +169,14 @@ export default async function handler(req, res) {
   if (update.message?.successful_payment) {
     const pay = update.message.successful_payment;
     try {
+      const parts = String(pay.invoice_payload || '').split('|');
+      const sku = parts[1];
+      const uid = parts[2] || String(update.message.from?.id || '');
+      if (sku && uid) await applySku(uid, sku);
       if (hasRedis()) {
         await redis(['LPUSH', 'cb:stars:paid', JSON.stringify({
           at: Date.now(),
-          userId: update.message.from?.id,
+          userId: uid,
           payload: pay.invoice_payload,
           stars: pay.total_amount,
         })]);
