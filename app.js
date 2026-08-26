@@ -420,14 +420,41 @@ function refreshEnergyUI() {
 }
 
 /** Returns true if spent successfully, false if not enough */
+function hasUnlimitedPass() {
+  return Date.now() < (Number(localStorage.getItem('cb_pass_until')) || 0);
+}
+
+function extraCardsLeft() {
+  return Math.max(0, Number(localStorage.getItem('cb_extra_cards')) || 0);
+}
+
+function consumeExtraCard() {
+  const n = extraCardsLeft();
+  if (n < 1) return false;
+  localStorage.setItem('cb_extra_cards', String(n - 1));
+  return true;
+}
+
 function spendEnergy(cost = ENERGY_COST) {
+  if (hasUnlimitedPass()) {
+    refreshEnergyUI();
+    return true;
+  }
   const cur = getEnergy();
   if (cur < cost) {
     haptic('error');
     const msg = lang === 'ru'
-      ? `Мало космической энергии (${cur}%). Зайди завтра — вселенная зарядит до 100%, или поделись приложением с другом ✨`
-      : `Low cosmic energy (${cur}%). Come back tomorrow for a full charge, or share the app with a friend ✨`;
-    if (tg?.showPopup) tg.showPopup({ title: lang === 'ru' ? 'Энергия' : 'Energy', message: msg, buttons: [{ type: 'ok' }] });
+      ? `Мало космической энергии (${cur}%). Завтра будет 100%, либо дозаряд за Stars в профиле ✨`
+      : `Low cosmic energy (${cur}%). Full charge tomorrow, or refill with Stars in Profile ✨`;
+    if (tg?.showPopup) {
+      tg.showPopup({
+        title: lang === 'ru' ? 'Энергия' : 'Energy',
+        message: msg,
+        buttons: [
+          { id: 'shop', type: 'default', text: lang === 'ru' ? 'В магазин ⭐' : 'Shop ⭐' },
+          { type: 'ok' }
+        ]
+      }, (id) => { if (id === 'shop') showScreen('profile'); });
     else if (tg?.showAlert) tg.showAlert(msg);
     else alert(msg);
     return false;
@@ -435,6 +462,7 @@ function spendEnergy(cost = ENERGY_COST) {
   setEnergy(cur - cost);
   refreshEnergyUI();
   renderRefLink();
+  renderShopStatus();
   haptic('medium');
   return true;
 }
@@ -1093,7 +1121,7 @@ async function drawCard() {
   const titleEl = document.getElementById('card-title');
   const textEl = document.getElementById('card-text');
   // already have card today in collection? free redraw same day from cache - still cost once
-  if (!spendEnergy()) {
+  if (!consumeExtraCard() && !spendEnergy()) {
     return;
   }
   titleEl.innerHTML = `<div class="cosmo-loader cosmo-loader-sm"><div class="cosmo-orbit"></div></div>`;
@@ -1325,6 +1353,80 @@ function copyRefLink() {
   }
 }
 
+
+function applyStarsPurchase(sku) {
+  if (sku === 'energy') {
+    setEnergy(ENERGY_MAX);
+  } else if (sku === 'cards') {
+    localStorage.setItem('cb_extra_cards', String(extraCardsLeft() + 3));
+  } else if (sku === 'pass') {
+    const until = Date.now() + 24 * 60 * 60 * 1000;
+    localStorage.setItem('cb_pass_until', String(until));
+  }
+  refreshEnergyUI();
+  renderShopStatus();
+  haptic('success');
+  if (tg?.showPopup) {
+    const msg = sku === 'energy'
+      ? (lang === 'ru' ? 'Энергия снова 100% ⚡' : 'Energy is back to 100% ⚡')
+      : sku === 'cards'
+        ? (lang === 'ru' ? '+3 карты дня без энергии 🃏' : '+3 day cards without energy 🃏')
+        : (lang === 'ru' ? 'Безлимит на 24 часа включён 🌌' : '24h unlimited is on 🌌');
+    tg.showPopup({ title: 'Cosmic Boost', message: msg, buttons: [{ type: 'ok' }] });
+  }
+}
+
+function renderShopStatus() {
+  const el = document.getElementById('shop-status');
+  if (!el) return;
+  const bits = [];
+  if (hasUnlimitedPass()) {
+    const mins = Math.max(1, Math.round((Number(localStorage.getItem('cb_pass_until')) - Date.now()) / 60000));
+    bits.push(lang === 'ru' ? `Безлимит ещё ~${mins} мин` : `Unlimited ~${mins} min left`);
+  }
+  const extra = extraCardsLeft();
+  if (extra) bits.push(lang === 'ru' ? `Запас карт: ${extra}` : `Extra cards: ${extra}`);
+  el.textContent = bits.join(' · ');
+  const title = document.getElementById('title-shop');
+  if (title) title.textContent = lang === 'ru' ? 'Магазин вселенной' : 'Universe shop';
+  const hint = document.getElementById('shop-hint');
+  if (hint) hint.textContent = lang === 'ru'
+    ? 'Telegram Stars. Безлимит, карты и дозаряд энергии'
+    : 'Telegram Stars. Unlimited, cards and energy refill';
+}
+
+async function buyStars(sku) {
+  haptic('medium');
+  const userId = tg?.initDataUnsafe?.user?.id;
+  if (!userId) {
+    if (tg?.showAlert) tg.showAlert(lang === 'ru' ? 'Открой приложение внутри Telegram' : 'Open the app inside Telegram');
+    return;
+  }
+  if (typeof tg?.openInvoice !== 'function') {
+    if (tg?.showAlert) tg.showAlert(lang === 'ru' ? 'Обнови Telegram, чтобы платить Stars' : 'Update Telegram to pay with Stars');
+    return;
+  }
+  try {
+    const r = await fetch('https://cosmic-boost.vercel.app/api/stars', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ sku, userId })
+    });
+    const data = await r.json();
+    if (!data?.url) {
+      if (tg?.showAlert) tg.showAlert(data?.error || 'Stars error');
+      return;
+    }
+    tg.openInvoice(data.url, (status) => {
+      if (status === 'paid') applyStarsPurchase(sku);
+      else if (status === 'failed' && tg.showAlert) tg.showAlert(lang === 'ru' ? 'Оплата не прошла' : 'Payment failed');
+    });
+  } catch (e) {
+    console.error(e);
+    if (tg?.showAlert) tg.showAlert('Stars error');
+  }
+}
+
 function trackVisit() {
   try {
     const user = tg?.initDataUnsafe?.user;
@@ -1403,6 +1505,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     updateUI();
     trackVisit();
     renderRefLink();
+    renderShopStatus();
     processReferral();
     collectRefBonus();
     hideSplash();
