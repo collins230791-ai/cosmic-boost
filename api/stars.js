@@ -1,3 +1,5 @@
+import { cors, userFromRequest } from '../lib/telegram.js';
+
 const SKUS = {
   energy: {
     title: 'Дозаряд энергии',
@@ -20,21 +22,21 @@ const SKUS = {
 };
 
 export default async function handler(req, res) {
-  res.setHeader('Access-Control-Allow-Origin', '*');
-  res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
-  res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
+  cors(res);
   if (req.method === 'OPTIONS') return res.status(200).end();
   if (req.method !== 'POST') return res.status(405).json({ error: 'POST only' });
 
   const TOKEN = process.env.BOT_TOKEN;
   if (!TOKEN) return res.status(500).json({ error: 'BOT_TOKEN not set' });
 
-  const sku = String(req.body?.sku || '');
-  const userId = String(req.body?.userId || '').replace(/\D/g, '');
-  const item = SKUS[sku];
-  if (!item || !userId) return res.status(400).json({ error: 'bad sku' });
+  const { user, body } = userFromRequest(req);
+  if (!user?.id) return res.status(401).json({ error: 'auth' });
 
-  const payload = `cb|${sku}|${userId}`.slice(0, 128);
+  const sku = String(body?.sku || '');
+  const item = SKUS[sku];
+  if (!item) return res.status(400).json({ error: 'bad sku' });
+
+  const payload = `cb|${sku}|${user.id}`.slice(0, 128);
   try {
     const tgRes = await fetch(`https://api.telegram.org/bot${TOKEN}/createInvoiceLink`, {
       method: 'POST',
@@ -48,9 +50,7 @@ export default async function handler(req, res) {
       }),
     });
     const data = await tgRes.json();
-    if (!data.ok) {
-      return res.status(502).json({ error: data.description || 'invoice failed' });
-    }
+    if (!data.ok) return res.status(502).json({ error: data.description || 'invoice failed' });
     return res.status(200).json({ ok: true, url: data.result, sku, stars: item.amount });
   } catch (e) {
     return res.status(500).json({ error: e.message || 'fail' });
