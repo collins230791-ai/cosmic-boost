@@ -165,6 +165,16 @@
         <button class="btn btn-secondary mt-10 hidden" id="card-share" onclick="shareSmart(document.getElementById('card-title').textContent + ' — ' + document.getElementById('card-text').textContent, 'card')">Поделиться</button>
       </div>
 
+
+      <div class="card" id="shop-card">
+        <div class="card-title">⭐ <span id="title-shop">Магазин вселенной</span></div>
+        <div class="text-soft mb-8" id="shop-hint" style="font-size:13px">Telegram Stars. Безлимит, карты и дозаряд энергии</div>
+        <div id="shop-status" class="text-soft" style="font-size:13px;margin-bottom:10px"></div>
+        <button class="btn btn-secondary mt-8" onclick="buyStars('energy')">⚡ Дозаряд до 100% — 15 ⭐</button>
+        <button class="btn btn-secondary mt-8" onclick="buyStars('cards')">🃏 3 карты дня — 29 ⭐</button>
+        <button class="btn btn-primary mt-8" onclick="buyStars('pass')">🌌 Безлимит 24ч — 49 ⭐</button>
+      </div>
+
       <div class="card">
         <div class="card-title"><img class="title-img" src="icons/stars.png" alt=""> <span id="title-collection">Коллекция карт</span></div>
         <div class="text-soft mb-8" id="collection-hint" style="font-size:13px">Собери 7 карт — получи бейдж</div>
