@@ -197,45 +197,18 @@ export default async function handler(req) {
                         props: { style: { height: 4, display: 'flex' }, children: '' },
                       },
                   ...lineNodes,
-                ],
-              },
-            },
-            {
-              type: 'div',
-              props: {
-                style: {
-                  position: 'absolute',
-                  bottom: 210,
-                  display: 'flex',
-                  flexDirection: 'column',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                },
-                children: [
-                  {
-                    type: 'img',
-                    props: {
-                      src: `${ORIGIN}/share-bg/qr.png`,
-                      width: 118,
-                      height: 118,
-                      style: {
-                        width: 118,
-                        height: 118,
-                        borderRadius: 14,
-                      },
-                    },
-                  },
                   {
                     type: 'div',
                     props: {
                       style: {
-                        marginTop: 10,
-                        fontSize: 28,
+                        marginTop: 28,
+                        fontSize: 22,
                         fontWeight: 700,
-                        color: '#3A2A18',
+                        color: theme.color,
+                        opacity: 0.85,
                         fontFamily: 'sans-serif',
-                        letterSpacing: '0.02em',
-                        textShadow: '0 1px 6px rgba(255,255,255,0.55)',
+                        textAlign: 'center',
+                        textShadow: theme.shadow,
                       },
                       children: 'Cosmic Boost',
                     },
