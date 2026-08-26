@@ -17,15 +17,15 @@ const i18n = {
     titleCompliment: "Комплимент от вселенной",
     titleHoroscope: "Твой прогноз на сегодня",
     titleLazy: "Гороскоп для ленивых",
-    titleStars: "С кем из звёзд совместим(а)",
+    titleStars: "Кто тебе важен",
     titleUniverse: "Спросить вселенную",
     titleProfile: "Профиль",
     titleCard: "Карта дня",
     titleStreak: "Серия дней",
-    navBoost: "Буст", navLazy: "Ленивый", navStars: "Звёзды", navUniverse: "Вселенная", navProfile: "Профиль",
+    navBoost: "Буст", navLazy: "Ленивый", navStars: "Связь", navUniverse: "Вселенная", navProfile: "Профиль",
     btnLazy: "Получить разрешение", btnCard: "Открыть карту", btnAsk: "Спросить ✨", btnClose: "Закрыть", btnShare: "Поделиться", btnStory: "В Stories",
     chooseSign: "Твой знак зодиака:", signNotSelected: "Знак не выбран", guest: "Гость",
-    starsHint: "Выбери знаменитость", cardPlaceholder: "Нажми, чтобы открыть",
+    starsHint: "Имя и дата — где срастаетесь и где трёт", cardPlaceholder: "Нажми, чтобы открыть",
     horoscopePlaceholder: "Выбери знак в Профиле ✨",
     aiPlaceholder: "Напиши что угодно вселенной...",
     loading: "Связываемся с космосом...",
@@ -39,15 +39,15 @@ const i18n = {
     titleCompliment: "Compliment from the Universe",
     titleHoroscope: "Your forecast for today",
     titleLazy: "Lazy Horoscope",
-    titleStars: "Celebrity Compatibility",
+    titleStars: "Who matters to you",
     titleUniverse: "Ask the Universe",
     titleProfile: "Profile",
     titleCard: "Card of the Day",
     titleStreak: "Day streak",
-    navBoost: "Boost", navLazy: "Lazy", navStars: "Stars", navUniverse: "Universe", navProfile: "Profile",
+    navBoost: "Boost", navLazy: "Lazy", navStars: "Bond", navUniverse: "Universe", navProfile: "Profile",
     btnLazy: "Get permission", btnCard: "Draw a card", btnAsk: "Ask ✨", btnClose: "Close", btnShare: "Share", btnStory: "To Stories",
     chooseSign: "Your zodiac sign:", signNotSelected: "Sign not selected", guest: "Guest",
-    starsHint: "Choose a celebrity", cardPlaceholder: "Press to open",
+    starsHint: "Name and birth date — where you fuse and where it rubs", cardPlaceholder: "Press to open",
     horoscopePlaceholder: "Choose your sign in Profile ✨",
     aiPlaceholder: "Write anything to the universe...",
     loading: "Connecting to the cosmos...",
@@ -485,7 +485,7 @@ const QUEST_TYPES = [
   { id: 'card', icon: '🃏', ru: 'Открой карту дня', en: 'Draw the card of the day', screen: 'profile', action: 'card' },
   { id: 'universe', icon: '🌌', ru: 'Спроси вселенную', en: 'Ask the universe', screen: 'universe', action: 'universe' },
   { id: 'lazy', icon: '😴', ru: 'Возьми разрешение ничего не делать', en: 'Get permission to do nothing', screen: 'lazy', action: 'lazy' },
-  { id: 'stars', icon: '🌟', ru: 'Проверь совместимость со звездой', en: 'Check celebrity compatibility', screen: 'stars', action: 'stars' },
+  { id: 'stars', icon: '🌟', ru: 'Разбери связь с тем, кто важен', en: 'Read the bond with someone who matters', screen: 'stars', action: 'stars' },
 ];
 
 function questKey() {
@@ -574,7 +574,7 @@ function doDailyQuest() {
     }, 400);
   } else if (meta.action === 'stars') {
     setTimeout(() => {
-      if (tg?.showPopup) tg.showPopup({ message: lang === 'ru' ? 'Выбери знаменитость 🌟' : 'Pick a celebrity 🌟', buttons: [{ type: 'ok' }] });
+      if (tg?.showPopup) tg.showPopup({ message: lang === 'ru' ? 'Введи имя и дату того, кто важен 🌟' : 'Enter the name and date of someone who matters 🌟', buttons: [{ type: 'ok' }] });
     }, 400);
   }
 }
@@ -584,6 +584,7 @@ function tryCompleteQuest(actionId) {
   if (data.done || data.id !== actionId) return;
   if (setQuestDone()) {
     renderDailyQuest();
+  renderSynastryYou();
   fetchDailyCount();
     haptic('success');
     if (tg?.showPopup) {
@@ -957,6 +958,7 @@ function updateUI() {
   renderStreakUI(s);
   renderCollection();
   renderDailyQuest();
+  renderSynastryYou();
   fetchDailyCount();
 
   const titleCol = document.getElementById('title-collection');
@@ -1092,6 +1094,127 @@ function renderCelebrities() {
     item.onclick = () => showCelebAI(celeb);
     list.appendChild(item);
   });
+}
+
+
+let relType = 'love';
+
+function setRelType(btn) {
+  relType = btn?.dataset?.rel || 'love';
+  document.querySelectorAll('.rel-chip').forEach(el => el.classList.toggle('active', el === btn));
+}
+
+function renderSynastryYou() {
+  const el = document.getElementById('synastry-you');
+  if (!el) return;
+  const myDate = birthDate;
+  const mySign = (myDate && signFromDate(myDate)) || userSign;
+  if (!myDate && !mySign) {
+    el.textContent = lang === 'ru'
+      ? 'Сначала сохрани свою дату рождения в Профиле — иначе сравнение будет кривым'
+      : 'Save your birth date in Profile first — otherwise the reading is crooked';
+    return;
+  }
+  const lp = myDate ? lifePathNumber(myDate) : '—';
+  const signLabel = mySign && ZODIAC[mySign] ? (ZODIAC[mySign].emoji + ' ' + ZODIAC[mySign][lang]) : '—';
+  const nm = userName || (lang === 'ru' ? 'Ты' : 'You');
+  el.textContent = lang === 'ru'
+    ? `Ты: ${nm} · ${signLabel} · число судьбы ${lp}`
+    : `You: ${nm} · ${signLabel} · life path ${lp}`;
+}
+
+function elementOfSign(sign) {
+  return {
+    aries:'fire', leo:'fire', sagittarius:'fire',
+    taurus:'earth', virgo:'earth', capricorn:'earth',
+    gemini:'air', libra:'air', aquarius:'air',
+    cancer:'water', scorpio:'water', pisces:'water'
+  }[sign] || null;
+}
+
+async function runSynastry() {
+  const otherName = (document.getElementById('other-name')?.value || '').trim();
+  const otherBirth = document.getElementById('other-birth')?.value || '';
+  const textEl = document.getElementById('synastry-text');
+  const factsEl = document.getElementById('synastry-facts');
+  const shareBtn = document.getElementById('synastry-share');
+  if (!otherName || otherName.length < 2) {
+    if (tg?.showAlert) tg.showAlert(lang === 'ru' ? 'Напиши, как человека зовут' : 'Write their name');
+    return;
+  }
+  if (!otherBirth) {
+    if (tg?.showAlert) tg.showAlert(lang === 'ru' ? 'Нужна дата рождения' : 'Birth date is required');
+    return;
+  }
+  const myDate = birthDate;
+  const mySign = (myDate && signFromDate(myDate)) || userSign;
+  if (!myDate && !mySign) {
+    if (tg?.showPopup) {
+      tg.showPopup({
+        title: lang === 'ru' ? 'Сначала ты' : 'You first',
+        message: lang === 'ru' ? 'Сохрани свою дату в Профиле — сравнение без неё пустое' : 'Save your date in Profile — without it the reading is empty',
+        buttons: [
+          { id: 'prof', type: 'default', text: lang === 'ru' ? 'В профиль' : 'Profile' },
+          { type: 'ok' }
+        ]
+      }, (id) => { if (id === 'prof') showScreen('profile'); });
+    }
+    return;
+  }
+  if (!spendEnergy()) return;
+
+  const otherSign = signFromDate(otherBirth);
+  const facts = {
+    me: {
+      name: nameForAI(),
+      date: myDate || null,
+      sign: mySign,
+      lifePath: myDate ? lifePathNumber(myDate) : null,
+      element: elementOfSign(mySign)
+    },
+    other: {
+      name: otherName.slice(0, 24),
+      date: otherBirth,
+      sign: otherSign,
+      lifePath: lifePathNumber(otherBirth),
+      element: elementOfSign(otherSign)
+    },
+    bond: relType
+  };
+
+  const signA = facts.me.sign && ZODIAC[facts.me.sign] ? ZODIAC[facts.me.sign][lang] : 'неизвестен';
+  const signB = facts.other.sign && ZODIAC[facts.other.sign] ? ZODIAC[facts.other.sign][lang] : 'неизвестен';
+  if (factsEl) {
+    factsEl.textContent = lang === 'ru'
+      ? `${facts.me.name}: ${signA}, число ${facts.me.lifePath ?? '—'}  ·  ${facts.other.name}: ${signB}, число ${facts.other.lifePath}`
+      : `${facts.me.name}: ${signA}, path ${facts.me.lifePath ?? '—'}  ·  ${facts.other.name}: ${signB}, path ${facts.other.lifePath}`;
+  }
+
+  setLoading(textEl, true);
+  if (shareBtn) shareBtn.classList.add('hidden');
+  haptic('medium');
+
+  const bondWord = {
+    love: lang === 'ru' ? 'пара / близкие отношения' : 'romantic bond',
+    crush: lang === 'ru' ? 'влечение / ещё не случилось' : 'attraction / not yet a couple',
+    friend: lang === 'ru' ? 'дружба' : 'friendship'
+  }[relType];
+
+  const prompt = lang === 'ru'
+    ? `Это факты, не выдумывай другие знаки и числа. Тон тёплый, точный, без насмешки и без гуру.
+Я: имя ${facts.me.name}, солнце ${signA}, стихия ${facts.me.element || 'неизвестно'}, число судьбы ${facts.me.lifePath ?? 'неизвестно'}.
+Другой человек: имя ${facts.other.name}, солнце ${signB}, стихия ${facts.other.element || 'неизвестно'}, число судьбы ${facts.other.lifePath}, роль связи: ${bondWord}.
+Напиши 4-5 предложений: 1) где вы срастаетесь, 2) где будет тереть, 3) как это ощущается в теле/дне, 4) один конкретный совет на эту неделю. Без процентов совместимости. Без markdown.`
+    : `These are facts, do not invent other signs or numbers. Warm, precise tone, no mockery, no guru voice.
+Me: name ${facts.me.name}, sun ${signA}, element ${facts.me.element || 'unknown'}, life path ${facts.me.lifePath ?? 'unknown'}.
+Other: name ${facts.other.name}, sun ${signB}, element ${facts.other.element || 'unknown'}, life path ${facts.other.lifePath}, bond: ${bondWord}.
+Write 4-5 sentences: 1) where you fuse, 2) where it will rub, 3) how it feels in the body/day, 4) one concrete tip for this week. No compatibility percent. No markdown.`;
+
+  const reply = await askAI(prompt, 'stars');
+  if (textEl) textEl.textContent = reply || t('error');
+  if (reply && shareBtn) shareBtn.classList.remove('hidden');
+  if (reply) tryCompleteQuest('stars');
+  haptic(reply ? 'success' : 'error');
 }
 
 async function showCelebAI(celeb) {
