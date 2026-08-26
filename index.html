@@ -110,9 +110,11 @@
         <div id="synastry-full" class="mt-12" style="font-size:15px;line-height:1.55;white-space:pre-wrap"></div>
       </div>
       <div class="card">
-        <div class="card-title" id="title-celebs">Или со звездой экрана</div>
-        <div class="text-soft mb-8" id="stars-hint-celeb" style="font-size:13px">Для настроения, не вместо живого человека</div>
-        <div class="celeb-list" id="celeb-list"></div>
+        <div class="card-title" id="title-celebs">Или со звездой</div>
+        <div class="text-soft mb-8" id="stars-hint-celeb" style="font-size:13px">Имя, фамилия или псевдоним — найдём дату и разберём связь</div>
+        <input type="text" id="celeb-query" class="name-input" placeholder="Зендая, Наталья Орейро..." maxlength="80" style="text-align:left">
+        <button class="btn btn-secondary mt-10" id="btn-celeb-search" onclick="searchFamous()">Найти ✨</button>
+        <div id="celeb-list" class="celeb-list mt-12"></div>
       </div>
     </div>
 
