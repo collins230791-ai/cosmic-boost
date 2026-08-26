@@ -1104,6 +1104,7 @@ function renderCelebrities() {
 
 
 let relType = 'love';
+let lastSynastry = null;
 
 function setRelType(btn) {
   relType = btn?.dataset?.rel || 'love';
@@ -1249,10 +1250,74 @@ Write 4-5 sentences: 1) where you fuse, 2) where it will rub, 3) how it feels in
 
   let reply = await askAI(prompt, 'stars');
   if (!reply) reply = synastryFallback(facts);
+  lastSynastry = { facts, signA, signB, bondWord, short: reply };
   if (textEl) textEl.textContent = reply;
   if (shareBtn) shareBtn.classList.remove('hidden');
+  const fullBtn = document.getElementById('btn-synastry-full');
+  if (fullBtn) {
+    fullBtn.classList.remove('hidden');
+    fullBtn.textContent = lang === 'ru' ? 'Полный разбор — 75 ⭐' : 'Full reading — 75 ⭐';
+  }
+  const fullEl = document.getElementById('synastry-full');
+  if (fullEl) fullEl.textContent = '';
   tryCompleteQuest('stars');
   haptic('success');
+}
+
+function fullSynastryPrompt(pack) {
+  const f = pack.facts;
+  if (lang === 'ru') {
+    return `Это факты. Не выдумывай другие знаки, числа и события. Тон тёплый, взрослый, без насмешки и без эзотерического пафоса. Пиши как умный близкий человек.
+Я: ${f.me.name}, солнце ${pack.signA}, стихия ${f.me.element}, число судьбы ${f.me.lifePath}.
+Другой: ${f.other.name}, солнце ${pack.signB}, стихия ${f.other.element}, число судьбы ${f.other.lifePath}.
+Тип связи: ${pack.bondWord}.
+Короткий разбор уже был: ${pack.short}
+
+Дай полный разбор в 3 абзацах с заголовками как обычный текст:
+1) Где живёт тепло
+2) Где будет срыв
+3) Что делать на этой неделе — 3 конкретных шага
+Каждый абзац 3-4 предложения. Без процентов, без markdown, без слова "натал".`;
+  }
+  return `Facts only. Do not invent other signs or events. Warm adult tone.
+Me: ${f.me.name}, sun ${pack.signA}, element ${f.me.element}, life path ${f.me.lifePath}.
+Other: ${f.other.name}, sun ${pack.signB}, element ${f.other.element}, life path ${f.other.lifePath}.
+Bond: ${pack.bondWord}.
+Short reading: ${pack.short}
+Write 3 sections: Where the warmth lives; Where it breaks; What to do this week (3 concrete steps). No percent, no markdown.`;
+}
+
+async function writeFullSynastry() {
+  if (!lastSynastry) return;
+  const el = document.getElementById('synastry-full');
+  if (el) setLoading(el, true);
+  haptic('medium');
+  let reply = await askAI(fullSynastryPrompt(lastSynastry), 'stars');
+  if (!reply) {
+    reply = lang === 'ru'
+      ? 'Тепло у вас в дополнении ритмов: один зажигает, второй держит берег. Срыв — когда темп одного становится приговором другому. На этой неделе: одно маленькое обещание в день, один вечер без разбора «кто виноват», одна фраза «мне сейчас нужно вот это» без намёка.'
+      : 'Warmth is in complementary pace. The break is when one tempo becomes a verdict. This week: one small kept promise a day, one evening without blame, one clear ask.';
+  }
+  lastSynastry.full = reply;
+  if (el) el.textContent = reply;
+  const shareBtn = document.getElementById('synastry-share');
+  if (shareBtn) {
+    shareBtn.classList.remove('hidden');
+    shareBtn.onclick = () => shareSmart((lastSynastry.short || '') + '\n\n' + reply, 'stars');
+  }
+  haptic('success');
+}
+
+function buyFullSynastry() {
+  if (!lastSynastry) {
+    if (tg?.showAlert) tg.showAlert(lang === 'ru' ? 'Сначала короткий разбор' : 'Do the short reading first');
+    return;
+  }
+  if (lastSynastry.full) {
+    writeFullSynastry();
+    return;
+  }
+  buyStars('synastry');
 }
 
 async function showCelebAI(celeb) {
@@ -1546,11 +1611,13 @@ function applyStarsPurchase(sku) {
   } else if (sku === 'pass') {
     const until = Date.now() + 24 * 60 * 60 * 1000;
     localStorage.setItem('cb_pass_until', String(until));
+  } else if (sku === 'synastry') {
+    writeFullSynastry();
   }
   refreshEnergyUI();
   renderShopStatus();
   haptic('success');
-  if (tg?.showPopup) {
+  if (sku !== 'synastry' && tg?.showPopup) {
     const msg = sku === 'energy'
       ? (lang === 'ru' ? 'Энергия снова 100% ⚡' : 'Energy is back to 100% ⚡')
       : sku === 'cards'
