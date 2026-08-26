@@ -4,5 +4,11 @@
       "path": "/api/cron-remind",
       "schedule": "0 10 * * *"
     }
+  ],
+  "rewrites": [
+    {
+      "source": "/story-card.png",
+      "destination": "/api/story-card"
+    }
   ]
 }
