@@ -25,7 +25,7 @@ const i18n = {
     navBoost: "Буст", navLazy: "Ленивый", navHall: "Зал", navStars: "Связь", navUniverse: "Вселенная", navProfile: "Профиль",
     btnLazy: "Получить разрешение", btnCard: "Открыть карту", btnAsk: "Спросить ✨", btnClose: "Закрыть", btnShare: "Поделиться", btnStory: "В Stories",
     chooseSign: "Твой знак зодиака:", signNotSelected: "Знак не выбран", guest: "Гость",
-    starsHint: "Человек, с которым хочешь понять связь", cardPlaceholder: "Нажми, чтобы открыть",
+    starsHint: "Имя и дата — где срастаетесь и где трёт", cardPlaceholder: "Нажми, чтобы открыть",
     horoscopePlaceholder: "Выбери знак в Профиле ✨",
     aiPlaceholder: "Напиши что угодно вселенной...",
     loading: "Связываемся с космосом...",
@@ -47,7 +47,7 @@ const i18n = {
     navBoost: "Boost", navLazy: "Lazy", navHall: "Hall", navStars: "Bond", navUniverse: "Universe", navProfile: "Profile",
     btnLazy: "Get permission", btnCard: "Draw a card", btnAsk: "Ask ✨", btnClose: "Close", btnShare: "Share", btnStory: "To Stories",
     chooseSign: "Your zodiac sign:", signNotSelected: "Sign not selected", guest: "Guest",
-    starsHint: "The person whose bond you want to understand", cardPlaceholder: "Press to open",
+    starsHint: "Name and birth date — where you fuse and where it rubs", cardPlaceholder: "Press to open",
     horoscopePlaceholder: "Choose your sign in Profile ✨",
     aiPlaceholder: "Write anything to the universe...",
     loading: "Connecting to the cosmos...",
@@ -435,18 +435,6 @@ function refreshEnergyUI() {
   if (val) val.textContent = energy + '%';
   if (fill) fill.style.width = energy + '%';
   if (label) label.textContent = energyComment(energy);
-  const rules = document.getElementById('energy-rules');
-  if (rules) {
-    if (hasUnlimitedPass()) {
-      rules.textContent = lang === 'ru'
-        ? 'Сейчас безлимит: вопросы и разборы энергию не едят.'
-        : 'Unlimited is on: questions and readings do not spend energy.';
-    } else {
-      rules.textContent = lang === 'ru'
-        ? 'Короткий разбор и вопрос — по 18%. Завтра снова 100. Полный разбор связи — 75 ⭐.'
-        : 'A short reading or question costs 18%. Back to 100 tomorrow. Full bond reading is 75 ⭐.';
-    }
-  }
   return energy;
 }
 
@@ -969,8 +957,6 @@ function updateUI() {
   });
   const aiInput = document.getElementById('ai-input');
   if (aiInput) aiInput.placeholder = t('aiPlaceholder');
-  const otherName = document.getElementById('other-name');
-  if (otherName) otherName.placeholder = lang === 'ru' ? 'Наталья, мама, коллега' : 'Natalie, mom, coworker';
 
   const s = updateStreak();
   const streakEl = document.getElementById('streak-value');
@@ -1027,49 +1013,44 @@ function updateUI() {
   loadBoostContent();
 }
 
-function pickBank(arr) {
-  if (!arr || !arr.length) return '';
-  return arr[Math.floor(Math.random() * arr.length)];
-}
-
-function polishInBackground(key, prompt, el) {
-  if (!tg?.initData || !el) return;
-  askAI(prompt, 'ai').then((reply) => {
-    if (!reply) return;
-    localStorage.setItem(key, reply);
-    if (el) el.textContent = reply;
-  }).catch(() => {});
-}
-
 async function loadBoostContent() {
   const compEl = document.getElementById('compliment-text');
   const horEl = document.getElementById('horoscope-text');
+  setLoading(compEl, true);
+  if (!userSign) horEl.textContent = t('horoscopePlaceholder');
+  else setLoading(horEl, true);
+
   const n = nameForAI();
   const compKey = cacheKey('compliment');
   const horKey = cacheKey('horoscope');
+  const hasComp = !!localStorage.getItem(compKey);
+  const hasHor = !userSign || !!localStorage.getItem(horKey);
 
-  const cachedComp = localStorage.getItem(compKey);
-  if (compEl) compEl.textContent = cachedComp || pickBank(COMPLIMENTS[lang]) || t('error');
-
-  if (!userSign) {
-    if (horEl) horEl.textContent = t('horoscopePlaceholder');
-  } else {
-    const fallback = (DAILY_HOROSCOPES[lang] && DAILY_HOROSCOPES[lang][userSign]) || [];
-    const cachedHor = localStorage.getItem(horKey);
-    if (horEl) horEl.textContent = cachedHor || pickBank(fallback) || t('horoscopePlaceholder');
+  // One energy charge for today's boost pack if anything needs AI
+  if ((!hasComp || !hasHor) && !spendEnergy(20)) {
+    compEl.textContent = hasComp
+      ? localStorage.getItem(compKey)
+      : (lang === 'ru' ? 'Не хватает энергии на комплимент. Завтра будет полный заряд ✨' : 'Not enough energy for a compliment. Full charge tomorrow ✨');
+    if (userSign) {
+      horEl.textContent = hasHor
+        ? localStorage.getItem(horKey)
+        : (lang === 'ru' ? 'Не хватает энергии на прогноз ✨' : 'Not enough energy for a forecast ✨');
+    }
+    return;
   }
 
   const compPrompt = lang === 'ru'
     ? `Напиши один короткий тёплый и смешной комплимент от вселенной для человека по имени ${n}. Обратись по имени. 1-2 предложения. С эмодзи. Без markdown.`
     : `Write one short warm funny compliment from the universe for a person named ${n}. Address them by name. 1-2 sentences. With emoji. No markdown.`;
-  if (!cachedComp) polishInBackground(compKey, compPrompt, compEl);
+  compEl.textContent = await getCachedOrAI('compliment', compPrompt, COMPLIMENTS[lang], { free: true });
 
-  if (userSign && !localStorage.getItem(horKey)) {
+  if (userSign) {
     const signName = ZODIAC[userSign][lang];
     const horPrompt = lang === 'ru'
       ? `Короткий весёлый гороскоп на сегодня для ${signName}, обратись к человеку по имени ${n}. 2-3 предложения, юмор и тепло. Эмодзи. Без markdown.`
       : `Short fun horoscope for today for ${signName}, address the person as ${n}. 2-3 sentences, humor and warmth. Emoji. No markdown.`;
-    polishInBackground(horKey, horPrompt, horEl);
+    const fallback = (DAILY_HOROSCOPES[lang] && DAILY_HOROSCOPES[lang][userSign]) || [];
+    horEl.textContent = await getCachedOrAI('horoscope', horPrompt, fallback, { free: true });
   }
 }
 
@@ -1165,7 +1146,7 @@ function pickFamous(person) {
   if (crush) setRelType(crush);
   haptic('medium');
   window.scrollTo({ top: 0, behavior: 'smooth' });
-  prepareSynastry();
+  runSynastry();
 }
 
 
@@ -1271,19 +1252,12 @@ function sendSynastryToOther() {
   shareResult(text, 'stars');
 }
 
-
-let pendingSynastry = null;
-
-function cancelSynastry() {
-  pendingSynastry = null;
-  document.getElementById('synastry-confirm')?.classList.add('hidden');
-  const btn = document.getElementById('btn-synastry');
-  if (btn) btn.classList.remove('hidden');
-}
-
-function prepareSynastry() {
+async function runSynastry() {
   const otherName = (document.getElementById('other-name')?.value || '').trim();
   const otherBirth = document.getElementById('other-birth')?.value || '';
+  const textEl = document.getElementById('synastry-text');
+  const factsEl = document.getElementById('synastry-facts');
+  const shareBtn = document.getElementById('synastry-share');
   if (!otherName || otherName.length < 2) {
     if (tg?.showAlert) tg.showAlert(lang === 'ru' ? 'Напиши, как человека зовут' : 'Write their name');
     return;
@@ -1325,36 +1299,14 @@ function prepareSynastry() {
     },
     bond: relType
   };
-  const signA = facts.me.sign && ZODIAC[facts.me.sign] ? ZODIAC[facts.me.sign][lang] : (lang === 'ru' ? 'неизвестен' : 'unknown');
-  const signB = facts.other.sign && ZODIAC[facts.other.sign] ? ZODIAC[facts.other.sign][lang] : (lang === 'ru' ? 'неизвестен' : 'unknown');
-  pendingSynastry = { facts, signA, signB };
-  const factsEl = document.getElementById('synastry-facts');
+
+  const signA = facts.me.sign && ZODIAC[facts.me.sign] ? ZODIAC[facts.me.sign][lang] : 'неизвестен';
+  const signB = facts.other.sign && ZODIAC[facts.other.sign] ? ZODIAC[facts.other.sign][lang] : 'неизвестен';
   if (factsEl) {
     factsEl.textContent = lang === 'ru'
-      ? `${facts.me.name}: ${signA}, число ${facts.me.lifePath ?? '—'}  ·  ${facts.other.name}: ${signB}, число ${facts.other.lifePath}  ·  ${otherBirth}`
-      : `${facts.me.name}: ${signA}, path ${facts.me.lifePath ?? '—'}  ·  ${facts.other.name}: ${signB}, path ${facts.other.lifePath}  ·  ${otherBirth}`;
+      ? `${facts.me.name}: ${signA}, число ${facts.me.lifePath ?? '—'}  ·  ${facts.other.name}: ${signB}, число ${facts.other.lifePath}`
+      : `${facts.me.name}: ${signA}, path ${facts.me.lifePath ?? '—'}  ·  ${facts.other.name}: ${signB}, path ${facts.other.lifePath}`;
   }
-  document.getElementById('synastry-confirm')?.classList.remove('hidden');
-  document.getElementById('btn-synastry')?.classList.add('hidden');
-  haptic('medium');
-}
-
-function confirmSynastry() {
-  if (!pendingSynastry) {
-    prepareSynastry();
-    return;
-  }
-  runSynastry();
-}
-
-async function runSynastry() {
-  if (!pendingSynastry) {
-    prepareSynastry();
-    return;
-  }
-  const { facts, signA, signB } = pendingSynastry;
-  const textEl = document.getElementById('synastry-text');
-  const shareBtn = document.getElementById('synastry-share');
 
   setLoading(textEl, true);
   if (shareBtn) shareBtn.classList.add('hidden');
