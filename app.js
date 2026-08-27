@@ -25,7 +25,7 @@ const i18n = {
     navBoost: "Буст", navLazy: "Ленивый", navHall: "Зал", navStars: "Связь", navUniverse: "Вселенная", navProfile: "Профиль",
     btnLazy: "Получить разрешение", btnCard: "Открыть карту", btnAsk: "Спросить ✨", btnClose: "Закрыть", btnShare: "Поделиться", btnStory: "В Stories",
     chooseSign: "Твой знак зодиака:", signNotSelected: "Знак не выбран", guest: "Гость",
-    starsHint: "Разбор связи с человеком", cardPlaceholder: "Нажми, чтобы открыть",
+    cardPlaceholder: "Нажми, чтобы открыть",
     horoscopePlaceholder: "Выбери знак в Профиле ✨",
     aiPlaceholder: "Напиши что угодно вселенной...",
     loading: "Связываемся с космосом...",
@@ -47,7 +47,7 @@ const i18n = {
     navBoost: "Boost", navLazy: "Lazy", navHall: "Hall", navStars: "Bond", navUniverse: "Universe", navProfile: "Profile",
     btnLazy: "Get permission", btnCard: "Draw a card", btnAsk: "Ask ✨", btnClose: "Close", btnShare: "Share", btnStory: "To Stories",
     chooseSign: "Your zodiac sign:", signNotSelected: "Sign not selected", guest: "Guest",
-    starsHint: "A bond reading for two people", cardPlaceholder: "Press to open",
+    cardPlaceholder: "Press to open",
     horoscopePlaceholder: "Choose your sign in Profile ✨",
     aiPlaceholder: "Write anything to the universe...",
     loading: "Connecting to the cosmos...",
@@ -961,7 +961,7 @@ function updateUI() {
     'nav-boost': 'navBoost', 'nav-lazy': 'navLazy', 'nav-hall': 'navHall', 'nav-stars': 'navStars',
     'nav-universe': 'navUniverse', 'nav-profile': 'navProfile',
     'btn-lazy': 'btnLazy', 'btn-card': 'btnCard', 'btn-ask': 'btnAsk',
-    'modal-close-btn': 'btnClose', 'choose-sign-label': 'chooseSign', 'stars-hint': 'starsHint'
+    'modal-close-btn': 'btnClose', 'choose-sign-label': 'chooseSign'
   };
   Object.entries(map).forEach(([id, key]) => {
     const el = document.getElementById(id);
