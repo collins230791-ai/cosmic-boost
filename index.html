@@ -57,7 +57,6 @@
           <div class="energy-value" id="energy-value">—</div>
           <div class="energy-label" id="energy-label">...</div>
           <div class="energy-bar"><div class="energy-fill" id="energy-fill" style="width:0%"></div></div>
-          <div class="text-soft" id="energy-rules" style="font-size:12px;margin-top:8px;line-height:1.4">Разбор и вопрос — 18%. Завтра снова 100.</div>
         </div>
       </div>
 
@@ -93,25 +92,17 @@
     <div class="screen" id="screen-stars">
       <div class="card">
         <div class="card-title"><img class="title-img" src="icons/stars.png" alt=""> <span id="title-stars">Кто тебе важен</span></div>
-        <div class="text-soft mb-8" id="stars-hint" style="font-size:13px">Человек, с которым хочешь понять связь</div>
+        <div class="text-soft mb-8" id="stars-hint" style="font-size:13px">Имя и дата рождения — разберём, где вы срастаетесь и где трёт</div>
         <div id="synastry-you" class="text-soft mb-8" style="font-size:13px"></div>
-        <div class="text-soft mb-8" style="font-size:12px">Имя</div>
-        <input type="text" id="other-name" class="name-input" placeholder="Наталья, мама, коллега" maxlength="24" style="text-align:left">
-        <div class="text-soft mb-8 mt-12" style="font-size:12px">Дата рождения этого человека</div>
-        <input type="date" id="other-birth" class="name-input" style="text-align:left">
+        <input type="text" id="other-name" class="name-input" placeholder="Как зовут" maxlength="24" style="text-align:left">
+        <input type="date" id="other-birth" class="name-input mt-10" style="text-align:left">
         <div class="rel-row" id="rel-row">
           <button type="button" class="rel-chip active" data-rel="love" onclick="setRelType(this)">Пара</button>
           <button type="button" class="rel-chip" data-rel="crush" onclick="setRelType(this)">Влечение</button>
           <button type="button" class="rel-chip" data-rel="friend" onclick="setRelType(this)">Друг</button>
         </div>
-        <button class="btn btn-primary mt-16" id="btn-synastry" onclick="prepareSynastry()">Разобрать связь ✨</button>
-        <div id="synastry-confirm" class="syn-confirm hidden">
-          <div class="text-soft" style="font-size:12px;margin-bottom:6px" id="synastry-confirm-label">Проверь данные</div>
-          <div id="synastry-facts" style="font-size:14px;line-height:1.45"></div>
-          <button class="btn btn-primary mt-12" id="btn-synastry-go" onclick="confirmSynastry()">Всё верно, разобрать</button>
-          <button class="btn btn-secondary mt-8" type="button" onclick="cancelSynastry()">Исправить</button>
-        </div>
-
+        <button class="btn btn-primary mt-16" id="btn-synastry" onclick="runSynastry()">Разобрать связь ✨</button>
+        <div id="synastry-facts" class="text-soft mt-12" style="font-size:13px"></div>
         <div id="synastry-text" class="mt-12" style="font-size:15px;line-height:1.55"></div>
         <button class="btn btn-primary mt-10 hidden" id="btn-synastry-send" onclick="sendSynastryToOther()">Отправить</button>
         <button class="btn btn-secondary mt-10 hidden" id="synastry-share" onclick="shareSmart((document.getElementById('synastry-text').textContent||''), 'stars')">Поделиться</button>
