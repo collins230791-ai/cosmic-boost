@@ -884,9 +884,9 @@ function pickBirthCity(item, btn) {
 
 async function saveBirthDate() {
   const el = document.getElementById('birth-date');
-  const v = el?.value || '';
-  if (!v) {
-    if (tg?.showAlert) tg.showAlert(lang === 'ru' ? 'Выбери дату' : 'Pick a date');
+  const v = parseBirthDate(el?.value || '') || (el?.value || '');
+  if (!parseBirthDate(el?.value || '')) {
+    if (tg?.showAlert) tg.showAlert(lang === 'ru' ? 'Дата в формате 23.07.1991' : 'Use date format 23.07.1991');
     return;
   }
   const typedTime = parseBirthTime(document.getElementById('birth-time')?.value || '');
@@ -1109,7 +1109,7 @@ function updateUI() {
   }
 
   const birthEl = document.getElementById('birth-date');
-  if (birthEl && birthDate) birthEl.value = birthDate;
+  if (birthEl && birthDate) birthEl.value = formatBirthDate(birthDate);
   const timeEl = document.getElementById('birth-time');
   if (timeEl && !birthTimeUnknown) timeEl.value = birthTime || '';
   if (timeEl && birthTimeUnknown) timeEl.placeholder = lang === 'ru' ? 'неизвестно' : 'unknown';
@@ -1394,6 +1394,15 @@ function sendSynastryToOther() {
   shareResult(text, 'stars');
 }
 
+
+function formatBirthDate(iso) {
+  if (!iso) return '';
+  if (/^\d{4}-\d{2}-\d{2}$/.test(iso)) {
+    const [y, m, d] = iso.split('-');
+    return d + '.' + m + '.' + y;
+  }
+  return iso;
+}
 
 function parseBirthDate(raw) {
   const v = String(raw || '').trim();
