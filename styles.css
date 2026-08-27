@@ -994,3 +994,16 @@ body.tg-light {
   background: rgba(168,120,255,.12);
   border: 1px solid rgba(200,170,255,.28);
 }
+
+.city-results { display:flex; flex-direction:column; gap:8px; }
+.city-chip {
+  text-align:left;
+  width:100%;
+  padding:10px 12px;
+  border-radius:14px;
+  border:1px solid rgba(200,170,255,.28);
+  background:rgba(168,120,255,.12);
+  color:#fff;
+  font-size:13px;
+}
+.city-chip.active { border-color:#c9a6ff; background:rgba(168,120,255,.28); }
