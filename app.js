@@ -435,6 +435,18 @@ function refreshEnergyUI() {
   if (val) val.textContent = energy + '%';
   if (fill) fill.style.width = energy + '%';
   if (label) label.textContent = energyComment(energy);
+  const rules = document.getElementById('energy-rules');
+  if (rules) {
+    if (hasUnlimitedPass()) {
+      rules.textContent = lang === 'ru'
+        ? 'Сейчас безлимит: вопросы и разборы энергию не едят.'
+        : 'Unlimited is on: questions and readings do not spend energy.';
+    } else {
+      rules.textContent = lang === 'ru'
+        ? 'Короткий разбор и вопрос — по 18%. Завтра снова 100. Полный разбор связи — 75 ⭐.'
+        : 'A short reading or question costs 18%. Back to 100 tomorrow. Full bond reading is 75 ⭐.';
+    }
+  }
   return energy;
 }
 
@@ -1146,7 +1158,7 @@ function pickFamous(person) {
   if (crush) setRelType(crush);
   haptic('medium');
   window.scrollTo({ top: 0, behavior: 'smooth' });
-  runSynastry();
+  prepareSynastry();
 }
 
 
@@ -1252,12 +1264,19 @@ function sendSynastryToOther() {
   shareResult(text, 'stars');
 }
 
-async function runSynastry() {
+
+let pendingSynastry = null;
+
+function cancelSynastry() {
+  pendingSynastry = null;
+  document.getElementById('synastry-confirm')?.classList.add('hidden');
+  const btn = document.getElementById('btn-synastry');
+  if (btn) btn.classList.remove('hidden');
+}
+
+function prepareSynastry() {
   const otherName = (document.getElementById('other-name')?.value || '').trim();
   const otherBirth = document.getElementById('other-birth')?.value || '';
-  const textEl = document.getElementById('synastry-text');
-  const factsEl = document.getElementById('synastry-facts');
-  const shareBtn = document.getElementById('synastry-share');
   if (!otherName || otherName.length < 2) {
     if (tg?.showAlert) tg.showAlert(lang === 'ru' ? 'Напиши, как человека зовут' : 'Write their name');
     return;
@@ -1299,14 +1318,36 @@ async function runSynastry() {
     },
     bond: relType
   };
-
-  const signA = facts.me.sign && ZODIAC[facts.me.sign] ? ZODIAC[facts.me.sign][lang] : 'неизвестен';
-  const signB = facts.other.sign && ZODIAC[facts.other.sign] ? ZODIAC[facts.other.sign][lang] : 'неизвестен';
+  const signA = facts.me.sign && ZODIAC[facts.me.sign] ? ZODIAC[facts.me.sign][lang] : (lang === 'ru' ? 'неизвестен' : 'unknown');
+  const signB = facts.other.sign && ZODIAC[facts.other.sign] ? ZODIAC[facts.other.sign][lang] : (lang === 'ru' ? 'неизвестен' : 'unknown');
+  pendingSynastry = { facts, signA, signB };
+  const factsEl = document.getElementById('synastry-facts');
   if (factsEl) {
     factsEl.textContent = lang === 'ru'
-      ? `${facts.me.name}: ${signA}, число ${facts.me.lifePath ?? '—'}  ·  ${facts.other.name}: ${signB}, число ${facts.other.lifePath}`
-      : `${facts.me.name}: ${signA}, path ${facts.me.lifePath ?? '—'}  ·  ${facts.other.name}: ${signB}, path ${facts.other.lifePath}`;
+      ? `${facts.me.name}: ${signA}, число ${facts.me.lifePath ?? '—'}  ·  ${facts.other.name}: ${signB}, число ${facts.other.lifePath}  ·  ${otherBirth}`
+      : `${facts.me.name}: ${signA}, path ${facts.me.lifePath ?? '—'}  ·  ${facts.other.name}: ${signB}, path ${facts.other.lifePath}  ·  ${otherBirth}`;
   }
+  document.getElementById('synastry-confirm')?.classList.remove('hidden');
+  document.getElementById('btn-synastry')?.classList.add('hidden');
+  haptic('medium');
+}
+
+function confirmSynastry() {
+  if (!pendingSynastry) {
+    prepareSynastry();
+    return;
+  }
+  runSynastry();
+}
+
+async function runSynastry() {
+  if (!pendingSynastry) {
+    prepareSynastry();
+    return;
+  }
+  const { facts, signA, signB } = pendingSynastry;
+  const textEl = document.getElementById('synastry-text');
+  const shareBtn = document.getElementById('synastry-share');
 
   setLoading(textEl, true);
   if (shareBtn) shareBtn.classList.add('hidden');
