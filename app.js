@@ -25,7 +25,7 @@ const i18n = {
     navBoost: "Буст", navLazy: "Ленивый", navHall: "Зал", navStars: "Связь", navUniverse: "Вселенная", navProfile: "Профиль",
     btnLazy: "Получить разрешение", btnCard: "Открыть карту", btnAsk: "Спросить ✨", btnClose: "Закрыть", btnShare: "Поделиться", btnStory: "В Stories",
     chooseSign: "Твой знак зодиака:", signNotSelected: "Знак не выбран", guest: "Гость",
-    starsHint: "Имя и дата — где срастаетесь и где трёт", cardPlaceholder: "Нажми, чтобы открыть",
+    starsHint: "Человек, с которым хочешь понять связь", cardPlaceholder: "Нажми, чтобы открыть",
     horoscopePlaceholder: "Выбери знак в Профиле ✨",
     aiPlaceholder: "Напиши что угодно вселенной...",
     loading: "Связываемся с космосом...",
@@ -47,7 +47,7 @@ const i18n = {
     navBoost: "Boost", navLazy: "Lazy", navHall: "Hall", navStars: "Bond", navUniverse: "Universe", navProfile: "Profile",
     btnLazy: "Get permission", btnCard: "Draw a card", btnAsk: "Ask ✨", btnClose: "Close", btnShare: "Share", btnStory: "To Stories",
     chooseSign: "Your zodiac sign:", signNotSelected: "Sign not selected", guest: "Guest",
-    starsHint: "Name and birth date — where you fuse and where it rubs", cardPlaceholder: "Press to open",
+    starsHint: "The person whose bond you want to understand", cardPlaceholder: "Press to open",
     horoscopePlaceholder: "Choose your sign in Profile ✨",
     aiPlaceholder: "Write anything to the universe...",
     loading: "Connecting to the cosmos...",
@@ -969,6 +969,8 @@ function updateUI() {
   });
   const aiInput = document.getElementById('ai-input');
   if (aiInput) aiInput.placeholder = t('aiPlaceholder');
+  const otherName = document.getElementById('other-name');
+  if (otherName) otherName.placeholder = lang === 'ru' ? 'Наталья, мама, коллега' : 'Natalie, mom, coworker';
 
   const s = updateStreak();
   const streakEl = document.getElementById('streak-value');
