@@ -1219,6 +1219,39 @@ function synastryFallback(facts) {
     : `${a} and ${b} move at different speeds. That is not a verdict. Talk once this week about what each of you needs to stay close.`);
 }
 
+
+function synastryShareText() {
+  if (!lastSynastry) return '';
+  const me = lastSynastry.facts?.me?.name || (lang === 'ru' ? 'Я' : 'Me');
+  const other = lastSynastry.facts?.other?.name || '';
+  const body = cleanText(lastSynastry.full || lastSynastry.short || '').trim();
+  const hook = body.split('\n').filter(Boolean)[0] || body;
+  const short = hook.length > 320 ? hook.slice(0, 317) + '...' : hook;
+  return `${me} × ${other}\n${lastSynastry.signA} и ${lastSynastry.signB}\n\n${short}`;
+}
+
+function revealSynastryShare() {
+  const other = lastSynastry?.facts?.other?.name || '';
+  const sendBtn = document.getElementById('btn-synastry-send');
+  if (sendBtn) {
+    sendBtn.classList.remove('hidden');
+    sendBtn.textContent = other
+      ? (lang === 'ru' ? `Отправить ${other}` : `Send to ${other}`)
+      : (lang === 'ru' ? 'Отправить в чат' : 'Send to chat');
+  }
+  const shareBtn = document.getElementById('synastry-share');
+  if (shareBtn) shareBtn.classList.remove('hidden');
+}
+
+function sendSynastryToOther() {
+  const text = synastryShareText();
+  if (!text) {
+    if (tg?.showAlert) tg.showAlert(lang === 'ru' ? 'Сначала разбор' : 'Do the reading first');
+    return;
+  }
+  shareResult(text, 'stars');
+}
+
 async function runSynastry() {
   const otherName = (document.getElementById('other-name')?.value || '').trim();
   const otherBirth = document.getElementById('other-birth')?.value || '';
@@ -1299,7 +1332,7 @@ Write 4-5 sentences: 1) where you fuse, 2) where it will rub, 3) how it feels in
   if (!reply) reply = synastryFallback(facts);
   lastSynastry = { facts, signA, signB, bondWord, short: reply };
   if (textEl) textEl.textContent = reply;
-  if (shareBtn) shareBtn.classList.remove('hidden');
+  revealSynastryShare();
   const fullBtn = document.getElementById('btn-synastry-full');
   if (fullBtn) {
     fullBtn.classList.remove('hidden');
@@ -1347,11 +1380,7 @@ async function writeFullSynastry() {
   }
   lastSynastry.full = reply;
   if (el) el.textContent = reply;
-  const shareBtn = document.getElementById('synastry-share');
-  if (shareBtn) {
-    shareBtn.classList.remove('hidden');
-    shareBtn.onclick = () => shareSmart((lastSynastry.short || '') + '\n\n' + reply, 'stars');
-  }
+  revealSynastryShare();
   haptic('success');
 }
 
