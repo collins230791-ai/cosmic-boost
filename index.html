@@ -190,9 +190,17 @@
         <div class="text-soft mb-8" id="choose-sign-label" style="font-size:13px">Твой знак зодиака:</div>
         <div class="zodiac-grid" id="profile-zodiac-grid"></div>
         <div class="birth-block mt-16">
-          <div class="text-soft mb-8" style="font-size:13px" id="birth-label">Дата рождения:</div>
+          <div class="text-soft mb-8" style="font-size:13px" id="birth-label">Дата рождения</div>
           <input type="date" id="birth-date" class="name-input" style="text-align:left">
-          <button class="btn btn-secondary mt-10" id="btn-save-birth" onclick="saveBirthDate()">Сохранить дату</button>
+          <div class="text-soft mb-8 mt-12" style="font-size:13px" id="time-label">Время рождения</div>
+          <input type="text" id="birth-time" class="name-input" placeholder="05:15" inputmode="numeric" maxlength="8" style="text-align:left">
+          <button class="btn btn-secondary mt-10" type="button" id="btn-time-unknown" onclick="markTimeUnknown()">Не знаю точное время</button>
+          <div class="text-soft mb-8 mt-12" style="font-size:13px" id="city-label">Город рождения</div>
+          <input type="text" id="birth-city" class="name-input" placeholder="Москва" maxlength="80" style="text-align:left">
+          <button class="btn btn-secondary mt-10" type="button" id="btn-city-search" onclick="searchBirthCity()">Найти город</button>
+          <div id="city-results" class="city-results mt-10"></div>
+          <button class="btn btn-primary mt-12" id="btn-save-birth" onclick="saveBirthDate()">Сохранить</button>
+          <div class="text-soft mt-10" id="birth-meta" style="font-size:12px"></div>
         </div>
       </div>
 
