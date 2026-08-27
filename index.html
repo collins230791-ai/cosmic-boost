@@ -46,17 +46,11 @@
         <button class="btn btn-primary mt-12" id="quest-btn" onclick="doDailyQuest()">Выполнить</button>
       </div>
 
-      <div class="card streak-card">
-        <div class="streak-row">
-          <span class="streak-fire">🔥</span>
-          <div style="flex:1">
-            <div class="streak-label" id="title-streak">Серия дней</div>
-            <div class="streak-value" id="streak-value">1 день</div>
-            <div class="streak-milestones" id="streak-milestones"></div>
-          </div>
-        </div>
-        <div class="streak-reward" id="streak-reward" style="display:none"></div>
-      </div>
+      <button class="card streak-mini" onclick="showScreen('hall')">
+        <span>🔥</span>
+        <span id="streak-mini-text">Серия: 1</span>
+        <span class="text-soft" style="margin-left:auto;font-size:12px">Зал →</span>
+      </button>
 
       <div class="card">
         <div class="energy-box">
@@ -64,6 +58,11 @@
           <div class="energy-label" id="energy-label">...</div>
           <div class="energy-bar"><div class="energy-fill" id="energy-fill" style="width:0%"></div></div>
         </div>
+      </div>
+
+      <div class="card" onclick="showScreen('lazy')" style="cursor:pointer">
+        <div class="card-title"><img class="title-img" src="icons/lazy.png" alt=""> <span id="title-lazy-link">Гороскоп для ленивых</span></div>
+        <div class="text-soft" style="font-size:13px">Разрешение на диван — без астро-пафоса</div>
       </div>
 
       <div class="card">
@@ -129,6 +128,43 @@
       </div>
     </div>
 
+
+    <!-- HALL -->
+    <div class="screen" id="screen-hall">
+      <div class="card streak-card streak-card-lg">
+        <div class="streak-row">
+          <span class="streak-fire">🔥</span>
+          <div style="flex:1">
+            <div class="streak-label" id="title-streak">Серия дней</div>
+            <div class="streak-value" id="streak-value">1 день</div>
+            <div class="streak-milestones" id="streak-milestones"></div>
+          </div>
+        </div>
+        <div class="streak-reward" id="streak-reward" style="display:none"></div>
+      </div>
+
+      <div class="card">
+        <div class="card-title"><img class="title-img" src="icons/stars.png" alt=""> <span id="title-card">Карта дня</span></div>
+        <div class="day-card day-card-lg" id="day-card">
+          <div class="day-card-title" id="card-title">Нажми, чтобы открыть</div>
+          <div class="card-text" id="card-text"></div>
+        </div>
+        <button class="btn btn-primary mt-16" id="btn-card" onclick="drawCard()">Открыть карту</button>
+        <button class="btn btn-secondary mt-10 hidden" id="card-share" onclick="shareSmart(document.getElementById('card-title').textContent + ' — ' + document.getElementById('card-text').textContent, 'card')">Поделиться</button>
+      </div>
+
+      <div class="card">
+        <div class="card-title"><img class="title-img" src="icons/stars.png" alt=""> <span id="title-collection">Коллекция карт</span></div>
+        <div class="text-soft mb-8" id="collection-hint" style="font-size:13px">Собери 7 карт — получи бейдж</div>
+        <div class="collection-progress">
+          <div class="collection-count" id="collection-count">0 / 7</div>
+          <div class="energy-bar"><div class="energy-fill" id="collection-fill" style="width:0%"></div></div>
+        </div>
+        <div class="collection-grid collection-grid-lg" id="collection-grid"></div>
+        <div class="badge-row" id="badge-row"></div>
+      </div>
+    </div>
+
     <!-- PROFILE -->
     <div class="screen" id="screen-profile">
       <div class="card">
@@ -175,16 +211,6 @@
         <button class="btn btn-secondary mt-10 hidden" id="relocate-share" onclick="shareSmart(document.getElementById('relocate-text').textContent, 'relocate')">Поделиться</button>
       </div>
 
-      <div class="card">
-        <div class="card-title"><img class="title-img" src="icons/stars.png" alt=""> <span id="title-card">Карта дня</span></div>
-        <div class="day-card" id="day-card">
-          <div class="day-card-title" id="card-title">Нажми, чтобы открыть</div>
-          <div class="card-text" id="card-text"></div>
-        </div>
-        <button class="btn btn-primary mt-16" id="btn-card" onclick="drawCard()">Открыть карту</button>
-        <button class="btn btn-secondary mt-10 hidden" id="card-share" onclick="shareSmart(document.getElementById('card-title').textContent + ' — ' + document.getElementById('card-text').textContent, 'card')">Поделиться</button>
-      </div>
-
 
       <div class="card" id="shop-card">
         <div class="card-title">⭐ <span id="title-shop">Магазин вселенной</span></div>
@@ -196,16 +222,6 @@
         <button class="btn btn-secondary mt-8" onclick="showScreen('stars')">💞 Полный разбор связи — 75 ⭐</button>
       </div>
 
-      <div class="card">
-        <div class="card-title"><img class="title-img" src="icons/stars.png" alt=""> <span id="title-collection">Коллекция карт</span></div>
-        <div class="text-soft mb-8" id="collection-hint" style="font-size:13px">Собери 7 карт — получи бейдж</div>
-        <div class="collection-progress">
-          <div class="collection-count" id="collection-count">0 / 7</div>
-          <div class="energy-bar"><div class="energy-fill" id="collection-fill" style="width:0%"></div></div>
-        </div>
-        <div class="collection-grid" id="collection-grid"></div>
-        <div class="badge-row" id="badge-row"></div>
-      </div>
     </div>
   </div>
 
@@ -213,8 +229,8 @@
     <button class="nav-item active" data-screen="boost" onclick="showScreen('boost')">
       <img class="nav-img" src="icons/boost.png" alt=""><span id="nav-boost">Буст</span>
     </button>
-    <button class="nav-item" data-screen="lazy" onclick="showScreen('lazy')">
-      <img class="nav-img" src="icons/lazy.png" alt=""><span id="nav-lazy">Ленивый</span>
+    <button class="nav-item" data-screen="hall" onclick="showScreen('hall')">
+      <img class="nav-img" src="icons/lazy.png" alt=""><span id="nav-hall">Зал</span>
     </button>
     <button class="nav-item" data-screen="stars" onclick="showScreen('stars')">
       <img class="nav-img" src="icons/stars.png" alt=""><span id="nav-stars">Звёзды</span>
