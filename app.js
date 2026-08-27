@@ -9,6 +9,11 @@ let lang = localStorage.getItem('cb_lang') || 'ru';
 let userSign = localStorage.getItem('cb_sign') || null;
 let userName = localStorage.getItem('cb_name') || '';
 let birthDate = localStorage.getItem('cb_birth') || '';
+let birthTime = localStorage.getItem('cb_time') || '';
+let birthTimeUnknown = localStorage.getItem('cb_time_unk') === '1';
+let birthCity = localStorage.getItem('cb_city') || '';
+let birthCityLat = localStorage.getItem('cb_city_lat') || '';
+let birthCityLon = localStorage.getItem('cb_city_lon') || '';
 let streak = parseInt(localStorage.getItem('cb_streak') || '0', 10);
 
 const i18n = {
@@ -159,16 +164,26 @@ function cloudSet(key, value) {
 }
 
 async function loadProfileFromCloud() {
-  const [sign, savedLang, name, birth] = await Promise.all([
+  const [sign, savedLang, name, birth, time, unk, city, lat, lon] = await Promise.all([
     cloudGet('cb_sign'),
     cloudGet('cb_lang'),
     cloudGet('cb_name'),
-    cloudGet('cb_birth')
+    cloudGet('cb_birth'),
+    cloudGet('cb_time'),
+    cloudGet('cb_time_unk'),
+    cloudGet('cb_city'),
+    cloudGet('cb_city_lat'),
+    cloudGet('cb_city_lon')
   ]);
   if (sign) userSign = sign;
   if (savedLang === 'ru' || savedLang === 'en') lang = savedLang;
   if (name) userName = name;
   if (birth) birthDate = birth;
+  if (time) birthTime = time;
+  if (unk === '1' || unk === '0') birthTimeUnknown = unk === '1';
+  if (city) birthCity = city;
+  if (lat) birthCityLat = lat;
+  if (lon) birthCityLon = lon;
 }
 
 function escapeHtml(str) {
@@ -796,6 +811,77 @@ async function getNumerology() {
   haptic(reply ? 'success' : 'error');
 }
 
+
+function parseBirthTime(raw) {
+  const v = String(raw || '').trim().toLowerCase();
+  if (!v) return '';
+  const m = v.replace('.', ':').match(/^(\d{1,2}):(\d{2})$/);
+  if (!m) return '';
+  const h = Number(m[1]);
+  const min = Number(m[2]);
+  if (h > 23 || min > 59) return '';
+  return String(h).padStart(2, '0') + ':' + String(min).padStart(2, '0');
+}
+
+function markTimeUnknown() {
+  birthTimeUnknown = true;
+  birthTime = '12:00';
+  const el = document.getElementById('birth-time');
+  if (el) el.value = '';
+  const meta = document.getElementById('birth-meta');
+  if (meta) meta.textContent = lang === 'ru'
+    ? 'Время не указано. Луна и дома будут условными.'
+    : 'Time unknown. Moon and houses will be approximate.';
+  haptic('light');
+}
+
+async function searchBirthCity() {
+  const q = (document.getElementById('birth-city')?.value || '').trim();
+  const box = document.getElementById('city-results');
+  if (!box) return;
+  if (q.length < 2) {
+    if (tg?.showAlert) tg.showAlert(lang === 'ru' ? 'Напиши город' : 'Type a city');
+    return;
+  }
+  box.innerHTML = `<div class="text-soft" style="font-size:13px">${t('loadingShort')}</div>`;
+  try {
+    const r = await fetch('https://cosmic-boost.vercel.app/api/city', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ q, lang })
+    });
+    const data = await r.json();
+    const items = data.items || [];
+    if (!items.length) {
+      box.innerHTML = `<div class="text-soft" style="font-size:13px">${lang === 'ru' ? 'Город не найден. Попробуй иначе.' : 'City not found. Try another spelling.'}</div>`;
+      return;
+    }
+    box.innerHTML = '';
+    items.forEach((item, i) => {
+      const btn = document.createElement('button');
+      btn.type = 'button';
+      btn.className = 'city-chip' + (i === 0 ? ' active' : '');
+      btn.textContent = item.label;
+      btn.onclick = () => pickBirthCity(item, btn);
+      box.appendChild(btn);
+    });
+    pickBirthCity(items[0], box.querySelector('.city-chip'));
+  } catch (e) {
+    console.error(e);
+    box.innerHTML = `<div class="text-soft" style="font-size:13px">${t('error')}</div>`;
+  }
+}
+
+function pickBirthCity(item, btn) {
+  birthCity = item.label;
+  birthCityLat = String(item.lat);
+  birthCityLon = String(item.lon);
+  const input = document.getElementById('birth-city');
+  if (input) input.value = item.label;
+  document.querySelectorAll('.city-chip').forEach((el) => el.classList.toggle('active', el === btn));
+  haptic('light');
+}
+
 async function saveBirthDate() {
   const el = document.getElementById('birth-date');
   const v = el?.value || '';
@@ -803,10 +889,30 @@ async function saveBirthDate() {
     if (tg?.showAlert) tg.showAlert(lang === 'ru' ? 'Выбери дату' : 'Pick a date');
     return;
   }
+  const typedTime = parseBirthTime(document.getElementById('birth-time')?.value || '');
+  if (typedTime) {
+    birthTime = typedTime;
+    birthTimeUnknown = false;
+  } else if (!birthTimeUnknown) {
+    birthTime = '';
+  }
+  const typedCity = (document.getElementById('birth-city')?.value || '').trim();
+  if (typedCity && typedCity !== birthCity) {
+    birthCity = typedCity;
+  }
   birthDate = v;
   localStorage.setItem('cb_birth', birthDate);
+  localStorage.setItem('cb_time', birthTime || '');
+  localStorage.setItem('cb_time_unk', birthTimeUnknown ? '1' : '0');
+  localStorage.setItem('cb_city', birthCity || '');
+  localStorage.setItem('cb_city_lat', birthCityLat || '');
+  localStorage.setItem('cb_city_lon', birthCityLon || '');
   await cloudSet('cb_birth', birthDate);
-  // auto-set zodiac from date if possible
+  await cloudSet('cb_time', birthTime || '');
+  await cloudSet('cb_time_unk', birthTimeUnknown ? '1' : '0');
+  await cloudSet('cb_city', birthCity || '');
+  await cloudSet('cb_city_lat', birthCityLat || '');
+  await cloudSet('cb_city_lon', birthCityLon || '');
   const sign = signFromDate(birthDate);
   if (sign) {
     userSign = sign;
@@ -816,7 +922,8 @@ async function saveBirthDate() {
   }
   haptic('success');
   updateUI();
-  if (tg?.showPopup) tg.showPopup({ message: lang === 'ru' ? 'Дата сохранена ✨' : 'Date saved ✨', buttons: [{ type: 'ok' }] });
+  const msg = lang === 'ru' ? 'Данные рождения сохранены ✨' : 'Birth data saved ✨';
+  if (tg?.showPopup) tg.showPopup({ message: msg, buttons: [{ type: 'ok' }] });
 }
 
 function signFromDate(iso) {
@@ -1003,10 +1110,31 @@ function updateUI() {
 
   const birthEl = document.getElementById('birth-date');
   if (birthEl && birthDate) birthEl.value = birthDate;
+  const timeEl = document.getElementById('birth-time');
+  if (timeEl && !birthTimeUnknown) timeEl.value = birthTime || '';
+  if (timeEl && birthTimeUnknown) timeEl.placeholder = lang === 'ru' ? 'неизвестно' : 'unknown';
+  const cityEl = document.getElementById('birth-city');
+  if (cityEl && birthCity) cityEl.value = birthCity;
   const birthLabel = document.getElementById('birth-label');
-  if (birthLabel) birthLabel.textContent = lang === 'ru' ? 'Дата рождения:' : 'Birth date:';
+  if (birthLabel) birthLabel.textContent = lang === 'ru' ? 'Дата рождения' : 'Birth date';
+  const timeLabel = document.getElementById('time-label');
+  if (timeLabel) timeLabel.textContent = lang === 'ru' ? 'Время рождения' : 'Birth time';
+  const cityLabel = document.getElementById('city-label');
+  if (cityLabel) cityLabel.textContent = lang === 'ru' ? 'Город рождения' : 'Birth city';
+  const unkBtn = document.getElementById('btn-time-unknown');
+  if (unkBtn) unkBtn.textContent = lang === 'ru' ? 'Не знаю точное время' : "I don't know the exact time";
+  const cityBtn = document.getElementById('btn-city-search');
+  if (cityBtn) cityBtn.textContent = lang === 'ru' ? 'Найти город' : 'Find city';
   const btnBirth = document.getElementById('btn-save-birth');
-  if (btnBirth) btnBirth.textContent = lang === 'ru' ? 'Сохранить дату' : 'Save date';
+  if (btnBirth) btnBirth.textContent = lang === 'ru' ? 'Сохранить' : 'Save';
+  const meta = document.getElementById('birth-meta');
+  if (meta) {
+    const bits = [];
+    if (birthTimeUnknown) bits.push(lang === 'ru' ? 'время не указано, Луна условная' : 'time unknown, Moon approximate');
+    else if (birthTime) bits.push((lang === 'ru' ? 'время ' : 'time ') + birthTime);
+    if (birthCity) bits.push(birthCity);
+    meta.textContent = bits.join(' · ');
+  }
   const titleNum = document.getElementById('title-numerology');
   if (titleNum) titleNum.textContent = lang === 'ru' ? 'Число судьбы' : 'Life path number';
   const numHint = document.getElementById('numerology-hint');
@@ -1182,9 +1310,13 @@ function renderSynastryYou() {
   const lp = myDate ? lifePathNumber(myDate) : '—';
   const signLabel = mySign && ZODIAC[mySign] ? (ZODIAC[mySign].emoji + ' ' + ZODIAC[mySign][lang]) : '—';
   const nm = userName || (lang === 'ru' ? 'Ты' : 'You');
+  const timeBit = birthTimeUnknown
+    ? (lang === 'ru' ? 'время не указано' : 'time unknown')
+    : (birthTime || '');
+  const cityBit = birthCity || '';
   el.textContent = lang === 'ru'
-    ? `Ты: ${nm} · ${signLabel} · число судьбы ${lp}`
-    : `You: ${nm} · ${signLabel} · life path ${lp}`;
+    ? `Ты: ${nm} · ${signLabel} · число судьбы ${lp}${timeBit ? ' · ' + timeBit : ''}${cityBit ? ' · ' + cityBit : ''}`
+    : `You: ${nm} · ${signLabel} · life path ${lp}${timeBit ? ' · ' + timeBit : ''}${cityBit ? ' · ' + cityBit : ''}`;
 }
 
 function elementOfSign(sign) {
