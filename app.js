@@ -1025,44 +1025,49 @@ function updateUI() {
   loadBoostContent();
 }
 
+function pickBank(arr) {
+  if (!arr || !arr.length) return '';
+  return arr[Math.floor(Math.random() * arr.length)];
+}
+
+function polishInBackground(key, prompt, el) {
+  if (!tg?.initData || !el) return;
+  askAI(prompt, 'ai').then((reply) => {
+    if (!reply) return;
+    localStorage.setItem(key, reply);
+    if (el) el.textContent = reply;
+  }).catch(() => {});
+}
+
 async function loadBoostContent() {
   const compEl = document.getElementById('compliment-text');
   const horEl = document.getElementById('horoscope-text');
-  setLoading(compEl, true);
-  if (!userSign) horEl.textContent = t('horoscopePlaceholder');
-  else setLoading(horEl, true);
-
   const n = nameForAI();
   const compKey = cacheKey('compliment');
   const horKey = cacheKey('horoscope');
-  const hasComp = !!localStorage.getItem(compKey);
-  const hasHor = !userSign || !!localStorage.getItem(horKey);
 
-  // One energy charge for today's boost pack if anything needs AI
-  if ((!hasComp || !hasHor) && !spendEnergy(20)) {
-    compEl.textContent = hasComp
-      ? localStorage.getItem(compKey)
-      : (lang === 'ru' ? 'Не хватает энергии на комплимент. Завтра будет полный заряд ✨' : 'Not enough energy for a compliment. Full charge tomorrow ✨');
-    if (userSign) {
-      horEl.textContent = hasHor
-        ? localStorage.getItem(horKey)
-        : (lang === 'ru' ? 'Не хватает энергии на прогноз ✨' : 'Not enough energy for a forecast ✨');
-    }
-    return;
+  const cachedComp = localStorage.getItem(compKey);
+  if (compEl) compEl.textContent = cachedComp || pickBank(COMPLIMENTS[lang]) || t('error');
+
+  if (!userSign) {
+    if (horEl) horEl.textContent = t('horoscopePlaceholder');
+  } else {
+    const fallback = (DAILY_HOROSCOPES[lang] && DAILY_HOROSCOPES[lang][userSign]) || [];
+    const cachedHor = localStorage.getItem(horKey);
+    if (horEl) horEl.textContent = cachedHor || pickBank(fallback) || t('horoscopePlaceholder');
   }
 
   const compPrompt = lang === 'ru'
     ? `Напиши один короткий тёплый и смешной комплимент от вселенной для человека по имени ${n}. Обратись по имени. 1-2 предложения. С эмодзи. Без markdown.`
     : `Write one short warm funny compliment from the universe for a person named ${n}. Address them by name. 1-2 sentences. With emoji. No markdown.`;
-  compEl.textContent = await getCachedOrAI('compliment', compPrompt, COMPLIMENTS[lang], { free: true });
+  if (!cachedComp) polishInBackground(compKey, compPrompt, compEl);
 
-  if (userSign) {
+  if (userSign && !localStorage.getItem(horKey)) {
     const signName = ZODIAC[userSign][lang];
     const horPrompt = lang === 'ru'
       ? `Короткий весёлый гороскоп на сегодня для ${signName}, обратись к человеку по имени ${n}. 2-3 предложения, юмор и тепло. Эмодзи. Без markdown.`
       : `Short fun horoscope for today for ${signName}, address the person as ${n}. 2-3 sentences, humor and warmth. Emoji. No markdown.`;
-    const fallback = (DAILY_HOROSCOPES[lang] && DAILY_HOROSCOPES[lang][userSign]) || [];
-    horEl.textContent = await getCachedOrAI('horoscope', horPrompt, fallback, { free: true });
+    polishInBackground(horKey, horPrompt, horEl);
   }
 }
 
