@@ -22,7 +22,7 @@ const i18n = {
     titleProfile: "Профиль",
     titleCard: "Карта дня",
     titleStreak: "Серия дней",
-    navBoost: "Буст", navLazy: "Ленивый", navStars: "Связь", navUniverse: "Вселенная", navProfile: "Профиль",
+    navBoost: "Буст", navLazy: "Ленивый", navHall: "Зал", navStars: "Связь", navUniverse: "Вселенная", navProfile: "Профиль",
     btnLazy: "Получить разрешение", btnCard: "Открыть карту", btnAsk: "Спросить ✨", btnClose: "Закрыть", btnShare: "Поделиться", btnStory: "В Stories",
     chooseSign: "Твой знак зодиака:", signNotSelected: "Знак не выбран", guest: "Гость",
     starsHint: "Имя и дата — где срастаетесь и где трёт", cardPlaceholder: "Нажми, чтобы открыть",
@@ -44,7 +44,7 @@ const i18n = {
     titleProfile: "Profile",
     titleCard: "Card of the Day",
     titleStreak: "Day streak",
-    navBoost: "Boost", navLazy: "Lazy", navStars: "Bond", navUniverse: "Universe", navProfile: "Profile",
+    navBoost: "Boost", navLazy: "Lazy", navHall: "Hall", navStars: "Bond", navUniverse: "Universe", navProfile: "Profile",
     btnLazy: "Get permission", btnCard: "Draw a card", btnAsk: "Ask ✨", btnClose: "Close", btnShare: "Share", btnStory: "To Stories",
     chooseSign: "Your zodiac sign:", signNotSelected: "Sign not selected", guest: "Guest",
     starsHint: "Name and birth date — where you fuse and where it rubs", cardPlaceholder: "Press to open",
@@ -488,7 +488,7 @@ function spendEnergy(cost = ENERGY_COST) {
 
 
 const QUEST_TYPES = [
-  { id: 'card', icon: '🃏', ru: 'Открой карту дня', en: 'Draw the card of the day', screen: 'profile', action: 'card' },
+  { id: 'card', icon: '🃏', ru: 'Открой карту дня', en: 'Draw the card of the day', screen: 'hall', action: 'card' },
   { id: 'universe', icon: '🌌', ru: 'Спроси вселенную', en: 'Ask the universe', screen: 'universe', action: 'universe' },
   { id: 'lazy', icon: '😴', ru: 'Возьми разрешение ничего не делать', en: 'Get permission to do nothing', screen: 'lazy', action: 'lazy' },
   { id: 'stars', icon: '🌟', ru: 'Разбери связь с тем, кто важен', en: 'Read the bond with someone who matters', screen: 'stars', action: 'stars' },
@@ -946,7 +946,7 @@ function updateUI() {
     subtitle: 'subtitle', 'title-compliment': 'titleCompliment', 'title-horoscope': 'titleHoroscope',
     'title-lazy': 'titleLazy', 'title-stars': 'titleStars', 'title-universe': 'titleUniverse',
     'title-profile': 'titleProfile', 'title-card': 'titleCard',
-    'nav-boost': 'navBoost', 'nav-lazy': 'navLazy', 'nav-stars': 'navStars',
+    'nav-boost': 'navBoost', 'nav-lazy': 'navLazy', 'nav-hall': 'navHall', 'nav-stars': 'navStars',
     'nav-universe': 'navUniverse', 'nav-profile': 'navProfile',
     'btn-lazy': 'btnLazy', 'btn-card': 'btnCard', 'btn-ask': 'btnAsk',
     'modal-close-btn': 'btnClose', 'choose-sign-label': 'chooseSign', 'stars-hint': 'starsHint'
@@ -961,6 +961,8 @@ function updateUI() {
   const s = updateStreak();
   const streakEl = document.getElementById('streak-value');
   if (streakEl) streakEl.textContent = `${s} ${t('streakDays')}`;
+  const mini = document.getElementById('streak-mini-text');
+  if (mini) mini.textContent = (lang === 'ru' ? 'Серия: ' : 'Streak: ') + s;
   renderStreakUI(s);
   renderCollection();
   renderDailyQuest();
